@@ -1,4 +1,6 @@
-
+.PHONY: nightlies
+nightlies: requirements
+	cd bin && ./check.sh
 
 .PHONY: requirements
 requirements: requirements/build.sh
