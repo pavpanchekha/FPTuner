@@ -71,6 +71,10 @@ class FPTaylorParser(Parser):
     def operation(self, p):
         return fpcore_ast.Operation(p[0], p.expression)
 
+    @_("OPERATION LP expression C expression RP")
+    def operation(self, p):
+        return fpcore_ast.Operation(p[0], p.expression0, p.expression1)
+
     # round
     @_("ROUND LP expression RP")
     def round(self, p):

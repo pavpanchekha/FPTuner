@@ -3,6 +3,8 @@
 from fpcore_logging import Logger
 from fpcore_ast import Operation, Variable
 
+import all_modifications_ast
+
 import sys
 
 logger = Logger()
@@ -128,7 +130,15 @@ class TunedExpression():
         for name, value in self.definitions.items():
             typ = self.types[name]
             rnd = TunedExpression.TYPES_TO_ROUNDS[typ]
-            lines.append("  {} {}= {};".format(name, rnd, value.infix_str()))
+            vstr = value.infix_str()
+            if (type(value) == Operation
+                and value.op in all_modifications_ast.OperationToFPTaylor):
+                fptop = all_modifications_ast.OperationToFPTaylor[value.op]
+                if value.op != fptop:
+                    vstr = vstr.replace(value.op, fptop)
+                    while vstr.count("(") != vstr.count(")"):
+                        vstr += ")"
+            lines.append("  {} {}= {};".format(name, rnd, vstr))
         lines.append("")
 
         lines.append("Expressions")

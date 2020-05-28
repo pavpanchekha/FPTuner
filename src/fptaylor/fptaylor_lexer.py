@@ -2,12 +2,17 @@
 
 from exceptions import FPTaylorLexError
 from fpcore_logging import Logger
+from fpcore_lexer import FPCoreLexer
 from sly import Lexer
 
 import sys
 
 
 logger = Logger()
+
+
+FPCoreLexer.UNARY_OPERATIONS.add("floor_power2")
+FPCoreLexer.BINARY_OPERATIONS.add("interval")
 
 
 class FPTaylorLexer(Lexer):
@@ -69,6 +74,8 @@ class FPTaylorLexer(Lexer):
         "sin", "zero_sin", "one_sin", "m_one_sin", "taylor_1_sin", "taylor_3_sin",
         "sqrt",
         "tan",
+        "floor_power2",
+        "interval",
     ], key=len)
     for i in range(len(OPERATIONS)):
         SYMBOL[OPERATIONS[i]] = OPERATION

@@ -17,6 +17,7 @@ from fpcore_lexer import FPCoreLexer
 from fpcore_parser import FPCoreParser
 from gurobi_result import GurobiResult
 from tuned_expression import TunedExpression
+from fptaylor_result import FPTaylorResult
 
 import all_modifications_ast
 import fptuner_argument_parser
@@ -80,6 +81,11 @@ def main(argv):
                                      first_header, header)
                         sys.exit(1)
                     print(row)
+
+                    if args.check:
+                        query = tr.to_fptaylor()
+                        res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
+                        assert(res.abs_error <= e)
 
             except DomainError as e:
                 if e.lower is None and e.upper is None:

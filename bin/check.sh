@@ -22,7 +22,7 @@ check_run ()
     tmp_out=$(mktemp /tmp/check_out.XXXXXX)
     tmp_err=$(mktemp /tmp/check_err.XXXXXX)
 
-    \time -f %e ${FPTUNER} ${1} -e 10.0 5.0 1.0 0.5 0.1 0.05 0.01 0.005 0.001 0.0005 0.0001 0.00005 0.00001 0.000005 0.000001 0.0000005 0.0000001 2>&1
+    \time -f %e ${FPTUNER} ${1} -e 10.0 1.0 0.1 0.01 0.001  0.0001  0.00001  0.000001  0.0000001 2>&1
     #> ${tmp_out} 2> ${tmp_err}
     exit_code=$?
 

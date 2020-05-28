@@ -140,7 +140,7 @@ class GurobiResult:
         costs = dict()
         for name, bools in self.bit_width_bools.items():
             cost = self.model.addVar(name="{}_bit_width_cost".format(name))
-            cost_pairs = list(zip(range(1, len(bools)+1), bools.values()))
+            cost_pairs = list(zip(range(1, 20*len(bools)+1, 20), bools.values()))
             self.model.addConstr(cost == sum([i*b for i, b in cost_pairs]))
             costs[name] = cost
             self.model.update()

@@ -1,5 +1,5 @@
 .PHONY: nightly
-nightlies: requirements
+nightly: requirements
 	cd bin && ./check.sh
 
 .PHONY: requirements

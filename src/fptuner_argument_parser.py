@@ -34,6 +34,10 @@ def parse_args(argv):
                             choices=["fp32", "fp64", "fp128"],
                             default=["fp32", "fp64"],
                             help="Bit widths to search over")
+    arg_parser.add_argument("-c", "--check",
+                            action="store_const",
+                            const=True,
+                            help="Use FPTaylor to verify final error bound")
 
     args = arg_parser.parse_args(argv[1:])
 

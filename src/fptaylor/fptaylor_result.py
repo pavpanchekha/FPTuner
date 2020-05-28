@@ -134,7 +134,8 @@ class FPTaylorResult:
             if state == "capture original exprs":
                 # Grab original subexpressions and look for their end
                 if line == "":
-                    break
+                    state = "capture error"
+                    continue
                 # Match on:
                 #   <int>: <expr>
                 # Get out expr
@@ -144,7 +145,12 @@ class FPTaylorResult:
                 original_exprs.append(expr)
                 continue
 
-            # todo: grab absolute error
+            if state == "capture error":
+                first = "Absolute error (exact):"
+                if line.startswith(first):
+                    self.abs_error = float(line[len(first):])
+                    break
+                continue
 
         # Catch if the two lists have different lengths
         if len(fptaylor_forms) != len(original_exprs):
