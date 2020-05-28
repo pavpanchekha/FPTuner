@@ -2,6 +2,11 @@
 
 SCRIPT_LOCATION=$(readlink -f $(dirname $0))
 
+if [ -z "$GUROBI_HOME" ]; then
+    export LD_LIBRARY_PATH=/opt/gurobi/lib
+    export PYTHONPATH=/opt/gurobi/lib/python3.7_utf32/
+fi
+
 #source ../requirements/gurobi_environment.sh
 
 FPTUNER="${SCRIPT_LOCATION}/fptuner -v none"
