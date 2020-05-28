@@ -1,4 +1,4 @@
-.PHONY: nightlies
+.PHONY: nightly
 nightlies: requirements
 	cd bin && ./check.sh
 
