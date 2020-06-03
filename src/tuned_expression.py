@@ -67,7 +67,7 @@ class TunedExpression():
                 header.append("{}-op".format(idx))
                 parts.append(op)
             idx += 1
-        return "\t".join(header), "\t".join(parts)
+        return header, parts
 
     def _get_input_type(self, name):
         counts = {"fp32": 0, "fp64": 0, "fp128": 0}

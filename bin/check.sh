@@ -15,6 +15,14 @@ PASSES=0
 FAILS=0
 TOTAL=0
 
+date=$(date +%s)
+
+cat <<EOF > $date.html
+<!doctype html>
+<title>FPTuner Results for $(date +%Y-%m-%d)</title>
+<body>
+EOF
+
 check_run ()
 {
     # echo "FPTUNER=${FPTUNER}"
@@ -27,7 +35,10 @@ check_run ()
     tmp_out=$(mktemp /tmp/check_out.XXXXXX)
     tmp_err=$(mktemp /tmp/check_err.XXXXXX)
 
-    \time -f %e ${FPTUNER} ${1} -e 10.0 1.0 0.1 0.01 0.001  0.0001  0.00001  0.000001  0.0000001 2>&1
+    cat <<EOF >>$date.html
+<h1>$(test_name)</h1>
+EOF
+    \time -f %e ${FPTUNER} ${1} -e 10.0 1.0 0.1 0.01 0.001  0.0001  0.00001  0.000001  0.0000001
     #> ${tmp_out} 2> ${tmp_err}
     exit_code=$?
 
@@ -80,3 +91,9 @@ check_run ../benchmarks/has_sin_exp_log/nmse_problem_3_3_7_domain.fpcore
 check_run ../benchmarks/has_sin_exp_log/nmse_problem_3_4_4_domain.fpcore
 check_run ../benchmarks/has_sin_exp_log/nmse_section_3_11_domain.fpcore
 check_run ../benchmarks/has_sin_exp_log/nmse_section_3_5_domain.fpcore
+
+cat <<EOF > $date.html
+</body>
+EOF
+
+scp $date.html uwplse.org:/var/www/fptuner/
