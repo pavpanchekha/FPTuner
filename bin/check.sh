@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e -x
 
 SCRIPT_LOCATION=$(readlink -f $(dirname $0))
 
@@ -38,7 +39,7 @@ check_run ()
     cat <<EOF >>$date.html
 <h1>${test_name}</h1>
 EOF
-    \time -f %e ${FPTUNER} ${1} -e 10.0 1.0 0.1 0.01 0.001  0.0001  0.00001  0.000001  0.0000001
+    \time -f %e ${FPTUNER} ${1} -e 10.0 1.0 0.1 0.01 0.001  0.0001  0.00001  0.000001  0.0000001 >> $date.html
     #> ${tmp_out} 2> ${tmp_err}
     exit_code=$?
 
@@ -92,7 +93,7 @@ check_run ../benchmarks/has_sin_exp_log/nmse_problem_3_4_4_domain.fpcore
 check_run ../benchmarks/has_sin_exp_log/nmse_section_3_11_domain.fpcore
 check_run ../benchmarks/has_sin_exp_log/nmse_section_3_5_domain.fpcore
 
-cat <<EOF > $date.html
+cat <<EOF >> $date.html
 </body>
 EOF
 

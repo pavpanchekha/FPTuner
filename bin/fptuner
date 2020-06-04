@@ -77,7 +77,6 @@ def main(argv):
                     rows.append(row)
                     if first_header is None:
                         first_header = header
-                        print(header)
                     elif first_header != header:
                         logger.error("Header mismatch: \n{} \n{}",
                                      first_header, header)
@@ -89,7 +88,7 @@ def main(argv):
                         assert(res.abs_error <= e)
 
                 print("<table>")
-                print("<tr><th>" + "</th><th>".join(header) + "</th></tr>")
+                print("<tr><th>" + "</th><th>".join(first_header) + "</th></tr>")
                 for row in rows:
                     print("<tr><th>" + "</th><th>".join(row) + "</th></tr>")
                 print("</table>")
