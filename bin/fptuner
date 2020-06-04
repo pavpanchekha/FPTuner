@@ -90,7 +90,7 @@ def main(argv):
                 print("<table>")
                 print("<tr><th>" + "</th><th>".join(first_header) + "</th></tr>")
                 for row in rows:
-                    print("<tr><th>" + "</th><th>".join(row) + "</th></tr>")
+                    print("<tr><td>" + "</td><td>".join(row) + "</td></tr>")
                 print("</table>")
 
             except DomainError as e:
