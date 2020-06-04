@@ -82,16 +82,17 @@ def main(argv):
                         logger.error("Header mismatch: \n{} \n{}",
                                      first_header, header)
                         sys.exit(1)
-                print("<table>")
-                print("<tr><th>" + "</th><th>".join(header) + "</th></tr>")
-                for row in rows:
-                    print("<tr><th>" + "</th><th>".join(row) + "</th></tr>")
-                print("</table>")
 
                     if args.check:
                         query = tr.to_fptaylor()
                         res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
                         assert(res.abs_error <= e)
+
+                print("<table>")
+                print("<tr><th>" + "</th><th>".join(header) + "</th></tr>")
+                for row in rows:
+                    print("<tr><th>" + "</th><th>".join(row) + "</th></tr>")
+                print("</table>")
 
             except DomainError as e:
                 if e.lower is None and e.upper is None:

@@ -36,7 +36,7 @@ check_run ()
     tmp_err=$(mktemp /tmp/check_err.XXXXXX)
 
     cat <<EOF >>$date.html
-<h1>$(test_name)</h1>
+<h1>${test_name}</h1>
 EOF
     \time -f %e ${FPTUNER} ${1} -e 10.0 1.0 0.1 0.01 0.001  0.0001  0.00001  0.000001  0.0000001
     #> ${tmp_out} 2> ${tmp_err}
