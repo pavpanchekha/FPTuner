@@ -34,13 +34,21 @@ except ModuleNotFoundError:
     sys.exit(1)
 
 try:
-    import gurobipy
-except ModuleNotFoundError as e:
-    logger.error(e)
-    logger.error("Unable to find gurobi")
-    logger.error("This can be installed from:")
-    logger.error("  https://www.gurobi.com/")
+    import z3
+except ModuleNotFoundError:
+    logger.error("Unable to find z3")
+    logger.error("Usually this can be installed with:")
+    logger.error("  pip3 install --user z3-solver")
     sys.exit(1)
+
+# try:
+#     import gurobipy
+# except ModuleNotFoundError as e:
+#     logger.error(e)
+#     logger.error("Unable to find gurobi")
+#     logger.error("This can be installed from:")
+#     logger.error("  https://www.gurobi.com/")
+#     sys.exit(1)
 
 
 # Self built requirements

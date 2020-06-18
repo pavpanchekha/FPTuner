@@ -64,7 +64,7 @@ class FPTaylorLexer(Lexer):
     DIVIDE = r"/"
 
     # todo: flesh out operations
-    OPERATIONS = sorted([
+    UNARY_OPERATIONS = {
         "acos",
         "asin",
         "atan",
@@ -76,7 +76,13 @@ class FPTaylorLexer(Lexer):
         "tan",
         "floor_power2",
         "interval",
-    ], key=len)
+    }
+    BINARY_OPERATIONS = {
+        "interval",
+    }
+    OPERATIONS = sorted(list(UNARY_OPERATIONS
+                             | BINARY_OPERATIONS),
+                        key=len)
     for i in range(len(OPERATIONS)):
         SYMBOL[OPERATIONS[i]] = OPERATION
     OPERATION = "({})".format(")|(".join(OPERATIONS))

@@ -17,18 +17,18 @@ class TunedExpression():
     TYPES_TO_DECLS = dict(zip(TYPES, DECLS))
     TYPES_TO_ROUNDS = dict(zip(TYPES, ROUNDS))
 
-    def __init__(self, ssa, gr):
+    def __init__(self, ssa, zr):
         self.name = ssa.name
         self.properties = ssa.properties
         self.inputs = ssa.inputs
         self.definitions = ssa.definitions.copy()
         self.search_operations = ssa.search_space["operations"]
-        self.error_bound = gr.max_error
+        self.error_bound = zr.raw_max_error
         self.types = None
         self.operators = None
         self.info = None
-        self.init_types(gr)
-        self.init_operators(gr)
+        self.init_types(zr)
+        self.init_operators(zr)
         self.inplace_operators()
         self.inline_untyped()
         self.get_info()
@@ -150,12 +150,12 @@ class TunedExpression():
         query = "\n".join(lines)
         return query
 
-    def init_types(self, gr):
+    def init_types(self, zr):
         types = dict()
-        for name, bools in gr.bit_width_bools.items():
+        for name, bools in zr.bit_width_choices.items():
             found = False
-            for bw_name, gvar in bools.items():
-                if gvar.x > 0.9:
+            for bw_name, bool_name in bools.items():
+                if zr.model[bool_name] == True:
                     types[name] = bw_name
                     found = True
                     break
@@ -166,12 +166,12 @@ class TunedExpression():
             assert(found == True)
         self.types = types
 
-    def init_operators(self, gr):
+    def init_operators(self, zr):
         operators = dict()
-        for name, bools in gr.operation_bools.items():
+        for name, bools in zr.operation_choices.items():
             found = False
-            for op_name, gvar in bools.items():
-                if gvar.x > 0.9:
+            for op_name, bool_name in bools.items():
+                if zr.model[bool_name] == True:
                     operators[name] = op_name
                     found = True
                     break

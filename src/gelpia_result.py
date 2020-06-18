@@ -28,13 +28,13 @@ class GelpiaResult:
     RUST_EXECUTABLE = gelpia.setup_rust_env(git_dir=gelpia.GIT_DIR,
                                             debug=False)
 
-    # Tell gelpia to always try as hard as possible
+    # Tell gelpia how hard to try
     CONFIG = {
-        "epsilons": (1e-4, 1e-4, 0),
+        "epsilons": (1e-8, 1e-8, 0),
         "timeout": 10,
         "grace": 0,
         "update": 0,
-        "iters": 2**18,
+        "iters": 0,
         "seed": 0,
         "debug": False,
         "src_dir": gelpia.SRC_DIR,

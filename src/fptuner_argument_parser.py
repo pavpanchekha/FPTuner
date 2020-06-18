@@ -57,5 +57,6 @@ def parse_args(argv):
     logger("    verbosity: {}", args.verbosity)
     logger("     log_file: {}", args.log_file)
     logger("   bit_widths: {}", args.bit_widths)
+    logger("        check: {}", args.check)
 
     return args

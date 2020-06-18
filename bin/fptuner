@@ -15,7 +15,8 @@ from fpcore_logging import Logger
 from exceptions import DomainError, UnsupportedError, NoPreError, BadPreError
 from fpcore_lexer import FPCoreLexer
 from fpcore_parser import FPCoreParser
-from gurobi_result import GurobiResult
+#from gurobi_result import GurobiResult
+from z3_result import Z3Result
 from tuned_expression import TunedExpression
 from fptaylor_result import FPTaylorResult
 
@@ -71,8 +72,8 @@ def main(argv):
                 first_header = None
                 rows = []
                 for e in args.error:
-                    gr = GurobiResult(ssa, e)
-                    tr = TunedExpression(ssa, gr)
+                    zr = Z3Result(ssa, e)
+                    tr = TunedExpression(ssa, zr)
                     header, row = tr.tsv()
                     rows.append(row)
                     if first_header is None:

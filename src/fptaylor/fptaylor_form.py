@@ -85,14 +85,43 @@ class FPTaylorForm:
                 logger("Memoized result for: {}", key)
             self.maximums[exp] = memoized[key]
 
-    def to_gurobi(self, eps, scale):
+    def to_gurobi(self, bit_choices, denoms):
         parts = list()
         parts_str = list()
         for exp, maximum in self.maximums.items():
             if exp == "eps":
-                parts.append(eps*maximum*scale)
-                parts_str.append("{}*{}*{}".format(eps.VarName, maximum, scale))
+                for grb_bool, d in zip(bit_choices, denoms):
+                    err = maximum/d
+                    parts.append(grb_bool*err)
+                    parts_str.append("{}*{}".format(grb_bool.VarName, err))
             else:
-                parts.append((2**exp)*maximum*scale)
-                parts_str.append("{}*{}*{}".format(2**exp, maximum, scale))
+                err = (2**exp)*maximum
+                parts.append(err)
+                parts_str.append("{}".format(err))
         return sum(parts), " + ".join(parts_str)
+
+    def to_z3(self, eps):
+        parts_str = list()
+        for exp, maximum in self.maximums.items():
+            if exp == "eps":
+                err = "(* {} {:20f})".format(eps, maximum)
+            else:
+                err = "(* {} {:20f})".format((2**exp), maximum)
+
+            parts_str.append(err)
+
+        if len(parts_str) == 1:
+            return parts_str[0]
+        return "(+ {})".format(" ".join(parts_str))
+
+        # def to_gurobi(self, eps):
+        # parts = list()
+        # parts_str = list()
+        # for exp, maximum in self.maximums.items():
+        #     if exp == "eps":
+        #         parts.append(eps*maximum)
+        #         parts_str.append("{}*{}".format(eps.VarName, maximum))
+        #     else:
+        #         parts.append((2**exp)*maximum)
+        #         parts_str.append("{}*{}".format(2**exp, maximum))
+        # return sum(parts), " + ".join(parts_str)

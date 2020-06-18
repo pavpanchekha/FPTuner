@@ -140,6 +140,7 @@ class FPTaylorResult:
                 #   <int>: <expr>
                 # Get out expr
                 raw = " ".join(items[1:])
+                print("parsing: {}".format(raw))
                 tokens = lexer.tokenize(raw)
                 expr = parser.parse(tokens)
                 original_exprs.append(expr)
