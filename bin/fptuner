@@ -75,7 +75,7 @@ def main(argv):
                     zr = Z3Result(ssa, e)
                     tr = TunedExpression(ssa, zr)
                     header, row = tr.tsv()
-                    rows.append(row)
+
                     if first_header is None:
                         first_header = header
                     elif first_header != header:
@@ -86,7 +86,11 @@ def main(argv):
                     if args.check:
                         query = tr.to_fptaylor()
                         res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
-                        assert(res.abs_error <= e)
+                        row.append(str(res.abs_error <= e))
+                    rows.append(row)
+
+                if args.check:
+                    first_header.append("FPTaylorCheck")
 
                 print("<table>")
                 print("<tr><th>" + "</th><th>".join(first_header) + "</th></tr>")

@@ -42,6 +42,7 @@ class FPTaylorResult:
 
     def __init__(self, query, config=None):
         logger.log("FPTaylor query:\n{}", query)
+        self.abs_error = None
         self.query = query
         self.config = config or FPTaylorResult.ERROR_FORM_CONFIG
         self._run()
@@ -140,7 +141,6 @@ class FPTaylorResult:
                 #   <int>: <expr>
                 # Get out expr
                 raw = " ".join(items[1:])
-                print("parsing: {}".format(raw))
                 tokens = lexer.tokenize(raw)
                 expr = parser.parse(tokens)
                 original_exprs.append(expr)
