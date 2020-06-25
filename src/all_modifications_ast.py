@@ -11,6 +11,12 @@ import fpcore_ast
 import infix_str_ast
 import to_single_assignment_ast
 
+BitWidthCost = {
+    # bit_width cost
+    "fp32":     0,
+    "fp64":    20,
+}
+
 OperationTable = [
     # srcOp operation       FPTaylorOperation                            Cost
     ("sin", "zero_sin",     "zero_sin",                                  0),

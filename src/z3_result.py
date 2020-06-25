@@ -23,6 +23,7 @@ class Z3Result:
         self.query_string_list = list()
         self.ssa = ssa
 
+        self.setup_query()
         self.bit_width_choices = self.get_bit_width_choices()
         self.epsilons = self.get_epsilons()
         self.operation_choices = self.get_operation_choices()
@@ -33,8 +34,9 @@ class Z3Result:
         self.operation_costs = self.get_operation_costs()
         self.cost = self.add_cost()
 
-        max_error = self.get_max_error()
-        self.query_string_list.append("(assert (<= {} {}))".format(self.error, max_error))
+        max_error = self.get_number(self.raw_max_error)
+        self.query_string_list.append("(assert (<= {} {}))".format(self.error,
+                                                                   max_error))
         self.query_string_list.append("(minimize {})".format(self.cost))
         self.query_string_list.append("(check_sat)")
 
@@ -49,61 +51,66 @@ class Z3Result:
         logger.log("z3 query:\n{}\n", self.query)
 
         self.optimizer = z3.Optimize()
+        z3.set_param("model_validate", "true")
         self.optimizer.from_string(self.query)
         self.optimizer.check()
         z3_model = self.optimizer.model()
         self.model = {d.name(): z3_model[d] for d in z3_model}
 
-        if logger.should_log():
-            print(self.model)
+        logger(self.model)
 
-    def get_max_error(self):
-        return "{:.20f}".format(self.raw_max_error)
+    def get_number(self, n):
+        frac = fractions.Fraction(n)
+        if frac.denominator == 1:
+            return "{}".format(frac.numerator)
+        return "(/ {} {})".format(frac.numerator, frac.denominator)
+
+    def setup_query(self):
+        # add bool_to_int and bool_to_real
+        self.query_string_list.extend(
+            ["(define-fun bool_to_int ((b Bool)) Int",
+             "  (ite b 1 0)",
+             ")",
+             "",
+             "(define-fun bool_to_real ((b Bool)) Real",
+             "  (ite b 1.0 0.0)",
+             ")",
+             "",
+            ])
 
     def get_bit_width_choices(self):
-
         # name -> {bit_width -> z3_name}
         bit_width_choices = dict()
-
-        # add bool_to_int
-        self.query_string_list.extend(["(define-fun bool_to_int ((b Bool)) Int",
-                                       "  (ite b 1 0)",
-                                       ")",
-                                       "",])
-
-        # add bool_to_real
-        self.query_string_list.extend(["(define-fun bool_to_real ((b Bool)) Real",
-                                       "  (ite b 1.0 0.0)",
-                                       ")",
-                                       "",])
 
         # Go through every expression
         for name in self.ssa.fptaylor_forms:
 
             # Note what we are working on
             val = self.ssa.definitions[name]
-            self.query_string_list.append("; type for {} = {}".format(name, val))
+            comment = "; type for {} = {}".format(name, val)
+            self.query_string_list.append(comment)
 
             # Setup the list of variable names
             bit_options = self.ssa.search_space["bit_widths"]
-            names = ["{}_is_{}".format(name, bw) for bw in bit_options]
-            query_decls = ["(declare-const {} Bool)".format(n) for n in names]
+            bool_names = ["{}_is_{}".format(name, bw) for bw in bit_options]
+            query_decls = ["(declare-const {} Bool)".format(n) for n
+                           in bool_names]
             self.query_string_list.extend(query_decls)
 
             # Assert that the sum of the booleans is 1 (i.e. only one is "true")
-            converted = ["(bool_to_int {})".format(n) for n in names]
-            assertion = "(assert (= 1 (+ {})))".format(" ".join(converted))
+            converted = ["(bool_to_int {})".format(n) for n in bool_names]
+            sum_parts = "\n  ".join(converted)
+            assertion = "(assert (= 1 (+ {})))".format(sum_parts)
             self.query_string_list.append(assertion)
+            self.query_string_list.append("")
 
             # Update our dictonary
             bit_width_choices[name] = {bw:n for bw,n
-                                       in zip(bit_options, names)}
-            self.query_string_list.append("")
+                                       in zip(bit_options, bool_names)}
 
         return bit_width_choices
 
     def get_epsilons(self):
-
         # name -> z3_name
         epsilons = dict()
 
@@ -112,7 +119,8 @@ class Z3Result:
 
             # Note what we are working on
             val = self.ssa.definitions[name]
-            self.query_string_list.append("; epsilon for {} = {}".format(name, val))
+            comment = "; epsilon for {} = {}".format(name, val)
+            self.query_string_list.append(comment)
 
             # Get the associated denominator for each bit width
             bit_options = self.ssa.search_space["bit_widths"]
@@ -120,23 +128,24 @@ class Z3Result:
 
             # Use those to create a list so that when one boolean is 1, the
             # sum is the epsilon for the given bit width
-            z3_bools = [choices[bw] for bw in bit_options]
+            bool_names = [choices[bw] for bw in bit_options]
             epsilon_parts = ["(/ (bool_to_real {}) {})".format(b, d)
-                             for b,d in zip(z3_bools, denoms)]
+                             for b, d in zip(bool_names, denoms)]
 
             # Sum these and get the result
             epsilon_name = "{}_eps".format(name)
-            epsilon = "(define-fun {} () Real (+ {}))".format(epsilon_name, " ".join(epsilon_parts))
+            sum_parts = "\n  ".join(epsilon_parts)
+            epsilon = "(define-fun {} () Real (+ {}))".format(epsilon_name,
+                                                              sum_parts)
             self.query_string_list.append(epsilon)
+            self.query_string_list.append("")
 
             # Update our dictionary
             epsilons[name] = epsilon_name
-            self.query_string_list.append("")
 
         return epsilons
 
     def get_operation_choices(self):
-
         # name -> {impl -> z3_name}
         operation_choices = dict()
 
@@ -145,24 +154,27 @@ class Z3Result:
 
             # Note what we are working on
             val = self.ssa.definitions[name]
-            self.query_string_list.append("; operation for {} = {}".format(name, val))
+            comment = "; operation for {} = {}".format(name, val)
+            self.query_string_list.append(comment)
 
             # Setup the list of variable names, and make the z3 booleans
             op = self.ssa.definitions[name].op
             impls = [impl for impl in self.ssa.search_space["operations"][op]]
-            names = ["{}_is_{}".format(name, impl) for impl in impls]
-            query_decls = ["(declare-const {} Bool)".format(n) for n in names]
+            name_bools = ["{}_is_{}".format(name, impl) for impl in impls]
+            query_decls = ["(declare-const {} Bool)".format(n) for n
+                           in name_bools]
             self.query_string_list.extend(query_decls)
 
             # Assert that the sum of the booleans is 1 (i.e. only one is "true")
-            converted = ["(bool_to_int {})".format(n) for n in names]
-            assertion = "(assert (= 1 (+ {})))".format(" ".join(converted))
+            converted = ["(bool_to_int {})".format(n) for n in name_bools]
+            sum_parts = "\n  ".join(converted)
+            assertion = "(assert (= 1 (+ {})))".format(sum_parts)
             self.query_string_list.append(assertion)
+            self.query_string_list.append("")
 
             # Update our dictonary
-            operation_choices[name] = {impl:n for impl,n
-                                       in zip(impls, names)}
-            self.query_string_list.append("")
+            operation_choices[name] = {impl:n for impl, n
+                                       in zip(impls, name_bools)}
 
         return operation_choices
 
@@ -174,7 +186,8 @@ class Z3Result:
 
             # Note what we are working on
             val = self.ssa.definitions[name]
-            self.query_string_list.append("; error for {} = {}".format(name, val))
+            comment = "; error for {} = {}".format(name, val)
+            self.query_string_list.append(comment)
 
             # get out epsilon variable and make the error variable
             this_eps = self.epsilons[name]
@@ -187,7 +200,8 @@ class Z3Result:
                 # Error can be computed as eps*max(fptaylor_form)
                 form = forms["default"]
                 error = form.to_z3(this_eps)
-                self.query_string_list.append("(define-fun {} () Real {})".format(error_name, error))
+                z3_error = "(define-fun {} () Real {})".format(error_name, error)
+                self.query_string_list.append(z3_error)
                 self.query_string_list.append("")
 
                 # Go onto the next expression
@@ -198,16 +212,23 @@ class Z3Result:
             for tup, form in forms.items():
                 if type(tup) == str and tup == "default":
                     oper = self.ssa.definitions[name].op
-                    bool = self.operation_choices[name][oper]
-                    val = forms["default"].to_z3(this_eps)
-                    options_str.append("(* {} (bool_to_real {}))".format(val, bool))
+                    bool_name = self.operation_choices[name][oper]
+                    error = forms["default"].to_z3(this_eps)
+                    z3_error = "(* (bool_to_real {}) {})".format(bool_name,
+                                                                 error)
+                    options_str.append(z3_error)
                     continue
-                target_name, oper = tup
-                bool = self.operation_choices[target_name][oper]
-                val = form.to_z3(this_eps)
-                options_str.append("(* {} (bool_to_real {}))".format(val, bool))
 
-            self.query_string_list.append("(define-fun {} () Real (+ {}))".format(error_name, " ".join(options_str)))
+                target_name, oper = tup
+                bool_name = self.operation_choices[target_name][oper]
+                error = form.to_z3(this_eps)
+                z3_error = "(* (bool_to_real {}) {})".format(bool_name, error)
+                options_str.append(z3_error)
+
+            error_parts = "\n  ".join(options_str)
+            expr_error = "(define-fun {} () Real (+ {}))".format(error_name,
+                                                                 error_parts)
+            self.query_string_list.append(expr_error)
             self.query_string_list.append("")
 
         return expression_errors
@@ -217,28 +238,39 @@ class Z3Result:
         self.query_string_list.append("; total error for expression")
 
         error_name = "total_error"
-        errors = " ".join([v for v in self.expression_errors.values()])
-        self.query_string_list.append("(define-fun {} () Real (+ {}))".format(error_name,
-                                                                                errors))
+        errors = "\n  ".join([v for v
+                              in sorted(self.expression_errors.values())])
+        z3_errors = "(define-fun {} () Real (+ {}))".format(error_name, errors)
+        self.query_string_list.append(z3_errors)
         self.query_string_list.append("")
         return error_name
 
     def get_bit_width_costs(self):
+        # name -> z3_name
         costs = dict()
+
+        # Go through all bit width choices
         for name, bools in self.bit_width_choices.items():
 
             # Note what we are working on
             val = self.ssa.definitions[name]
-            self.query_string_list.append("; cost for bit width of {} = {}".format(name, val))
+            comment = "; cost for bit width of {} = {}".format(name, val)
+            self.query_string_list.append(comment)
 
             cost_name = "{}_bit_width_cost".format(name)
-            bw_costs = range(1, 20*len(bools)+1, 20)
-            cost_parts = ["(* {} (bool_to_int {}))".format(c, b)
-                          for c,b in zip(bw_costs, bools.values())]
-            cost = " ".join(cost_parts)
-            self.query_string_list.append("(define-fun {} () Int (+ {}))".format(cost_name, cost))
-            costs[name] = cost_name
+            bit_options = self.ssa.search_space["bit_widths"]
+            bit_width_costs = [all_modifications_ast.BitWidthCost[bw] for bw
+                               in bit_options]
+            bool_names = [bools[bw] for bw in bit_options]
+            cost_parts = ["(* (bool_to_int {}) {})".format(b, c) for b, c
+                          in zip(bool_names, bit_width_costs)]
+            sum_parts = "\n  ".join(cost_parts)
+            z3_cost = "(define-fun {} () Int (+ {}))".format(cost_name,
+                                                             sum_parts)
+            self.query_string_list.append(z3_cost)
             self.query_string_list.append("")
+
+            costs[name] = cost_name
 
         return costs
 
@@ -248,18 +280,25 @@ class Z3Result:
 
             # Note what we are working on
             val = self.ssa.definitions[name]
-            self.query_string_list.append("; cost for implementation of {} = {}".format(name, val))
+            comment = "; cost for implementation of {} = {}".format(name, val)
+            self.query_string_list.append(comment)
 
             cost_name = "{}_operation_cost".format(name)
             op = self.ssa.definitions[name].op
+            impls = self.ssa.search_space["operations"][op]
             op_costs = [all_modifications_ast.OperationToCost[oper]
-                        for oper in self.ssa.search_space["operations"][op]]
-            cost_parts = ["(* {} (bool_to_int {}))".format(c, b)
-                          for c,b in zip(op_costs, bools.values())]
-            cost = " ".join(cost_parts)
-            self.query_string_list.append("(define-fun {} () Int (+ {}))".format(cost_name, cost))
-            costs[name] = cost_name
+                        for oper in impls]
+            bool_names = [bools[oper] for oper in impls]
+            cost_parts = ["(* (bool_to_int {}) {})".format(b, c)
+                          for b, c in zip(bool_names, op_costs)]
+            sum_parts = "\n  ".join(cost_parts)
+            z3_cost = "(define-fun {} () Int (+ {}))".format(cost_name,
+                                                             sum_parts)
+            self.query_string_list.append(z3_cost)
             self.query_string_list.append("")
+
+            costs[name] = cost_name
+
 
         return costs
 
@@ -267,9 +306,10 @@ class Z3Result:
         self.query_string_list.append("; total cost for expression")
 
         cost_name = "total_cost"
-        costs = " ".join([v for v in self.operation_costs.values()])
-        self.query_string_list.append("(define-fun {} () Int (+ {}))".format(cost_name,
-                                                                         costs))
+        costs = "\n  ".join([v for v in sorted(self.operation_costs.values())])
+        z3_costs = "(define-fun {} () Int (+ {}))".format(cost_name, costs)
+        self.query_string_list.append(z3_costs)
         self.query_string_list.append("")
+
         return cost_name
 

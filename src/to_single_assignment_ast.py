@@ -263,7 +263,7 @@ def to_single_assignment(self, search_space):
     for prop in self.properties:
         if prop.name == "name":
             name = prop.value
-    ssa.name = name
+    ssa.name = name.replace('"', "")
 
     # Keep properties from fpcore
     ssa.properties = self.properties

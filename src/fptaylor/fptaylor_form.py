@@ -103,10 +103,11 @@ class FPTaylorForm:
     def to_z3(self, eps):
         parts_str = list()
         for exp, maximum in self.maximums.items():
+            maximum_string = "{:20f}".format(maximum).strip()
             if exp == "eps":
-                err = "(* {} {:20f})".format(eps, maximum)
+                err = "(* {} {})".format(eps, maximum_string)
             else:
-                err = "(* {} {:20f})".format((2**exp), maximum)
+                err = "(* {} {})".format((2**exp), maximum_string)
 
             parts_str.append(err)
 
