@@ -16,7 +16,6 @@ from fpcore_logging import Logger
 from exceptions import DomainError, UnsupportedError, NoPreError, BadPreError
 from fpcore_lexer import FPCoreLexer
 from fpcore_parser import FPCoreParser
-#from gurobi_result import GurobiResult
 from z3_result import Z3Result
 from tuned_expression import TunedExpression
 from fptaylor_result import FPTaylorResult
