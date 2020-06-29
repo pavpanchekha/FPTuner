@@ -39,7 +39,7 @@ check_run ()
     cat <<EOF >>$date.html
 <h1>${test_name}</h1>
 EOF
-    \time -f %e ${FPTUNER} ${1} -e 10.0 1.0 0.1 0.01 0.001  0.0001  0.00001  0.000001  0.0000001 >> $date.html
+    \time -f %e ${FPTUNER} --nightly ${1} -e 10.0 1.0 0.1 0.01 0.001  0.0001  0.00001  0.000001  0.0000001 >> $date.html
     #> ${tmp_out} 2> ${tmp_err}
     exit_code=$?
 

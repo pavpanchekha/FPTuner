@@ -38,17 +38,31 @@ def parse_args(argv):
                             action="store_const",
                             const=True,
                             help="Use FPTaylor to verify final error bound")
+    arg_parser.add_argument("--nightly",
+                            action="store_const",
+                            const=True,
+                            help="Output in html format, use FPTaylor check, set verbosity to none")
 
     args = arg_parser.parse_args(argv[1:])
 
+    # Set verbosity, but override to none if using nightly
     logger.set_log_level(Logger.str_to_level(args.verbosity))
+    if args.nightly:
+        logger.set_log_level(Logger.NONE)
 
-    if args.log_file is not None:
+    # Set logfile if it is present and not doing nightly
+    if not args.nightly and args.log_file is not None:
         Logger.set_log_filename(args.log_file)
 
+    # Set check if doing nightly
+    if args.nightly:
+        args.check = True
+
+    # Dedupe and sort bit widths from less precise to more precise
     bws = list(set(args.bit_widths))
     args.bit_widths = sorted(bws, key=lambda s: int(s[2:]))
 
+    # Sort error bounds from larget to smallest
     args.error.sort(reverse=True)
 
     logger("Argument settings:")

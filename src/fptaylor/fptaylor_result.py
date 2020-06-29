@@ -43,6 +43,7 @@ class FPTaylorResult:
     def __init__(self, query, config=None):
         logger.log("FPTaylor query:\n{}", query)
         self.abs_error = None
+        self.high_second_order = None
         self.query = query
         self.config = config or FPTaylorResult.ERROR_FORM_CONFIG
         self._run()
@@ -82,11 +83,23 @@ class FPTaylorResult:
                                                self.err,
                                                self.retcode)
 
+                logger.llog(Logger.HIGH, "out:\n{}", self.out.strip())
+
+                # Grab when FPTaylor warns about second order error
+                err_lines = self.err.splitlines()
+                high_msg = "**WARNING**: Large second-order error:"
+                help_msg = "**WARNING**: Try intermediate-opt"
+                self.high_second_order = any([high_msg in line for line
+                                              in err_lines])
+                err_lines = [line for line in err_lines if line.strip() != ""]
+                err_lines = [line for line in err_lines if high_msg not in line]
+                err_lines = [line for line in err_lines if help_msg not in line]
+
                 # Warn when FPTaylor complains about infinity and domain errors
                 # todo: handle when this occurs
-                logger.llog(Logger.HIGH, "out:\n{}", self.out.strip())
-                if len(self.err) != 0:
-                    logger.warning("FPTaylor printed to stderr:\n{}", self.err)
+                if err_lines != 0:
+                    logger.warning("FPTaylor printed to stderr:\n{}",
+                                   "\n".join(err_lines))
 
     def _extract_fptaylor_forms(self):
         # Since FPTaylor forms are listed seperate from their corresponding

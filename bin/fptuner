@@ -11,6 +11,7 @@ sys.path.append(path.join(GIT_DIR, "src", "fpcore_parser", "src"))
 
 import check_requirements
 
+from datetime import date
 from fpcore_logging import Logger
 from exceptions import DomainError, UnsupportedError, NoPreError, BadPreError
 from fpcore_lexer import FPCoreLexer
@@ -30,28 +31,37 @@ logger = Logger(level=Logger.HIGH, color=Logger.green)
 def main(argv):
     args = fptuner_argument_parser.parse_args(argv)
 
+    # Grab all functions from the modifications table
     sins = [row[1] for row in all_modifications_ast.OperationTable
             if row[0] == "sin"]
     exps = [row[1] for row in all_modifications_ast.OperationTable
             if row[0] == "exp"]
     logs = [row[1] for row in all_modifications_ast.OperationTable
             if row[0] == "log"]
-
     operations = {"sin": sins,
                   "exp": exps,
                   "log": logs}
+
+    # Setup the search space
     search_space = {"bit_widths": args.bit_widths,
                     "operations": operations}
 
     lexer = FPCoreLexer()
     parser = FPCoreParser()
 
-    for query_file in args.query_files:
-        print(query_file)
+    # Optionally print html header
+    if args.nightly:
+        today = date.today()
+        (Y, m, d) = today.year, today.month, today.day
+        print("<!doctype html>")
+        print("<title>FPTuner Results for {}-{}-{}</title>".format(Y, m, d))
+        print("<body>")
 
+    for query_file in args.query_files:
         try:
             with open(query_file, "r") as f:
                 text = f.read()
+
         except FileNotFoundError:
             logger.error("Unable to find file '{}'", query_file)
             continue
@@ -86,17 +96,32 @@ def main(argv):
                     if args.check:
                         query = tr.to_fptaylor()
                         res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
-                        row.append(str(res.abs_error <= e))
+                        if res.abs_error is None:
+                            logger.error("FPTaylor did not find an error value")
+                            res.abs_error = float("nan")
+                            row.append("N/A")
+                        else:
+                            logger("FPTaylor error bound: {}", res.abs_error)
+                            row.append(str(res.abs_error <= e))
+                        row.append(str(res.high_second_order))
                     rows.append(row)
 
                 if args.check:
                     first_header.append("FPTaylorCheck")
+                    first_header.append("HighSecondOrder")
 
-                print("<table>")
-                print("<tr><th>" + "</th><th>".join(first_header) + "</th></tr>")
-                for row in rows:
-                    print("<tr><td>" + "</td><td>".join(row) + "</td></tr>")
-                print("</table>")
+                if args.nightly:
+                    print("<h1>{}</h1>".format(ssa.name))
+                    print("<table>")
+                    print("<tr><th>" + "</th><th>".join(first_header) + "</th></tr>")
+                    for row in rows:
+                        print("<tr><td>" + "</td><td>".join(row) + "</td></tr>")
+                    print("</table>")
+                else:
+                    print(ssa.name)
+                    print("\t".join(first_header))
+                    for row in rows:
+                        print("\t".join(row))
 
             except DomainError as e:
                 if e.lower is None and e.upper is None:
@@ -116,7 +141,8 @@ def main(argv):
             except BadPreError as e:
                 logger.error("Unable to process precondition: '{}'", e.pre)
 
-            print("\n\n\n")
+    if args.nightly:
+        print("</body>")
 
 
 if __name__ == "__main__":
