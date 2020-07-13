@@ -41,7 +41,7 @@ class FPTaylorResult:
     }
 
     def __init__(self, query, config=None):
-        logger.log("FPTaylor query:\n{}", query)
+        logger.llog(logger.HIGH, "Query:\n{}", query)
         self.abs_error = None
         self.high_second_order = None
         self.query = query
@@ -61,7 +61,7 @@ class FPTaylorResult:
             # Put together the FPTaylor command
             flags = " ".join([k+" "+v for k, v in self.config.items()])
             command = "fptaylor {} {}".format(flags, f.name)
-            logger.llog(Logger.HIGH, "command: {}", command)
+            logger.llog(Logger.HIGH, "Command: {}", command)
 
             # Call FPTaylor
             with subprocess.Popen(shlex.split(command),
@@ -75,37 +75,39 @@ class FPTaylorResult:
                 self.err = raw_err.decode("utf8")
                 self.retcode = p.returncode
 
-                # If anything went wrong in the call unceremoniusly exit
-                if self.retcode != 0:
-                    raise FPTaylorRuntimeError(self.query,
-                                               command,
-                                               self.out,
-                                               self.err,
-                                               self.retcode)
+        # If anything went wrong in the call unceremoniusly exit
+        if self.retcode != 0:
+            raise FPTaylorRuntimeError(self.query,
+                                       command,
+                                       self.out,
+                                       self.err,
+                                       self.retcode)
 
-                logger.llog(Logger.HIGH, "out:\n{}", self.out.strip())
+        logger.llog(Logger.HIGH, "stdout:\n{}", self.out.strip())
 
-                # Grab when FPTaylor warns about second order error
-                err_lines = self.err.splitlines()
-                high_msg = "**WARNING**: Large second-order error:"
-                help_msg = "**WARNING**: Try intermediate-opt"
-                self.high_second_order = any([high_msg in line for line
-                                              in err_lines])
-                err_lines = [line for line in err_lines if line.strip() != ""]
-                err_lines = [line for line in err_lines if high_msg not in line]
-                err_lines = [line for line in err_lines if help_msg not in line]
+        # Grab when FPTaylor warns about second order error
+        err_lines = self.err.splitlines()
+        high_msg = "**WARNING**: Large second-order error:"
+        help_msg = "**WARNING**: Try intermediate-opt"
+        self.high_second_order = any([high_msg in line for line in err_lines])
+        err_lines = [line for line in err_lines if line.strip() != ""]
+        err_lines = [line for line in err_lines if high_msg not in line]
+        err_lines = [line for line in err_lines if help_msg not in line]
 
-                # Warn when FPTaylor complains about infinity and domain errors
-                # todo: handle when this occurs
-                if err_lines != 0:
-                    logger.warning("FPTaylor printed to stderr:\n{}",
-                                   "\n".join(err_lines))
+        # Error when FPTaylor complains about infinity and domain errors
+        # todo: handle when this occurs
+        if len(err_lines) != 0:
+            if not logger.should_log(Logger.HIGH):
+                logger.llog(logger.NONE, "Query:\n{}", self.query)
+                logger.llog(Logger.NONE, "Command: {}", command)
+                logger.llog(Logger.NONE, "stdout:\n{}", self.out.strip())
+            logger.error("stderr:\n{}", "\n".join(err_lines))
 
     def _extract_fptaylor_forms(self):
         # Since FPTaylor forms are listed seperate from their corresponding
         # original expressions we will capture both and realign them after
-        fptaylor_forms = list()
-        original_exprs = list()
+        fptaylor_forms = dict()
+        original_exprs = dict()
 
         # Get the expression parser ready
         lexer = FPTaylorLexer()
@@ -125,18 +127,18 @@ class FPTaylorResult:
 
             if state == "capture fptaylor forms":
                 # Grab fptaylor forms and look for the end of fptaylor forms
-                if len(items) > 0 and line.split()[0] == "-1":
-                    continue
                 if line == "":
                     state = "find original expr"
                     continue
                 # Match on:
-                #   <int> (<int>): exp = <int>: <expr>
-                # Get out the exp = <int> and <expr> parts
+                #   0       1        2   3 4      5...
+                #   |       |        |   | |      |
+                #   <index> (<int>): exp = <exp>: <expr>
+                index = int(items[0])
                 exp = items[4].replace(":", "")
-                raw = " ".join(items[5:])
-                form = FPTaylorForm(exp, raw)
-                fptaylor_forms.append(form)
+                expr = " ".join(items[5:])
+                form = FPTaylorForm(exp, expr)
+                fptaylor_forms[index] = form
                 continue
 
             if state == "find original expr":
@@ -151,12 +153,14 @@ class FPTaylorResult:
                     state = "capture error"
                     continue
                 # Match on:
-                #   <int>: <expr>
-                # Get out expr
-                raw = " ".join(items[1:])
-                tokens = lexer.tokenize(raw)
-                expr = parser.parse(tokens)
-                original_exprs.append(expr)
+                #   0        1...
+                #   |        |
+                #   <index>: <expr>
+                index = int(items[0].replace(":", ""))
+                expr = " ".join(items[1:])
+                tokens = lexer.tokenize(expr)
+                parsed = parser.parse(tokens)
+                original_exprs[index] = parsed
                 continue
 
             if state == "capture error":
@@ -166,9 +170,16 @@ class FPTaylorResult:
                     break
                 continue
 
-        # Catch if the two lists have different lengths
-        if len(fptaylor_forms) != len(original_exprs):
-            raise FPTaylorFormError(self.out, fptaylor_forms, original_exprs)
+        # Combine both dicts in order
+        logger("Original -> FPtaylor Form")
+        forms = list()
+        for index in sorted(original_exprs):
+            o = original_exprs[index]
+            f = fptaylor_forms[index]
+            logger("{} -> {}", o, f)
+            forms.append((o, f))
 
-        # Set member as list, since zip objects don't play nice
-        self.fptaylor_forms = list(zip(original_exprs, fptaylor_forms))
+        if self.abs_error is not None:
+            logger("abs_error: {}", self.abs_error)
+
+        self.fptaylor_forms = forms

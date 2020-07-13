@@ -38,7 +38,10 @@ class SingleAssignment:
         lines.append("SingleAssignment:")
         lines.append("  search_space:")
         lines.append("    bit_widths = {}".format(bits))
-        lines.append("    operations = {}".format(ops))
+        lines.append("    operations:")
+
+        for op, impls in ops.items():
+            lines.append("      {} = {}".format(op, " ".join(impls)))
 
         lines.append("  inputs:")
         for name, domain in self.inputs.items():
@@ -56,9 +59,10 @@ class SingleAssignment:
             if len(forms) == 0:
                 lines.append("    {} = not_computed".format(name))
                 continue
-            lines.append("    {} = {} => {}".format(name, value.op, forms["default"]))
+            lines.append("    {}:".format(name))
             for key, form in forms.items():
                 if key == "default":
+                    lines.append("        {} => {}".format(key, form))
                     continue
                 lines.append("        {} => {}".format(key[1], form))
 
@@ -87,6 +91,10 @@ class SingleAssignment:
     def add_input(self, name, domain):
         self.assert_unique_name(name)
         self.inputs[name] = domain
+        new_inputs = OrderedDict()
+        for n in sorted(self.inputs):
+            new_inputs[n] = self.inputs[n]
+        self.inputs = new_inputs
         return name
 
     def add_subexpression(self, value):

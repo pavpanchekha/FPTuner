@@ -35,12 +35,15 @@ class FPTaylorForm:
         return " + ".join(parts)
 
     def __eq__(self, other):
-        if len(self.forms) != other.forms:
+        if len(self.forms) != len(other.forms):
             return False
         for exp in self.forms:
             if exp not in other.forms or self.forms[exp] != other.forms[exp]:
                 return False
         return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __add__(self, other):
         retval = FPTaylorForm(None, None)
