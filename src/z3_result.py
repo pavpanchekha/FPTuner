@@ -50,8 +50,8 @@ class Z3Result:
         #logger.log("z3 query:\n{}\n", "\n".join(numbered_lines))
         logger.log("z3 query:\n{}\n", self.query)
 
+        ctx = z3.Context("model_validate", "true")
         self.optimizer = z3.Optimize()
-        z3.set_param("model_validate", "true")
         self.optimizer.from_string(self.query)
         self.optimizer.check()
         z3_model = self.optimizer.model()
@@ -100,7 +100,7 @@ class Z3Result:
             # Assert that the sum of the booleans is 1 (i.e. only one is "true")
             converted = ["(bool_to_int {})".format(n) for n in bool_names]
             sum_parts = "\n  ".join(converted)
-            assertion = "(assert (= 1 (+ {})))".format(sum_parts)
+            assertion = "(assert (= 1 (+\n  {})))".format(sum_parts)
             self.query_string_list.append(assertion)
             self.query_string_list.append("")
 
@@ -135,7 +135,7 @@ class Z3Result:
             # Sum these and get the result
             epsilon_name = "{}_eps".format(name)
             sum_parts = "\n  ".join(epsilon_parts)
-            epsilon = "(define-fun {} () Real (+ {}))".format(epsilon_name,
+            epsilon = "(define-fun {} () Real (+\n  {}))".format(epsilon_name,
                                                               sum_parts)
             self.query_string_list.append(epsilon)
             self.query_string_list.append("")
@@ -168,7 +168,7 @@ class Z3Result:
             # Assert that the sum of the booleans is 1 (i.e. only one is "true")
             converted = ["(bool_to_int {})".format(n) for n in name_bools]
             sum_parts = "\n  ".join(converted)
-            assertion = "(assert (= 1 (+ {})))".format(sum_parts)
+            assertion = "(assert (= 1 (+\n  {})))".format(sum_parts)
             self.query_string_list.append(assertion)
             self.query_string_list.append("")
 
@@ -226,8 +226,8 @@ class Z3Result:
                 options_str.append(z3_error)
 
             error_parts = "\n  ".join(options_str)
-            expr_error = "(define-fun {} () Real (+ {}))".format(error_name,
-                                                                 error_parts)
+            expr_error = "(define-fun {} () Real (+\n  {}))".format(error_name,
+                                                                     error_parts)
             self.query_string_list.append(expr_error)
             self.query_string_list.append("")
 
@@ -240,7 +240,7 @@ class Z3Result:
         error_name = "total_error"
         errors = "\n  ".join([v for v
                               in sorted(self.expression_errors.values())])
-        z3_errors = "(define-fun {} () Real (+ {}))".format(error_name, errors)
+        z3_errors = "(define-fun {} () Real (+\n  {}))".format(error_name, errors)
         self.query_string_list.append(z3_errors)
         self.query_string_list.append("")
         return error_name
@@ -265,7 +265,7 @@ class Z3Result:
             cost_parts = ["(* (bool_to_int {}) {})".format(b, c) for b, c
                           in zip(bool_names, bit_width_costs)]
             sum_parts = "\n  ".join(cost_parts)
-            z3_cost = "(define-fun {} () Int (+ {}))".format(cost_name,
+            z3_cost = "(define-fun {} () Int (+\n  {}))".format(cost_name,
                                                              sum_parts)
             self.query_string_list.append(z3_cost)
             self.query_string_list.append("")
@@ -292,7 +292,7 @@ class Z3Result:
             cost_parts = ["(* (bool_to_int {}) {})".format(b, c)
                           for b, c in zip(bool_names, op_costs)]
             sum_parts = "\n  ".join(cost_parts)
-            z3_cost = "(define-fun {} () Int (+ {}))".format(cost_name,
+            z3_cost = "(define-fun {} () Int (+\n  {}))".format(cost_name,
                                                              sum_parts)
             self.query_string_list.append(z3_cost)
             self.query_string_list.append("")
@@ -307,7 +307,7 @@ class Z3Result:
 
         cost_name = "total_cost"
         costs = "\n  ".join([v for v in sorted(self.operation_costs.values())])
-        z3_costs = "(define-fun {} () Int (+ {}))".format(cost_name, costs)
+        z3_costs = "(define-fun {} () Int (+\n  {}))".format(cost_name, costs)
         self.query_string_list.append(z3_costs)
         self.query_string_list.append("")
 
