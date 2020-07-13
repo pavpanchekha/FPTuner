@@ -45,7 +45,6 @@ echo "Installing Gelpia"
 pushd "$SCRIPT_LOCATION"
 rm -rf gelpia
 git clone https://github.com/soarlab/gelpia.git &>> "${LOG}"
-ln -s FPTuner/gelpia gelpia &>> "${LOG}"
 pushd gelpia
 SUCCESS=-1
 pushd requirements
@@ -53,6 +52,13 @@ pushd requirements
 popd
 SUCCESS=1
 make &>> "${LOG}"
+popd
+popd
+
+# symbolic link gelpia
+pushd "$SCRIPT_LOCATION"
+pushd FPTaylor
+ln -s ../gelpia gelpia
 popd
 popd
 
