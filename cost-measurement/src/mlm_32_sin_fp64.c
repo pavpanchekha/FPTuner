@@ -5,7 +5,7 @@
  * INFO: git status was clean when file was generated.
  * 
  * command used for generation:
- *   metalibm_functions/ml_sin.py --fuse-fma --target x86_sse42 --precision \
+ *   metalibm_functions/ml_sin.py --fuse-fma --target x86_avx2 --precision \
  *     binary64 --output mlm_32_sin_fp64.c --fname mlm_32_sin_fp64 --accuracy \
  *     dar(4.76837158203125e-07)
  * 
@@ -14,8 +14,9 @@
 #include <fenv.h>
 #include <xmmintrin.h>
 #include <emmintrin.h>
-#include <math.h>
+#include <immintrin.h>
 #include <support_lib/ml_special_values.h>
+#include <math.h>
 #include <inttypes.h>
 
 
@@ -55,7 +56,7 @@ static const __m128d mlm_32_sin_fp64_c_51 = {0x1.11110ea950cdcp-7}/*sse*/;
 static const __m128d mlm_32_sin_fp64_c_41 = {0x1.28b5cf9928a9bp-72}/*sse*/;
 static const __m128d mlm_32_sin_fp64_c_31 = {-0x1.5555555555555p-3}/*sse*/;
 static const __m128d mlm_32_sin_fp64_c_21 = {-0x1.b17b22f8ba5fp-100}/*sse*/;
-static const double PH_scale_table[47][1]  = {
+const double PH_scale_table[47][1]  = {
     { 0x1p0},
     { 0x1p-12},
     { 0x1p-24},
@@ -104,7 +105,7 @@ static const double PH_scale_table[47][1]  = {
     { 0x1p-540},
     { 0x1p-552}
 };
-static const double PH_cst_table[47][1]  = {
+const double PH_cst_table[47][1]  = {
     { 0x1.45f307p12},
     { -0x1.1b1bcp9},
     { 0x1.529fcp9},
@@ -153,7 +154,7 @@ static const double PH_cst_table[47][1]  = {
     { -0x1.594048p9},
     { -0x1.027704p10}
 };
-static const double mlm_32_sin_fp64_cos_table[32768][1]  = {
+const double mlm_32_sin_fp64_cos_table[32768][1]  = {
     { 0x1p0},
     { 0x1.ffffff621619cp-1},
     { 0x1.fffffd8858675p-1},
@@ -32955,53 +32956,64 @@ double mlm_32_sin_fp64(double vx){
         double tab_sin;
         double tmp5;
         double tmp6;
-        double tmp7;
-        double tmp8;
+        __m128d tmp7;
+        __m128d tmp8;
         double tmp9;
+        __m128d tmp10;
+        __m128d tmp11;
+        double tmp12;
+        double tmp13;
         double mul_coeff_sin;
-        double tmp10;
+        double tmp14;
         double pm_5;
-        double tmp11;
+        double tmp15;
         double pa_5;
         double pm_4;
-        double tmp12;
+        double tmp16;
         double pa_4;
         double pm_3;
-        double tmp13;
+        double tmp17;
         double pa_3;
         double pm_2;
-        double tmp14;
+        double tmp18;
         double pa_2;
-        double tmp15;
-        double tmp16;
-        double tmp17;
+        double tmp19;
+        double tmp20;
+        double tmp21;
         double poly_cos;
         double mul_cos_x;
-        double tmp18;
-        double mul_cos_y;
+        __m128d tmp22;
+        __m128d tmp23;
+        double tmp24;
+        __m128d tmp25;
+        __m128d mul_cos_y;
+        double tmp26;
         double mul_cos;
-        double tmp19;
+        double tmp27;
         double pm_51;
-        double tmp20;
+        double tmp28;
         double pa_51;
         double pm_41;
-        double tmp21;
+        double tmp29;
         double pa_41;
         double pm_31;
-        double tmp22;
+        double tmp30;
         double pa_31;
-        double tmp23;
-        double tmp24;
-        double tmp25;
+        double tmp31;
+        double tmp32;
+        double tmp33;
         double red_vx2_;
         double poly_sin;
         double mul_sin_x;
-        double tmp26;
-        double mul_sin_y;
-        double tmp27;
+        __m128d tmp34;
+        double tmp35;
+        __m128d tmp36;
+        __m128d mul_sin_y;
+        double tmp37;
+        double tmp38;
         double mul_sin;
-        double tmp28;
-        double tmp29;
+        double tmp39;
+        double tmp40;
         double cos_eval_d_1;
 
         tmp0 = _mm_cvtsd_f64(mlm_32_sin_fp64_cst1);
@@ -33265,54 +33277,65 @@ double mlm_32_sin_fp64(double vx){
         tab_sin = mlm_32_sin_fp64_cos_table[sin_index][INT64_C(0)];
         tmp5 =  - tab_sin;
         tmp6 = tmp5 * red_vx;
-        tmp7 =  - tmp6;
-        tmp8 = fma(tmp5, red_vx, tmp7);
-        tmp9 = tmp6 + tmp8;
-        mul_coeff_sin =  - tmp9;
-        tmp10 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_6);
-        pm_5 = red_vx * tmp10;
-        tmp11 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_5);
-        pa_5 = tmp11 + pm_5;
+        tmp7 = _mm_set_sd(tmp5);
+        tmp8 = _mm_set_sd(red_vx);
+        tmp9 =  - tmp6;
+        tmp10 = _mm_set_sd(tmp9);
+        tmp11 = _mm_fmadd_sd(tmp7, tmp8, tmp10);
+        tmp12 = _mm_cvtsd_f64(tmp11);
+        tmp13 = tmp6 + tmp12;
+        mul_coeff_sin =  - tmp13;
+        tmp14 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_6);
+        pm_5 = red_vx * tmp14;
+        tmp15 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_5);
+        pa_5 = tmp15 + pm_5;
         pm_4 = red_vx * pa_5;
-        tmp12 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_4);
-        pa_4 = tmp12 + pm_4;
+        tmp16 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_4);
+        pa_4 = tmp16 + pm_4;
         pm_3 = red_vx * pa_4;
-        tmp13 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_3);
-        pa_3 = tmp13 + pm_3;
+        tmp17 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_3);
+        pa_3 = tmp17 + pm_3;
         pm_2 = red_vx * pa_3;
-        tmp14 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_2);
-        pa_2 = tmp14 + pm_2;
-        tmp15 = red_vx * pa_2;
-        tmp16 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_1);
-        tmp17 = tmp16 + tmp15;
-        poly_cos = red_vx * tmp17;
+        tmp18 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_2);
+        pa_2 = tmp18 + pm_2;
+        tmp19 = red_vx * pa_2;
+        tmp20 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_1);
+        tmp21 = tmp20 + tmp19;
+        poly_cos = red_vx * tmp21;
         mul_cos_x = tab_cos * poly_cos;
-        tmp18 =  - mul_cos_x;
-        mul_cos_y = fma(tab_cos, poly_cos, tmp18);
-        mul_cos = mul_cos_x + mul_cos_y;
-        tmp19 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_61);
-        pm_51 = red_vx * tmp19;
-        tmp20 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_51);
-        pa_51 = tmp20 + pm_51;
+        tmp22 = _mm_set_sd(tab_cos);
+        tmp23 = _mm_set_sd(poly_cos);
+        tmp24 =  - mul_cos_x;
+        tmp25 = _mm_set_sd(tmp24);
+        mul_cos_y = _mm_fmadd_sd(tmp22, tmp23, tmp25);
+        tmp26 = _mm_cvtsd_f64(mul_cos_y);
+        mul_cos = mul_cos_x + tmp26;
+        tmp27 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_61);
+        pm_51 = red_vx * tmp27;
+        tmp28 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_51);
+        pa_51 = tmp28 + pm_51;
         pm_41 = red_vx * pa_51;
-        tmp21 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_41);
-        pa_41 = tmp21 + pm_41;
+        tmp29 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_41);
+        pa_41 = tmp29 + pm_41;
         pm_31 = red_vx * pa_41;
-        tmp22 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_31);
-        pa_31 = tmp22 + pm_31;
-        tmp23 = red_vx * pa_31;
-        tmp24 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_21);
-        tmp25 = tmp24 + tmp23;
+        tmp30 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_31);
+        pa_31 = tmp30 + pm_31;
+        tmp31 = red_vx * pa_31;
+        tmp32 = _mm_cvtsd_f64(mlm_32_sin_fp64_c_21);
+        tmp33 = tmp32 + tmp31;
         red_vx2_ = red_vx * red_vx;
-        poly_sin = red_vx2_ * tmp25;
+        poly_sin = red_vx2_ * tmp33;
         mul_sin_x = tmp5 * poly_sin;
-        tmp26 =  - mul_sin_x;
-        mul_sin_y = fma(tmp5, poly_sin, tmp26);
-        tmp27 = mul_sin_x + mul_sin_y;
-        mul_sin =  - tmp27;
-        tmp28 = mul_cos + mul_sin;
-        tmp29 = tmp28 + mul_coeff_sin;
-        cos_eval_d_1 = tmp29 + tab_cos;
+        tmp34 = _mm_set_sd(poly_sin);
+        tmp35 =  - mul_sin_x;
+        tmp36 = _mm_set_sd(tmp35);
+        mul_sin_y = _mm_fmadd_sd(tmp7, tmp34, tmp36);
+        tmp37 = _mm_cvtsd_f64(mul_sin_y);
+        tmp38 = mul_sin_x + tmp37;
+        mul_sin =  - tmp38;
+        tmp39 = mul_cos + mul_sin;
+        tmp40 = tmp39 + mul_coeff_sin;
+        cos_eval_d_1 = tmp40 + tab_cos;
         return cos_eval_d_1;
     }
 }
