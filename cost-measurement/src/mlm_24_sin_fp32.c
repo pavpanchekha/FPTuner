@@ -75,7 +75,7 @@ static const __m128 mlm_24_sin_fp32_c_51 = {0x1.5debbp-7f}/*sse*/;
 static const __m128 mlm_24_sin_fp32_c_61 = {0x1.005c7p-30f}/*sse*/;
 static const __m128i mlm_24_sin_fp32_cst39 = {INT32_C(512)}/*sse*/;
 static const __m128i mlm_24_sin_fp32_cst40 = {INT32_C(2048)}/*sse*/;
-const float PH_scale_table[18][1]  = {
+static const float PH_scale_table[18][1]  = {
     { 0x1p0f},
     { 0x1.306fep-5f},
     { 0x1.6a09e6p-10f},
@@ -95,7 +95,7 @@ const float PH_scale_table[18][1]  = {
     { 0x1p-76f},
     { 0x1.306fep-81f}
 };
-const float PH_cst_table[18][1]  = {
+static const float PH_cst_table[18][1]  = {
     { 0x1.45f9eap8f},
     { -0x1.372082p4f},
     { -0x1.8bfad4p4f},
@@ -115,7 +115,7 @@ const float PH_cst_table[18][1]  = {
     { -0x1.070b32p5f},
     { 0x1.0f876cp1f}
 };
-const float mlm_24_sin_fp32_cos_table[2048][1]  = {
+static const float mlm_24_sin_fp32_cos_table[2048][1]  = {
     { 0x1p0f},
     { 0x1.ffff62p-1f},
     { 0x1.fffd88p-1f},
@@ -2329,6 +2329,7 @@ float mlm_24_sin_fp32(float vx){
             int32_t tmp53;
             int32_t tmp54;
             int32_t lar_modk;
+            __m128i tmp74;
 
             tmp7 = _mm_cvtsi128_si32(mlm_24_sin_fp32_cst5);
             tmp8 = _mm_cvtsi128_si32(mlm_24_sin_fp32_cst7);
@@ -2427,7 +2428,6 @@ float mlm_24_sin_fp32(float vx){
                 __m128 lo_mult_red;
                 __m128 acc_expr;
                 float tmp73;
-                __m128i tmp74;
                 int32_t tmp75;
                 int32_t tmp76;
                 __m128i tmp77;

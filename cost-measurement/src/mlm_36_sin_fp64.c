@@ -56,7 +56,7 @@ static const __m128d mlm_36_sin_fp64_c_51 = {0x1.11110ea950cdcp-7}/*sse*/;
 static const __m128d mlm_36_sin_fp64_c_41 = {0x1.28b5cf9928a9bp-72}/*sse*/;
 static const __m128d mlm_36_sin_fp64_c_31 = {-0x1.5555555555555p-3}/*sse*/;
 static const __m128d mlm_36_sin_fp64_c_21 = {-0x1.b17b22f8ba5fp-100}/*sse*/;
-const double PH_scale_table[47][1]  = {
+static const double PH_scale_table[47][1]  = {
     { 0x1p0},
     { 0x1p-12},
     { 0x1p-24},
@@ -105,7 +105,7 @@ const double PH_scale_table[47][1]  = {
     { 0x1p-540},
     { 0x1p-552}
 };
-const double PH_cst_table[47][1]  = {
+static const double PH_cst_table[47][1]  = {
     { 0x1.45f307p12},
     { -0x1.1b1bcp9},
     { 0x1.529fcp9},
@@ -154,7 +154,7 @@ const double PH_cst_table[47][1]  = {
     { -0x1.594048p9},
     { -0x1.027704p10}
 };
-const double mlm_36_sin_fp64_cos_table[32768][1]  = {
+static const double mlm_36_sin_fp64_cos_table[32768][1]  = {
     { 0x1p0},
     { 0x1.ffffff621619cp-1},
     { 0x1.fffffd8858675p-1},
