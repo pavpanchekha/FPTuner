@@ -31,7 +31,7 @@ class GelpiaResult:
     # Tell gelpia how hard to try
     CONFIG = {
         "epsilons": (1e-8, 1e-8, 0),
-        "timeout": 10,
+        "timeout": 100,
         "grace": 0,
         "update": 0,
         "iters": 0,

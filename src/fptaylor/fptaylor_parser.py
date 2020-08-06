@@ -5,7 +5,7 @@ from fpcore_logging import Logger
 from fptaylor_lexer import FPTaylorLexer
 from sly import Parser
 
-import all_modifications_ast
+import ast_modifications.all_modifications_ast as all_modifications_ast
 import fpcore_ast
 import sys
 

@@ -1,6 +1,6 @@
 
 
-from ast_modifier import add_method
+from ast_modifications.ast_modifier import add_method
 from exceptions import (BadPreError, DomainError, FeatureError, NoPreError,
                         OperationError, UnsupportedError, VariableError)
 from fpcore_ast import (ASTNode, Binding, Cast, Constant, FPCore, If, Let,

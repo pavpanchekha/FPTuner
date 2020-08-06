@@ -8,7 +8,7 @@ from fpcore_ast import Operation, Number, Variable
 from fpcore_logging import Logger
 from fptaylor_result import FPTaylorResult
 
-import all_modifications_ast
+import ast_modifications.all_modifications_ast as all_modifications_ast
 import copy
 
 logger = Logger()

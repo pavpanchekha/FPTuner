@@ -3,7 +3,7 @@
 from fpcore_logging import Logger
 from fpcore_ast import Operation, Variable
 
-import all_modifications_ast
+import ast_modifications.all_modifications_ast as all_modifications_ast
 
 import sys
 

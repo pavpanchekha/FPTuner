@@ -20,7 +20,7 @@ from z3_result import Z3Result
 from tuned_expression import TunedExpression
 from fptaylor_result import FPTaylorResult
 
-import all_modifications_ast
+import ast_modifications.all_modifications_ast as all_modifications_ast
 import fptuner_argument_parser
 
 

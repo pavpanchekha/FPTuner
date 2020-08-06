@@ -3,9 +3,9 @@
 from fpcore_ast import Variable, Number, Operation
 from fpcore_logging import Logger
 
-import all_modifications_ast
+import ast_modifications.all_modifications_ast as all_modifications_ast
+
 import fractions
-import infix_str_ast
 import z3
 
 logger = Logger(level=Logger.HIGH, color=Logger.magenta)
@@ -38,7 +38,7 @@ class Z3Result:
         self.query_string_list.append("(assert (<= {} {}))".format(self.error,
                                                                    max_error))
         self.query_string_list.append("(minimize {})".format(self.cost))
-        self.query_string_list.append("(check_sat)")
+        self.query_string_list.append("(check-sat)")
 
         self.query = "\n".join(self.query_string_list)
 
@@ -51,7 +51,7 @@ class Z3Result:
         logger.log("z3 query:\n{}\n", self.query)
 
         ctx = z3.Context("model_validate", "true")
-        self.optimizer = z3.Optimize()
+        self.optimizer = z3.Optimize(ctx=ctx)
         self.optimizer.from_string(self.query)
         self.optimizer.check()
         z3_model = self.optimizer.model()
@@ -157,10 +157,21 @@ class Z3Result:
             comment = "; operation for {} = {}".format(name, val)
             self.query_string_list.append(comment)
 
+            # get the bounds on the argument
+            arg = val.args[0] # TODO: assuming unary
+            gr = GelpiaResult(inputs, arg.expand(self.ssa))
+            domain = [gr.min_lower, gr.max_upper]
+            all_ops = set(self.ssa.search_space["operations"][op])
+            mapped_ops = [(row[1], row[4]) for row
+                          in all_modifications_ast.OperationTable
+                          if row[0] in all_ops]
+            filtered_ops = [tup[0] for tup in mapped_ops
+                            if (tup[1][0] <= domain[0] and
+                                tup[1][1] >= domain[1])]
+
             # Setup the list of variable names, and make the z3 booleans
             op = self.ssa.definitions[name].op
-            impls = [impl for impl in self.ssa.search_space["operations"][op]]
-            name_bools = ["{}_is_{}".format(name, impl) for impl in impls]
+            name_bools = ["{}_is_{}".format(name, impl) for impl in filtered_ops]
             query_decls = ["(declare-const {} Bool)".format(n) for n
                            in name_bools]
             self.query_string_list.extend(query_decls)
@@ -307,6 +318,7 @@ class Z3Result:
 
         cost_name = "total_cost"
         costs = "\n  ".join([v for v in sorted(self.operation_costs.values())])
+        costs = "\n  ".join([v for v in sorted(self.bit_width_costs.values())])
         z3_costs = "(define-fun {} () Int (+\n  {}))".format(cost_name, costs)
         self.query_string_list.append(z3_costs)
         self.query_string_list.append("")

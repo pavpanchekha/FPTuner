@@ -1,7 +1,9 @@
+/cost-measurement/bin/
+/function-generation/*.c
+/function-generation/*.tmp
 /requirements/FPTaylor/
 /requirements/debug_eniroment.sh
 /requirements/gelpia/
-/requirements/gurobi[0-9]*
 /requirements/log.txt
 __pycache__
 log
