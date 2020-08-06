@@ -6,7 +6,7 @@ SCRIPT_LOCATION=$(readlink -f $(dirname $0))
 
 date=$(date +%s)
 
-BENCHMARKS=${SCRIPT_LOCATION}/../benchmarks/has_sin_exp_log/*.fpcore
+BENCHMARKS=${SCRIPT_LOCATION}/../benchmarks/supported_fpcores/*.fpcore
 
 ${SCRIPT_LOCATION}/fptuner \
                   ${BENCHMARKS} \

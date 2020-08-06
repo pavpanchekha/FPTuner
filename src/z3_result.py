@@ -2,6 +2,7 @@
 
 from fpcore_ast import Variable, Number, Operation
 from fpcore_logging import Logger
+from gelpia_result import GelpiaResult
 
 import ast_modifications.all_modifications_ast as all_modifications_ast
 
@@ -159,19 +160,19 @@ class Z3Result:
 
             # get the bounds on the argument
             arg = val.args[0] # TODO: assuming unary
-            gr = GelpiaResult(inputs, arg.expand(self.ssa))
+            gr = GelpiaResult(self.ssa.inputs, arg.expand(self.ssa))
             domain = [gr.min_lower, gr.max_upper]
+            op = self.ssa.definitions[name].op
             all_ops = set(self.ssa.search_space["operations"][op])
             mapped_ops = [(row[1], row[4]) for row
                           in all_modifications_ast.OperationTable
                           if row[0] in all_ops]
-            filtered_ops = [tup[0] for tup in mapped_ops
-                            if (tup[1][0] <= domain[0] and
-                                tup[1][1] >= domain[1])]
+            impls = [tup[0] for tup in mapped_ops
+                     if (tup[1][0] <= domain[0] and
+                         tup[1][1] >= domain[1])]
 
             # Setup the list of variable names, and make the z3 booleans
-            op = self.ssa.definitions[name].op
-            name_bools = ["{}_is_{}".format(name, impl) for impl in filtered_ops]
+            name_bools = ["{}_is_{}".format(name, impl) for impl in impls]
             query_decls = ["(declare-const {} Bool)".format(n) for n
                            in name_bools]
             self.query_string_list.extend(query_decls)
