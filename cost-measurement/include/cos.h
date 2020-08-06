@@ -1,7 +1,6 @@
 #ifndef COS_H
 #define COS_H
 
-
 #include "types.h"
 
 

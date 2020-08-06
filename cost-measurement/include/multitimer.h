@@ -1,7 +1,6 @@
 #ifndef MULTITIMER_H
 #define MULTITIMER_H
 
-
 #include "types.h"
 
 #include <stddef.h>

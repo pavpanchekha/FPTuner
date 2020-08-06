@@ -20,7 +20,7 @@ static void timespec_diff(struct timespec *start, struct timespec *stop,
   result->tv_nsec = stop->tv_nsec - start->tv_nsec;
   if (result->tv_nsec < 0) {
     result->tv_sec -= 1;
-    result->tv_nsec += 1000000000;
+    result->tv_nsec += 1000000000L;
   }
 }
 
@@ -53,6 +53,7 @@ void start_multitimer(multitimer* m)
   m->timing = 1;
   int status = clock_gettime(CLOCK_MONOTONIC, &(m->start));
   assert(status == 0);
+  UNUSED(status);
 }
 
 
@@ -65,6 +66,7 @@ void stop_multitimer(multitimer* m)
   struct timespec end;
   int status = clock_gettime(CLOCK_MONOTONIC, &end);
   assert(status == 0);
+  UNUSED(status);
 
   struct timespec elapsed;
   timespec_diff(&(m->start), &end, &elapsed);
