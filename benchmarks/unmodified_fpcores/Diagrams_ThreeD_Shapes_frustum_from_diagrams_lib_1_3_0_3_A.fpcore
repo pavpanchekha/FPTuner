@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b c i)
+ :name "Diagrams.ThreeD.Shapes:frustum from diagrams-lib-1.3.0.3, A"
+ :herbie-target
+ (* 2.0 (- (+ (* x y) (* z t)) (* (+ a (* b c)) (* c i))))
+ (* 2.0 (- (+ (* x y) (* z t)) (* (* (+ a (* b c)) c) i))))
+

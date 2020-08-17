@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b)
+ :name "Graphics.Rasterific.CubicBezier:cachedBezierAt from Rasterific-0.6.1"
+ :herbie-target
+ (if (< z -1.1820553527347888e+19)
+   (+ (* z (+ (* b a) y)) (+ x (* t a)))
+   (if (< z 4.7589743188364287e-122)
+     (+ (* (+ (* b z) t) a) (+ (* z y) x))
+     (+ (* z (+ (* b a) y)) (+ x (* t a)))))
+ (+ (+ (+ x (* y z)) (* t a)) (* (* a z) b)))
+

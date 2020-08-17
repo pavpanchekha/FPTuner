@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Data.HyperLogLog.Config:hll from hyperloglog-0.3.4"
+ (* (* x y) y))
+

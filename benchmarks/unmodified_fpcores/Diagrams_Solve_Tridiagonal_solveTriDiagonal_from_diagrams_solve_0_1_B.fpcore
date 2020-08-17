@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Diagrams.Solve.Tridiagonal:solveTriDiagonal from diagrams-solve-0.1, B"
+ :herbie-target
+ (if (< x -1.618195973607049e+50)
+   (/ 1 (- (/ y x) (* (/ z x) t)))
+   (if (< x 2.1378306434876444e+131)
+     (/ x (- y (* z t)))
+     (/ 1 (- (/ y x) (* (/ z x) t)))))
+ (/ x (- y (* z t))))
+

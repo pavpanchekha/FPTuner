@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Numeric.Log:$cexpm1 from log-domain-0.10.2.1, B"
+ (+ (+ (* x y) x) y))
+

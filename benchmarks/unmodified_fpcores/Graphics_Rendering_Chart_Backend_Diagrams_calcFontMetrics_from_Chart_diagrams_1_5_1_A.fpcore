@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Graphics.Rendering.Chart.Backend.Diagrams:calcFontMetrics from Chart-diagrams-1.5.1, A"
+ :herbie-target
+ (if (< y -3.7429310762689856e+171)
+   (* (/ (+ y x) (- y)) z)
+   (if (< y 3.5534662456086734e+168)
+     (/ (+ x y) (- 1.0 (/ y z)))
+     (* (/ (+ y x) (- y)) z)))
+ (/ (+ x y) (- 1.0 (/ y z))))
+

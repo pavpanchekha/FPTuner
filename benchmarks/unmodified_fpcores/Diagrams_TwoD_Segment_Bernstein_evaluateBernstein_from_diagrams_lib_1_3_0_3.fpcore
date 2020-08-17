@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Diagrams.TwoD.Segment.Bernstein:evaluateBernstein from diagrams-lib-1.3.0.3"
+ :herbie-target
+ (if (< x -2.71483106713436e-162)
+   (- (* (+ 1 y) (/ x z)) x)
+   (if (< x 3.874108816439546e-197)
+     (* (* x (+ (- y z) 1.0)) (/ 1 z))
+     (- (* (+ 1 y) (/ x z)) x)))
+ (/ (* x (+ (- y z) 1.0)) z))
+

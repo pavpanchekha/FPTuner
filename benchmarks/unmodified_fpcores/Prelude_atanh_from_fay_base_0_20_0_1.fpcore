@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Prelude:atanh from fay-base-0.20.0.1"
+ (/ (+ x 1.0) (- 1.0 x)))
+

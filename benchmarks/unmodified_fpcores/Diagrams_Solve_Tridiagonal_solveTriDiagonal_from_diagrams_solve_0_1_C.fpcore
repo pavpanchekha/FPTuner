@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Diagrams.Solve.Tridiagonal:solveTriDiagonal from diagrams-solve-0.1, C"
+ :herbie-target
+ (/ (+ x (* y z)) (/ (+ x (* y z)) (- x (* y z))))
+ (- x (* y z)))
+

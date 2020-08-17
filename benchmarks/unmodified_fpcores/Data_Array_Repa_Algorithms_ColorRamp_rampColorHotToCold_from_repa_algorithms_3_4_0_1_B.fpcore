@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Data.Array.Repa.Algorithms.ColorRamp:rampColorHotToCold from repa-algorithms-3.4.0.1, B"
+ :herbie-target
+ (- (* 4.0 (/ x z)) (+ 2.0 (* 4.0 (/ y z))))
+ (/ (* 4.0 (- (- x y) (* z 0.5))) z))
+

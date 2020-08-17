@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Diagrams.TwoD.Segment:bezierClip from diagrams-lib-1.3.0.3"
+ :herbie-target
+ (- z (* (- z x) y))
+ (+ (* x y) (* z (- 1.0 y))))
+

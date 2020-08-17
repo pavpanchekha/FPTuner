@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Data.Number.Erf:$cinvnormcdf from erf-2.0.0.0, A"
+ :herbie-target
+ (* (* (- (* x 0.5) y) (sqrt (* z 2.0))) (pow (exp 1) (/ (* t t) 2.0)))
+ (* (* (- (* x 0.5) y) (sqrt (* z 2.0))) (exp (/ (* t t) 2.0))))
+

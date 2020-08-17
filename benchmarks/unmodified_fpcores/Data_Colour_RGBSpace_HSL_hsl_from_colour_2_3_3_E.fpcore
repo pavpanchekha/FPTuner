@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Data.Colour.RGBSpace.HSL:hsl from colour-2.3.3, E"
+ :herbie-target
+ (- x (* (* 6.0 z) (- x y)))
+ (+ x (* (* (- y x) 6.0) z)))
+

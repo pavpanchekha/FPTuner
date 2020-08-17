@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Graphics.Rendering.Chart.Drawing:drawTextsR from Chart-1.5.3"
+ (+ (* x y) (* (- x 1.0) z)))
+

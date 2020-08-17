@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Numeric.Integration.TanhSinh:everywhere from integration-0.2.1"
+ :herbie-target
+ (+ x (* (* x y) y))
+ (* x (+ 1.0 (* y y))))
+

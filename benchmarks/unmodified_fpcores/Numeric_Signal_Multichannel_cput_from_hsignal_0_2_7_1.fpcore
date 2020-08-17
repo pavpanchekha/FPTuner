@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Numeric.Signal.Multichannel:$cput from hsignal-0.2.7.1"
+ :herbie-target
+ (/ t (/ (- z y) (- x y)))
+ (* (/ (- x y) (- z y)) t))
+

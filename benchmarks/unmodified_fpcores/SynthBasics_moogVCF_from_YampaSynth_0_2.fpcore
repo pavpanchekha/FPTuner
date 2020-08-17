@@ -1,0 +1,7 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "SynthBasics:moogVCF from YampaSynth-0.2"
+ :herbie-target
+ (+ x (* y (* z (- (tanh (/ t y)) (tanh (/ x y))))))
+ (+ x (* (* y z) (- (tanh (/ t y)) (tanh (/ x y))))))

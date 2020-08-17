@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Crypto.Random.Test:calculate from crypto-random-0.0.9"
+ :herbie-target
+ (+ x (* y (/ y z)))
+ (+ x (/ (* y y) z)))
+

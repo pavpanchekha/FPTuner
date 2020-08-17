@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Data.HashTable.ST.Basic:computeOverhead from hashtables-1.2.0.2"
+ :herbie-target
+ (- (/ (+ (/ 2.0 z) 2.0) t) (- 2.0 (/ x y)))
+ (+ (/ x y) (/ (+ 2.0 (* (* z 2.0) (- 1.0 t))) (* t z))))
+

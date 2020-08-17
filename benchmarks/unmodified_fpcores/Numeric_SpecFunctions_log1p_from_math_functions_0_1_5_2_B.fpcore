@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Numeric.SpecFunctions:log1p from math-functions-0.1.5.2, B"
+ (* x (- 1.0 (* x 0.5))))
+

@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Graphics.Rendering.Chart.Axis.Types:hBufferRect from Chart-1.5.3"
+ :herbie-target
+ (- (* 1.5 x) (* 0.5 y))
+ (+ x (/ (- x y) 2.0)))
+

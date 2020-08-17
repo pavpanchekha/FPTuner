@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Data.Colour.CIE:lightness from colour-2.3.3"
+ (- (* x 116.0) 16.0))
+

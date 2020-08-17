@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Optimisation.CirclePacking:place from circle-packing-0.1.0.4, H"
+ (* (+ x y) (- 1.0 z)))
+

@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Data.Approximate.Numerics:blog from approximate-0.2.2.1"
+ :herbie-target
+ (/ 6.0 (/ (+ (+ x 1.0) (* 4.0 (sqrt x))) (- x 1.0)))
+ (/ (* 6.0 (- x 1.0)) (+ (+ x 1.0) (* 4.0 (sqrt x)))))
+

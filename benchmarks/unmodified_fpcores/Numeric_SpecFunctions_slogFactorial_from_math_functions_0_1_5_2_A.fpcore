@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Numeric.SpecFunctions:$slogFactorial from math-functions-0.1.5.2, A"
+ :herbie-target
+ (/ (/ 1.0 x) x)
+ (/ 1.0 (* x x)))
+

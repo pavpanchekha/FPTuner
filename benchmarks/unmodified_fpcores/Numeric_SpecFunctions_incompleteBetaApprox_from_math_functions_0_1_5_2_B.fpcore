@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b)
+ :name "Numeric.SpecFunctions:incompleteBetaApprox from math-functions-0.1.5.2, B"
+ (* x (exp (+ (* y (- (log z) t)) (* a (- (log (- 1.0 z)) b))))))
+

@@ -1,0 +1,10 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Data.Octree.Internal:octantDistance  from Octree-0.5.4.2"
+ :herbie-target
+ (if (< x -1.1236950826599826e+145)
+   (- x)
+   (if (< x 1.116557621183362e+93) (sqrt (+ (* x x) (* y y))) x))
+ (sqrt (+ (* x x) (* y y))))
+

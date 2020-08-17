@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Data.Colour.CIE:cieLAB from colour-2.3.3, C"
+ (+ x (/ y 500.0)))
+

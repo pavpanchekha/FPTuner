@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Data.Array.Repa.Algorithms.Pixel:doubleRmsOfRGB8 from repa-algorithms-3.4.0.1"
+ :herbie-target
+ (if (< z -6.396479394109776e+136)
+   (/ (- z) (sqrt 3.0))
+   (if (< z 7.320293694404182e+117)
+     (/ (sqrt (+ (+ (* z z) (* x x)) (* y y))) (sqrt 3.0))
+     (* (sqrt 0.3333333333333333) z)))
+ (sqrt (/ (+ (+ (* x x) (* y y)) (* z z)) 3.0)))
+

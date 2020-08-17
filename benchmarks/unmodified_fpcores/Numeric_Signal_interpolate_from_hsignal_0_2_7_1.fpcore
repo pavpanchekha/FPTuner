@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a)
+ :name "Numeric.Signal:interpolate   from hsignal-0.2.7.1"
+ (+ x (* (- y z) (/ (- t x) (- a z)))))
+

@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Data.Colour.RGBSpace.HSV:hsv from colour-2.3.3, I"
+ (* x (- 1.0 (* y z))))
+

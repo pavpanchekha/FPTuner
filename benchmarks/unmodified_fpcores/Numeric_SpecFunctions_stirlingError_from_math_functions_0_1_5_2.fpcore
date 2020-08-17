@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Numeric.SpecFunctions:stirlingError from math-functions-0.1.5.2"
+ :herbie-target
+ (- (- (+ y x) z) (* (+ y 0.5) (log y)))
+ (- (+ (- x (* (+ y 0.5) (log y))) y) z))
+

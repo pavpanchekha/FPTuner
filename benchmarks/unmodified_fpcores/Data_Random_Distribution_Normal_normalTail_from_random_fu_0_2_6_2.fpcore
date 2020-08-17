@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Data.Random.Distribution.Normal:normalTail from random-fu-0.2.6.2"
+ :herbie-target
+ (+ (+ y y) (* x x))
+ (+ (+ (* x x) y) y))
+

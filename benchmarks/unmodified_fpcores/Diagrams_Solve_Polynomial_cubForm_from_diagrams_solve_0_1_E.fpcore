@@ -1,0 +1,22 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b c i j k)
+ :name "Diagrams.Solve.Polynomial:cubForm  from diagrams-solve-0.1, E"
+ :herbie-target
+ (if (< t -1.6210815397541398e-69)
+   (-
+    (- (* (* 18.0 t) (* (* x y) z)) (* (+ (* a t) (* i x)) 4.0))
+    (- (* (* k j) 27.0) (* c b)))
+   (if (< t 165.68027943805222)
+     (+
+      (- (* (* 18.0 y) (* x (* z t))) (* (+ (* a t) (* i x)) 4.0))
+      (- (* c b) (* 27.0 (* k j))))
+     (-
+      (- (* (* 18.0 t) (* (* x y) z)) (* (+ (* a t) (* i x)) 4.0))
+      (- (* (* k j) 27.0) (* c b)))))
+ (-
+  (-
+   (+ (- (* (* (* (* x 18.0) y) z) t) (* (* a 4.0) t)) (* b c))
+   (* (* x 4.0) i))
+  (* (* j 27.0) k)))
+

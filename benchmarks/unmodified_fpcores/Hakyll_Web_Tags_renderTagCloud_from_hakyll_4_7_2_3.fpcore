@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a)
+ :name "Hakyll.Web.Tags:renderTagCloud from hakyll-4.7.2.3"
+ (+ x (* (/ (- y z) (- (+ t 1.0) z)) (- a x))))
+

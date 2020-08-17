@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Graphics.Rasterific.Shading:$sgradientColorAt from Rasterific-0.6.1"
+ :herbie-target
+ (- (/ x (- z y)) (/ y (- z y)))
+ (/ (- x y) (- z y)))
+

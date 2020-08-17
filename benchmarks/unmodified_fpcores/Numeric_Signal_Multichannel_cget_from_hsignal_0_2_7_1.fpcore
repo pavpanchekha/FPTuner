@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Numeric.Signal.Multichannel:$cget from hsignal-0.2.7.1"
+ :herbie-target
+ (if (< z 2.759456554562692e-282)
+   (+ (* (/ x y) (- z t)) t)
+   (if (< z 2.326994450874436e-110)
+     (+ (* x (/ (- z t) y)) t)
+     (+ (* (/ x y) (- z t)) t)))
+ (+ (* (/ x y) (- z t)) t))
+

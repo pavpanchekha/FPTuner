@@ -1,0 +1,10 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Statistics.Distribution.Beta:$cvariance from math-functions-0.1.5.2"
+ :herbie-target
+ (if (< z 249.6182814532307)
+   (/ (* y (/ x z)) (+ z (* z z)))
+   (/ (* (/ (/ y z) (+ 1 z)) x) z))
+ (/ (* x y) (* (* z z) (+ z 1.0))))
+

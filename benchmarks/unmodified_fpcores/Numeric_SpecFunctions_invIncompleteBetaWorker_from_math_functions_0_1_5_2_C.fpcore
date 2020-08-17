@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Numeric.SpecFunctions:invIncompleteBetaWorker from math-functions-0.1.5.2, C"
+ :herbie-target
+ (if (< (* x (- (/ y z) (/ t (- 1.0 z)))) -7.623226303312042e-196)
+   (* x (- (/ y z) (* t (/ 1 (- 1.0 z)))))
+   (if (< (* x (- (/ y z) (/ t (- 1.0 z)))) 1.4133944927702302e-211)
+     (+ (/ (* y x) z) (- (/ (* t x) (- 1.0 z))))
+     (* x (- (/ y z) (* t (/ 1 (- 1.0 z)))))))
+ (* x (- (/ y z) (/ t (- 1.0 z)))))
+

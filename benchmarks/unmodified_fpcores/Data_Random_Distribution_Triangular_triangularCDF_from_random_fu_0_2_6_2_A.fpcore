@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Data.Random.Distribution.Triangular:triangularCDF from random-fu-0.2.6.2, A"
+ (- 1.0 (/ x (* (- y z) (- y t)))))
+

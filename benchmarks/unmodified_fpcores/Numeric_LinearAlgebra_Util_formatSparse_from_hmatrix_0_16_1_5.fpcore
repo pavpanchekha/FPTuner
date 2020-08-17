@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Numeric.LinearAlgebra.Util:formatSparse from hmatrix-0.16.1.5"
+ (/ (fabs (- x y)) (fabs y)))
+

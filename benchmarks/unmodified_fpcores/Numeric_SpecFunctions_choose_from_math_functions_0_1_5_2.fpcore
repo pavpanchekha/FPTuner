@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Numeric.SpecFunctions:choose from math-functions-0.1.5.2"
+ :herbie-target
+ (/ x (/ z (+ y z)))
+ (/ (* x (+ y z)) z))
+

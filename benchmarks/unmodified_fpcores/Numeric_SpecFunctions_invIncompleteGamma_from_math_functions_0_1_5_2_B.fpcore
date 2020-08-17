@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Numeric.SpecFunctions:invIncompleteGamma from math-functions-0.1.5.2, B"
+ :herbie-target
+ (if (< y -81284752.61947241)
+   (- 1.0 (log (- (/ x (* y y)) (- (/ 1.0 y) (/ x y)))))
+   (if (< y 3.0094271212461764e+25)
+     (log (/ (exp 1.0) (- 1.0 (/ (- x y) (- 1.0 y)))))
+     (- 1.0 (log (- (/ x (* y y)) (- (/ 1.0 y) (/ x y)))))))
+ (- 1.0 (log (- 1.0 (/ (- x y) (- 1.0 y))))))
+

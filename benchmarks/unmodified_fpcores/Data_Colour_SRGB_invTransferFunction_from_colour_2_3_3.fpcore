@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Data.Colour.SRGB:invTransferFunction from colour-2.3.3"
+ (/ (+ x y) (+ y 1.0)))
+

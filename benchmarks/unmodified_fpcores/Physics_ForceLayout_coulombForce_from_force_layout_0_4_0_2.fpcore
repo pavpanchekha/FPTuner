@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Physics.ForceLayout:coulombForce from force-layout-0.4.0.2"
+ :herbie-target
+ (/ (/ x y) y)
+ (/ x (* y y)))
+

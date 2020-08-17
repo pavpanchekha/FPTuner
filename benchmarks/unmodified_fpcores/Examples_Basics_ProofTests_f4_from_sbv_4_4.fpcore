@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Examples.Basics.ProofTests:f4 from sbv-4.4"
+ :herbie-target
+ (+ (* x x) (+ (* y y) (* (* x y) 2.0)))
+ (+ (+ (* x x) (* (* x 2.0) y)) (* y y)))
+

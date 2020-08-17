@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Graphics.Rasterific.Shading:$sradialGradientWithFocusShader from Rasterific-0.6.1, B"
+ :herbie-target
+ (- (* x x) (* 4.0 (* y (- (* z z) t))))
+ (- (* x x) (* (* y 4.0) (- (* z z) t))))
+

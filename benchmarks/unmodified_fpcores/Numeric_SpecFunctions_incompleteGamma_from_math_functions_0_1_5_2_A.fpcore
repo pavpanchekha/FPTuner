@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Numeric.SpecFunctions:incompleteGamma from math-functions-0.1.5.2, A"
+ (+ (- (- (* x (log y)) y) z) (log t)))
+

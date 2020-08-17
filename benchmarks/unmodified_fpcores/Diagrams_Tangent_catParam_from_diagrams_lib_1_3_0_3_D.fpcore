@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Diagrams.Tangent:$catParam from diagrams-lib-1.3.0.3, D"
+ :herbie-target
+ (+ 3.0 (- (* (* 9.0 x) x) (* 12.0 x)))
+ (* 3.0 (+ (- (* (* x 3.0) x) (* x 4.0)) 1.0)))
+

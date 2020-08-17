@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Diagrams.Solve.Polynomial:quartForm  from diagrams-solve-0.1, B"
+ :herbie-target
+ (- (+ (/ x 8.0) t) (* (/ z 2.0) y))
+ (+ (- (* (/ 1.0 8.0) x) (/ (* y z) 2.0)) t))
+

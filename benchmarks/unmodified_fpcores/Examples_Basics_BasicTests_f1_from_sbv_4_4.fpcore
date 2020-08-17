@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Examples.Basics.BasicTests:f1 from sbv-4.4"
+ (* (+ x y) (- x y)))
+

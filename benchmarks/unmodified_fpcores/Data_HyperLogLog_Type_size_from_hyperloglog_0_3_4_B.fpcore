@@ -1,0 +1,10 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Data.HyperLogLog.Type:size from hyperloglog-0.3.4, B"
+ :herbie-target
+ (if (< y 1.2973149052617803e-303)
+   (* x (log (/ x y)))
+   (/ x (/ 1 (- (log x) (log y)))))
+ (* x (log (/ x y))))
+

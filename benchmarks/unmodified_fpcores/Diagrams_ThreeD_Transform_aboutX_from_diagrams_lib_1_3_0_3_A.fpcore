@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Diagrams.ThreeD.Transform:aboutX from diagrams-lib-1.3.0.3, A"
+ (- (* x (cos y)) (* z (sin y))))
+

@@ -1,0 +1,18 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Main:z from "
+ :herbie-target
+ (+
+  (+
+   (+
+    (/ 1.0 (+ (sqrt (+ x 1.0)) (sqrt x)))
+    (/ 1.0 (+ (sqrt (+ y 1.0)) (sqrt y))))
+   (/ 1.0 (+ (sqrt (+ z 1.0)) (sqrt z))))
+  (- (sqrt (+ t 1.0)) (sqrt t)))
+ (+
+  (+
+   (+ (- (sqrt (+ x 1.0)) (sqrt x)) (- (sqrt (+ y 1.0)) (sqrt y)))
+   (- (sqrt (+ z 1.0)) (sqrt z)))
+  (- (sqrt (+ t 1.0)) (sqrt t))))
+

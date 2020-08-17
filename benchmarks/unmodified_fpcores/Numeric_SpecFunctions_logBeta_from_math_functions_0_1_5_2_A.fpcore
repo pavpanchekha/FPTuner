@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b)
+ :name "Numeric.SpecFunctions:logBeta from math-functions-0.1.5.2, A"
+ :herbie-target
+ (+ (+ (+ x y) (/ (* (- 1 (pow (log t) 2)) z) (+ 1 (log t)))) (* (- a 0.5) b))
+ (+ (- (+ (+ x y) z) (* z (log t))) (* (- a 0.5) b)))
+

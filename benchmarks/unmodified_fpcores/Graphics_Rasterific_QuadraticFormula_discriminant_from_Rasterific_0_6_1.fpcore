@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Graphics.Rasterific.QuadraticFormula:discriminant from Rasterific-0.6.1"
+ (- (* x x) (* (* y 4.0) z)))
+

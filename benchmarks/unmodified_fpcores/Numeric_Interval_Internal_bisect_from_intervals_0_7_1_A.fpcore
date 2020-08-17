@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Numeric.Interval.Internal:bisect from intervals-0.7.1, A"
+ :herbie-target
+ (* 0.5 (+ x y))
+ (+ x (/ (- y x) 2.0)))
+

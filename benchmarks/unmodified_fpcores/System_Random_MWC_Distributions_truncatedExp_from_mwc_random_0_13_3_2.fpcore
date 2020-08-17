@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "System.Random.MWC.Distributions:truncatedExp from mwc-random-0.13.3.2"
+ :herbie-target
+ (if (< z -2.8874623088207947e+119)
+   (-
+    (- x (/ (/ (- 0.5) (* y t)) (* z z)))
+    (* (/ (- 0.5) (* y t)) (/ (/ 2.0 z) (* z z))))
+   (- x (/ (log (+ 1.0 (* z y))) t)))
+ (- x (/ (log (+ (- 1.0 y) (* y (exp z)))) t)))
+

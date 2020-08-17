@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Diagrams.Solve.Polynomial:cubForm  from diagrams-solve-0.1, D"
+ :herbie-target
+ (/ (acos (* (/ (/ x 27.0) (* y z)) (/ (sqrt t) (/ 2.0 3.0)))) 3.0)
+ (* (/ 1.0 3.0) (acos (* (/ (* 3.0 (/ x (* y 27.0))) (* z 2.0)) (sqrt t)))))
+

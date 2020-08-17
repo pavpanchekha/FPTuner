@@ -1,0 +1,10 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b)
+ :name "Diagrams.Solve.Polynomial:cubForm  from diagrams-solve-0.1, A"
+ :herbie-target
+ (if (< y 7.590524218811189e-161)
+   (+ (- (* x 2.0) (* (* (* y 9.0) z) t)) (* a (* 27.0 b)))
+   (+ (- (* x 2.0) (* 9.0 (* y (* t z)))) (* (* a 27.0) b)))
+ (+ (- (* x 2.0) (* (* (* y 9.0) z) t)) (* (* a 27.0) b)))
+

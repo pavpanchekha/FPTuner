@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Statistics.Distribution.Poisson:$clogProbability from math-functions-0.1.5.2"
+ (- (- (* x (log y)) z) y))
+

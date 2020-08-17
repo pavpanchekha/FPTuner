@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Statistics.Sample:$skurtosis from math-functions-0.1.5.2"
+ :herbie-target
+ (- (/ (/ x y) y) 3.0)
+ (- (/ x (* y y)) 3.0))
+

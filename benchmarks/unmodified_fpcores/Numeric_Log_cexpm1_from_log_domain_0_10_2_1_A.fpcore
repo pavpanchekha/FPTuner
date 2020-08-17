@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Numeric.Log:$cexpm1 from log-domain-0.10.2.1, A"
+ :herbie-target
+ (* (* 2.0 x) x)
+ (* (* x 2.0) x))
+

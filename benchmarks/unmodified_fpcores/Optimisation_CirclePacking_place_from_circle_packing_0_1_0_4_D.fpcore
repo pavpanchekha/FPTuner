@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore (x y z t)
+ :name "Optimisation.CirclePacking:place from circle-packing-0.1.0.4, D"
+ :herbie-target
+ (- x (+ (* x (/ y t)) (* (- z) (/ y t))))
+ (+ x (/ (* y (- z x)) t)))
+

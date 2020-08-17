@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Diagrams.Trail:splitAtParam  from diagrams-lib-1.3.0.3, D"
+ :herbie-target
+ (if (< y -3693.8482788297247)
+   (- (/ 1.0 y) (- (/ x y) x))
+   (if (< y 6799310503.41891)
+     (- 1.0 (/ (* (- 1.0 x) y) (+ y 1.0)))
+     (- (/ 1.0 y) (- (/ x y) x))))
+ (- 1.0 (/ (* (- 1.0 x) y) (+ y 1.0))))
+

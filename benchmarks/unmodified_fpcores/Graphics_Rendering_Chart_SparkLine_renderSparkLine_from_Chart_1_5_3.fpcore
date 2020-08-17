@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a)
+ :name "Graphics.Rendering.Chart.SparkLine:renderSparkLine from Chart-1.5.3"
+ :herbie-target
+ (- x (* (/ (- y z) (+ (- t z) 1.0)) a))
+ (- x (/ (- y z) (/ (+ (- t z) 1.0) a))))
+

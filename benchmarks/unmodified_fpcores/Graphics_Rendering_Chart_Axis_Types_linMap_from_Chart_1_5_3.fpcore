@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a)
+ :name "Graphics.Rendering.Chart.Axis.Types:linMap from Chart-1.5.3"
+ :herbie-target
+ (if (< a -1.6153062845442575e-142)
+   (+ x (* (/ (- y x) 1) (/ (- z t) (- a t))))
+   (if (< a 3.774403170083174e-182)
+     (- y (* (/ z t) (- y x)))
+     (+ x (* (/ (- y x) 1) (/ (- z t) (- a t))))))
+ (+ x (/ (* (- y x) (- z t)) (- a t))))
+

@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Numeric.Histogram:binBounds from Chart-1.5.3"
+ :herbie-target
+ (if (< x -9.025511195533005e-135)
+   (- x (* (/ z t) (- x y)))
+   (if (< x 4.275032163700715e-250)
+     (+ x (* (/ (- y x) t) z))
+     (+ x (/ (- y x) (/ t z)))))
+ (+ x (/ (* (- y x) z) t)))
+

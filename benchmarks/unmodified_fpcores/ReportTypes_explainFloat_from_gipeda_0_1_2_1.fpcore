@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "ReportTypes:explainFloat from gipeda-0.1.2.1"
+ :herbie-target
+ 0
+ (* 100.0 (/ (- x x) x)))
+

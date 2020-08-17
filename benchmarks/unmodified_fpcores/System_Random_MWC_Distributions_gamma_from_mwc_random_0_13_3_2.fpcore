@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "System.Random.MWC.Distributions:gamma from mwc-random-0.13.3.2"
+ :herbie-target
+ (- (+ y (* 0.5 x)) (* y (- z (log z))))
+ (+ (* x 0.5) (* y (+ (- 1.0 z) (log z)))))
+

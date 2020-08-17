@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b)
+ :name "Development.Shake.Progress:decay from shake-0.15.5"
+ :herbie-target
+ (- (/ (+ (* z t) (* y x)) (+ y (* z (- b y)))) (/ a (+ (- b y) (/ y z))))
+ (/ (+ (* x y) (* z (- t a))) (+ y (* z (- b y)))))
+

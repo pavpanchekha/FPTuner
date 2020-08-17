@@ -1,0 +1,22 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b c i j)
+ :name "Data.Colour.Matrix:determinant from colour-2.3.3, A"
+ :herbie-target
+ (if (< x -1.469694296777705e-64)
+   (+
+    (-
+     (* x (- (* y z) (* t a)))
+     (/ (* b (- (pow (* c z) 2) (pow (* t i) 2))) (+ (* c z) (* t i))))
+    (* j (- (* c a) (* y i))))
+   (if (< x 3.2113527362226803e-147)
+     (- (* (- (* b i) (* x a)) t) (- (* z (* c b)) (* j (- (* c a) (* y i)))))
+     (+
+      (-
+       (* x (- (* y z) (* t a)))
+       (/ (* b (- (pow (* c z) 2) (pow (* t i) 2))) (+ (* c z) (* t i))))
+      (* j (- (* c a) (* y i))))))
+ (+
+  (- (* x (- (* y z) (* t a))) (* b (- (* c z) (* t i))))
+  (* j (- (* c a) (* y i)))))
+

@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a)
+ :name "Data.Colour.Matrix:inverse from colour-2.3.3, B"
+ :herbie-target
+ (if (< z -2.468684968699548e+170)
+   (- (* (/ y a) x) (* (/ t a) z))
+   (if (< z 6.309831121978371e-71)
+     (/ (- (* x y) (* z t)) a)
+     (- (* (/ y a) x) (* (/ t a) z))))
+ (/ (- (* x y) (* z t)) a))
+

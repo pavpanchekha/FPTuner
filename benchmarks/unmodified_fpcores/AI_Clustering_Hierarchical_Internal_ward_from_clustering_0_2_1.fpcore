@@ -1,0 +1,16 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b)
+ :name "AI.Clustering.Hierarchical.Internal:ward from clustering-0.2.1"
+ :herbie-target
+ (if (<
+      (/ (- (+ (* (+ x y) z) (* (+ t y) a)) (* y b)) (+ (+ x t) y))
+      -3.5813117084150564e+153)
+   (- (+ z a) b)
+   (if (<
+        (/ (- (+ (* (+ x y) z) (* (+ t y) a)) (* y b)) (+ (+ x t) y))
+        1.2285964308315609e+82)
+     (/ 1 (/ (+ (+ x t) y) (- (+ (* (+ x y) z) (* (+ t y) a)) (* y b))))
+     (- (+ z a) b)))
+ (/ (- (+ (* (+ x y) z) (* (+ t y) a)) (* y b)) (+ (+ x t) y)))
+

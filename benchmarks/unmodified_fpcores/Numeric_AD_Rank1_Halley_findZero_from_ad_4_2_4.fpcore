@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Numeric.AD.Rank1.Halley:findZero from ad-4.2.4"
+ :herbie-target
+ (- x (/ 1 (- (/ z y) (/ (/ t 2.0) z))))
+ (- x (/ (* (* y 2.0) z) (- (* (* z 2.0) z) (* y t)))))
+

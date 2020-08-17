@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Data.Colour.RGB:hslsv from colour-2.3.3, A"
+ (/ (+ x y) 2.0))
+

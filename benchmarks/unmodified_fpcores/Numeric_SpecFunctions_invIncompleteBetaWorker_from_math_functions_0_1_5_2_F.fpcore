@@ -1,0 +1,14 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Numeric.SpecFunctions:invIncompleteBetaWorker from math-functions-0.1.5.2, F"
+ :herbie-target
+ (if (< y -3.7311844206647956e+94)
+   (/ (exp (/ -1 y)) x)
+   (if (< y 2.817959242728288e+37)
+     (/ (pow (/ x (+ y x)) x) x)
+     (if (< y 2.347387415166998e+178)
+       (log (exp (/ (pow (/ x (+ y x)) x) x)))
+       (/ (exp (/ -1 y)) x))))
+ (/ (exp (* x (log (/ x (+ x y))))) x))
+

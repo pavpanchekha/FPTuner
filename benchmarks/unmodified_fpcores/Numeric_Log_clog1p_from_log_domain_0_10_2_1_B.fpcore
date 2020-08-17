@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Numeric.Log:$clog1p from log-domain-0.10.2.1, B"
+ (/ x (+ 1.0 (sqrt (+ x 1.0)))))
+

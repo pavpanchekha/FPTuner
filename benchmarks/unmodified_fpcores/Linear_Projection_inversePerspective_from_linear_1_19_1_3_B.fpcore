@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Linear.Projection:inversePerspective from linear-1.19.1.3, B"
+ :herbie-target
+ (- (/ 0.5 y) (/ 0.5 x))
+ (/ (- x y) (* (* x 2.0) y)))
+

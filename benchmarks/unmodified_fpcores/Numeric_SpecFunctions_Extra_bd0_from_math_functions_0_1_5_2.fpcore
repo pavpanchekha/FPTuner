@@ -1,0 +1,10 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Numeric.SpecFunctions.Extra:bd0 from math-functions-0.1.5.2"
+ :herbie-target
+ (if (< y 7.595077799083773e-308)
+   (- (* x (log (/ x y))) z)
+   (- (* x (- (log x) (log y))) z))
+ (- (* x (log (/ x y))) z))
+

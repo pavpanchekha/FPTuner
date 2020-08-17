@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Data.Colour.CIE:cieLAB from colour-2.3.3, A"
+ :herbie-target
+ (* y (- (* x 3.0) 0.41379310344827586))
+ (* (* (- x (/ 16.0 116.0)) 3.0) y))
+

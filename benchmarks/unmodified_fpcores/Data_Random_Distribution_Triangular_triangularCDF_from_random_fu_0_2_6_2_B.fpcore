@@ -1,0 +1,10 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Data.Random.Distribution.Triangular:triangularCDF from random-fu-0.2.6.2, B"
+ :herbie-target
+ (if (< (/ x (* (- y z) (- t z))) 0.0)
+   (/ (/ x (- y z)) (- t z))
+   (* x (/ 1 (* (- y z) (- t z)))))
+ (/ x (* (- y z) (- t z))))
+

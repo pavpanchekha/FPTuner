@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Diagrams.TwoD.Arc:bezierFromSweepQ1 from diagrams-lib-1.3.0.3"
+ :herbie-target
+ (* (/ (- 1.0 x) y) (/ (- 3.0 x) 3.0))
+ (/ (* (- 1.0 x) (- 3.0 x)) (* y 3.0)))
+

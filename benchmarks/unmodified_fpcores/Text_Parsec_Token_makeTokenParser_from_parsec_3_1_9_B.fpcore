@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Text.Parsec.Token:makeTokenParser from parsec-3.1.9, B"
+ (* (+ x y) z))
+

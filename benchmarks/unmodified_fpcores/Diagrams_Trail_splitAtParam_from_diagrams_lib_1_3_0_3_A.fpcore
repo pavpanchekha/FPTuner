@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Diagrams.Trail:splitAtParam  from diagrams-lib-1.3.0.3, A"
+ :herbie-target
+ (/ (+ x (- (/ y (- t (/ x z))) (/ x (- (* t z) x)))) (+ x 1.0))
+ (/ (+ x (/ (- (* y z) x) (- (* t z) x))) (+ x 1.0)))
+

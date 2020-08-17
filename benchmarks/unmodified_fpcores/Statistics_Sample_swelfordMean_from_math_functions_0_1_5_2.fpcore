@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Statistics.Sample:$swelfordMean from math-functions-0.1.5.2"
+ (+ x (/ (- y x) z)))
+

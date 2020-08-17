@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Language.Haskell.HsColour.ColourHighlight:unbase from hscolour-1.23"
+ (+ (* (+ (* x y) z) y) t))
+

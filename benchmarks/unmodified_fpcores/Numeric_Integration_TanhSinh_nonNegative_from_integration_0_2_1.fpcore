@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Numeric.Integration.TanhSinh:nonNegative from integration-0.2.1"
+ (/ x (- 1.0 x)))
+

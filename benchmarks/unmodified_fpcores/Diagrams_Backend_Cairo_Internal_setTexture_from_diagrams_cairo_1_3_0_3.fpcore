@@ -1,0 +1,10 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Diagrams.Backend.Cairo.Internal:setTexture from diagrams-cairo-1.3.0.3"
+ :herbie-target
+ (if (< z -2.060202331921739e+104)
+   (- x (/ (* z x) y))
+   (if (< z 1.6939766013828526e+213) (/ x (/ y (- y z))) (* (- y z) (/ x y))))
+ (/ (* x (- y z)) y))
+

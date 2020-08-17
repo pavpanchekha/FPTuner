@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Statistics.Distribution.Binomial:$cvariance from math-functions-0.1.5.2"
+ (* (* x y) (- 1.0 y)))
+

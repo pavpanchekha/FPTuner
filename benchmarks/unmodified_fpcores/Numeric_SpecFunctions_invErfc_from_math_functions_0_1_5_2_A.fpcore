@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Numeric.SpecFunctions:invErfc from math-functions-0.1.5.2, A"
+ :herbie-target
+ (+ x (/ 1 (- (* (/ 1.1283791670955126 y) (exp z)) x)))
+ (+ x (/ y (- (* 1.1283791670955126 (exp z)) (* x y)))))
+

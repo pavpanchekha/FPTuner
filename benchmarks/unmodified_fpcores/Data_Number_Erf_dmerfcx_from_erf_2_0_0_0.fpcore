@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Data.Number.Erf:$dmerfcx from erf-2.0.0.0"
+ :herbie-target
+ (* x (pow (exp y) y))
+ (* x (exp (* y y))))
+

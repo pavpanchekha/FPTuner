@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "AI.Clustering.Hierarchical.Internal:average from clustering-0.2.1, A"
+ (/ x (+ x y)))
+

@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Development.Shake.Progress:message from shake-0.15.5"
+ :herbie-target
+ (* (/ x 1) (/ 100.0 (+ x y)))
+ (/ (* x 100.0) (+ x y)))
+

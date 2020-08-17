@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a)
+ :name "Graphics.Rendering.Chart.Axis.Types:invLinMap from Chart-1.5.3"
+ :herbie-target
+ (if (< z -1.2536131056095036e+188)
+   (- t (* (/ y z) (- t x)))
+   (if (< z 4.446702369113811e+64)
+     (+ x (/ (- y z) (/ (- a z) (- t x))))
+     (- t (* (/ y z) (- t x)))))
+ (+ x (/ (* (- y z) (- t x)) (- a z))))
+

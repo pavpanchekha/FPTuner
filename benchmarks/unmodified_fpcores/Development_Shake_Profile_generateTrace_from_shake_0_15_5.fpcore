@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Development.Shake.Profile:generateTrace from shake-0.15.5"
+ :herbie-target
+ 0
+ (* 1000000.0 (- x x)))
+

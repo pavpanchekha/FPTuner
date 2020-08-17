@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b)
+ :name "Statistics.Distribution.Beta:$centropy from math-functions-0.1.5.2"
+ (+ (- (- x (* (- y 1.0) z)) (* (- t 1.0) a)) (* (- (+ y t) 2.0) b)))
+

@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Data.Random.Distribution.T:$ccdf from random-fu-0.2.6.2"
+ :herbie-target
+ (+ (* 1/2 (/ x y)) 1/2)
+ (/ (+ x y) (+ y y)))
+

@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Diagrams.Color.HSV:lerp  from diagrams-contrib-1.3.0.5"
+ :herbie-target
+ (- y (* x (- y z)))
+ (+ (* (- 1.0 x) y) (* x z)))
+

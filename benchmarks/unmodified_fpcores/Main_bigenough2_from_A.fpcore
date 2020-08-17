@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Main:bigenough2 from A"
+ (+ x (* y (+ z x))))
+

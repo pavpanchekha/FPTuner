@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Data.Colour.RGBSpace.HSV:hsv from colour-2.3.3, J"
+ :herbie-target
+ (if (< (* x (- 1.0 (* (- 1.0 y) z))) -1.618195973607049e+50)
+   (+ x (* (- 1.0 y) (* (- z) x)))
+   (if (< (* x (- 1.0 (* (- 1.0 y) z))) 3.892237649663903e+134)
+     (- (* (* x y) z) (- (* x z) x))
+     (+ x (* (- 1.0 y) (* (- z) x)))))
+ (* x (- 1.0 (* (- 1.0 y) z))))
+

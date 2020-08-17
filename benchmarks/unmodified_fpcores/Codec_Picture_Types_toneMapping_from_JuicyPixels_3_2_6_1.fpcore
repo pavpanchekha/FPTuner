@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Codec.Picture.Types:toneMapping from JuicyPixels-3.2.6.1"
+ :herbie-target
+ (* (/ x 1) (/ (+ (/ x y) 1.0) (+ x 1.0)))
+ (/ (* x (+ (/ x y) 1.0)) (+ x 1.0)))
+

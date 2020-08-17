@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Diagrams.Trail:splitAtParam  from diagrams-lib-1.3.0.3, C"
+ (/ (- x y) (- 1.0 y)))
+

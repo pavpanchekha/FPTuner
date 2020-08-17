@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b c i)
+ :name "Numeric.SpecFunctions:logBeta from math-functions-0.1.5.2, B"
+ (+ (+ (+ (+ (+ (* x (log y)) z) t) a) (* (- b 0.5) (log c))) (* y i)))
+

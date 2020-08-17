@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Main:bigenough3 from C"
+ :herbie-target
+ (/ 1.0 (+ (sqrt (+ x 1.0)) (sqrt x)))
+ (- (sqrt (+ x 1.0)) (sqrt x)))
+

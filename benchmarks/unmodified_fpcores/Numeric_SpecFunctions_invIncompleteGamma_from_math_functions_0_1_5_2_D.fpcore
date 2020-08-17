@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Numeric.SpecFunctions:invIncompleteGamma from math-functions-0.1.5.2, D"
+ :herbie-target
+ (- (- 1.0 (/ (/ 1.0 x) 9.0)) (/ y (* 3.0 (sqrt x))))
+ (- (- 1.0 (/ 1.0 (* x 9.0))) (/ y (* 3.0 (sqrt x)))))
+

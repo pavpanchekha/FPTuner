@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Diagrams.Solve.Polynomial:cubForm  from diagrams-solve-0.1, F"
+ (* (* x 27.0) y))
+

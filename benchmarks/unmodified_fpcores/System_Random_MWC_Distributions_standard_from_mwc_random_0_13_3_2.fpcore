@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "System.Random.MWC.Distributions:standard from mwc-random-0.13.3.2"
+ (* 0.5 (- (* x x) y)))
+

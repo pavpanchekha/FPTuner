@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Numeric.SpecFunctions:invIncompleteGamma from math-functions-0.1.5.2, A"
+ (- 1.0 (* x (+ 0.253 (* x 0.12)))))
+

@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Numeric.SpecFunctions:incompleteBetaApprox from math-functions-0.1.5.2, A"
+ :herbie-target
+ (/ (/ (/ x (+ (+ y 1) x)) (+ y x)) (/ 1 (/ y (+ y x))))
+ (/ (* x y) (* (* (+ x y) (+ x y)) (+ (+ x y) 1.0))))
+

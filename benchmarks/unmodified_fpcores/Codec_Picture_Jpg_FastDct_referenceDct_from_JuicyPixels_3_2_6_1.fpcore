@@ -1,0 +1,10 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a b)
+ :name "Codec.Picture.Jpg.FastDct:referenceDct from JuicyPixels-3.2.6.1"
+ :herbie-target
+ (* x (cos (* (/ b 16.0) (/ t (+ (- 1.0 (* a 2.0)) (pow (* a 2.0) 2))))))
+ (*
+  (* x (cos (/ (* (* (+ (* y 2.0) 1.0) z) t) 16.0)))
+  (cos (/ (* (* (+ (* a 2.0) 1.0) b) t) 16.0))))
+

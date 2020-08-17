@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Numeric.SpecFunctions:invIncompleteBetaWorker from math-functions-0.1.5.2, E"
+ (+ (- 1.0 x) (* y (sqrt x))))
+

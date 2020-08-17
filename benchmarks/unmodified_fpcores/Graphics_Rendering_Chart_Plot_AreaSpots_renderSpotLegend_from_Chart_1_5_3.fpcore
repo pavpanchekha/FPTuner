@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Graphics.Rendering.Chart.Plot.AreaSpots:renderSpotLegend from Chart-1.5.3"
+ (+ x (/ (fabs (- y x)) 2.0)))
+

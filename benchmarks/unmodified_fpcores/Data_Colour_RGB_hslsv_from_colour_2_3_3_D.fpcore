@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Data.Colour.RGB:hslsv from colour-2.3.3, D"
+ :herbie-target
+ (- (/ x (+ x y)) (/ y (+ x y)))
+ (/ (- x y) (+ x y)))
+

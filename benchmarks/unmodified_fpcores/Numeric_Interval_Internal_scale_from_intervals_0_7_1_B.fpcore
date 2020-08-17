@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y)
+ :name "Numeric.Interval.Internal:scale from intervals-0.7.1, B"
+ (/ (* x y) 2.0))
+

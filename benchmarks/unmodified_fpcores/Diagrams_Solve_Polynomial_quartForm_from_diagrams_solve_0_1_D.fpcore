@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z)
+ :name "Diagrams.Solve.Polynomial:quartForm  from diagrams-solve-0.1, D"
+ (- (/ (* x y) 2.0) (/ z 8.0)))
+

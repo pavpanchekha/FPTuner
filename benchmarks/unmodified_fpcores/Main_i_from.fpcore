@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Main:i from "
+ (+ (+ (+ (+ x x) x) x) x))
+

@@ -1,0 +1,6 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x)
+ :name "Data.Colour.RGBSpace.HSL:hsl from colour-2.3.3, G"
+ (- x (/ 1.0 3.0)))
+

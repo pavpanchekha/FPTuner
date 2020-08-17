@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Graphics.Rendering.Chart.Plot.AreaSpots:renderAreaSpots4D from Chart-1.5.3"
+ :herbie-target
+ (/ x (/ (- t z) (- y z)))
+ (/ (* x (- y z)) (- t z)))
+

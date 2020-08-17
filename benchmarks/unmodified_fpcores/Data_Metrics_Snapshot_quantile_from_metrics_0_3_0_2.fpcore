@@ -1,0 +1,8 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t)
+ :name "Data.Metrics.Snapshot:quantile from metrics-0.3.0.2"
+ :herbie-target
+ (+ x (+ (* t (- y z)) (* (- x) (- y z))))
+ (+ x (* (- y z) (- t x))))
+

@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a)
+ :name "Optimisation.CirclePacking:place from circle-packing-0.1.0.4, F"
+ :herbie-target
+ (if (< y -1.0761266216389975e-10)
+   (- x (/ 1 (/ (/ a (- z t)) y)))
+   (if (< y 2.894426862792089e-49)
+     (- x (/ (* y (- z t)) a))
+     (- x (/ y (/ a (- z t))))))
+ (- x (/ (* y (- z t)) a)))
+

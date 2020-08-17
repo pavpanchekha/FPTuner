@@ -1,0 +1,12 @@
+; -*- mode: scheme -*-
+
+(FPCore  (x y z t a)
+ :name "Graphics.Rendering.Plot.Render.Plot.Axis:renderAxisTick from plot-0.2.3.4, A"
+ :herbie-target
+ (if (< t -1.0682974490174067e-39)
+   (+ x (* (/ (- y z) (- a z)) t))
+   (if (< t 3.9110949887586375e-141)
+     (+ x (/ (* (- y z) t) (- a z)))
+     (+ x (* (/ (- y z) (- a z)) t))))
+ (+ x (/ (* (- y z) t) (- a z))))
+
