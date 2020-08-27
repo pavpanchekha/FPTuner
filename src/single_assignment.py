@@ -194,7 +194,7 @@ class SingleAssignment:
             for name, expanded in unused:
                 logger.warning("  {} = {}", name, expanded)
 
-        if len(unmatched) != 0:
+        if len(unmatched) > 1:
             logger.warning("Unmatched FPTaylor forms:")
             for name, expanded in unmatched:
                 logger.warning("  {} = {}", name, expanded)

@@ -29,6 +29,7 @@ class TunedExpression():
         self.info = None
         self.init_types(zr)
         self.init_operators(zr)
+        self.get_error(zr)
         self.inplace_operators()
         self.inline_untyped()
         self.get_info()
@@ -67,6 +68,8 @@ class TunedExpression():
                 header.append("{}-op".format(idx))
                 parts.append(op)
             idx += 1
+        header.append("Error")
+        parts.append(str(float(self.error.as_fraction())))
         return header, parts
 
     def _get_input_type(self, name):
@@ -90,12 +93,12 @@ class TunedExpression():
         input_strs = ["{} {}".format(d, i) for d, i in zip(input_decls, self.inputs)]
         arg_string = ", ".join(input_strs)
 
-        signature = "{}({})".format(self.name.strip('"'), arg_string)
+        self.signature = "{}({})".format(self.name.strip('"'), arg_string)
 
         lines = list()
 
         lines.append(ret_decl)
-        lines.append(signature)
+        lines.append(self.signature)
         lines.append("{")
 
         for name, domain in self.inputs.items():
@@ -177,6 +180,9 @@ class TunedExpression():
                     break
             assert(found == True)
         self.operators = operators
+
+    def get_error(self, zr):
+        self.error = zr.model["total_error"]
 
     def inplace_operators(self):
         for name, op in self.operators.items():

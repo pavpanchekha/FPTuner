@@ -29,15 +29,19 @@ def parse_args(argv):
                             nargs="?",
                             type=str,
                             help="Redirect logging to given file.")
-    arg_parser.add_argument("-b", "--bit-widths",
-                            nargs="+",
-                            choices=["fp32", "fp64", "fp128"],
-                            default=["fp32", "fp64"],
-                            help="Bit widths to search over")
+    # arg_parser.add_argument("-b", "--bit-widths",
+    #                         nargs="+",
+    #                         choices=["fp32", "fp64", "fp128"],
+    #                         default=["fp32", "fp64"],
+    #                         help="Bit widths to search over")
     arg_parser.add_argument("-c", "--check",
                             action="store_const",
                             const=True,
                             help="Use FPTaylor to verify final error bound")
+    arg_parser.add_argument("--cfile",
+                            action="store_const",
+                            const=True,
+                            help="Generate c files for the tuned expressions")
     arg_parser.add_argument("--nightly",
                             action="store_const",
                             const=True,
@@ -59,8 +63,8 @@ def parse_args(argv):
         args.check = True
 
     # Dedupe and sort bit widths from less precise to more precise
-    bws = list(set(args.bit_widths))
-    args.bit_widths = sorted(bws, key=lambda s: int(s[2:]))
+    # bws = list(set(args.bit_widths))
+    # args.bit_widths = sorted(bws, key=lambda s: int(s[2:]))
 
     # Sort error bounds from larget to smallest
     args.error.sort(reverse=True)
@@ -70,7 +74,7 @@ def parse_args(argv):
     logger("        error: {}", args.error)
     logger("    verbosity: {}", args.verbosity)
     logger("     log_file: {}", args.log_file)
-    logger("   bit_widths: {}", args.bit_widths)
+    # logger("   bit_widths: {}", args.bit_widths)
     logger("        check: {}", args.check)
 
     return args

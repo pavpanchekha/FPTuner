@@ -1,5 +1,6 @@
 
 
+from exceptions import FPTunerError
 from fpcore_ast import Variable, Number, Operation
 from fpcore_logging import Logger
 from gelpia_result import GelpiaResult
@@ -48,17 +49,23 @@ class Z3Result:
         linenos = range(1, max_lineno)
         numbered_lines = [formatter.format(i,l)
                           for i,l in zip(linenos, self.query_string_list)]
-        #logger.log("z3 query:\n{}\n", "\n".join(numbered_lines))
         logger.log("z3 query:\n{}\n", self.query)
 
         ctx = z3.Context("model_validate", "true")
         self.optimizer = z3.Optimize(ctx=ctx)
         self.optimizer.from_string(self.query)
-        self.optimizer.check()
+        state = self.optimizer.check()
+        if str(state) != "sat":
+            logger.error("Z3 returned: {} ({})", state, type(state))
+            logger.error("Unable to satisfy error bound of {}", self.raw_max_error)
+            raise FPTunerError()
+
         z3_model = self.optimizer.model()
         self.model = {d.name(): z3_model[d] for d in z3_model}
-
-        logger(self.model)
+        model_lines = ["{} = {}".format(name, value)
+                       for name, value in self.model.items()]
+        model_string = "\n"+"\n".join(model_lines)
+        logger(model_string)
 
     def get_number(self, n):
         frac = fractions.Fraction(n)
@@ -163,6 +170,8 @@ class Z3Result:
             gr = GelpiaResult(self.ssa.inputs, arg.expand(self.ssa))
             domain = [gr.min_lower, gr.max_upper]
             op = self.ssa.definitions[name].op
+            if op == "exp" and (domain[0] < 0.0 or domain[1] > 0.61):
+                logger.warning("Domain: {}", domain)
             all_ops = set(self.ssa.search_space["operations"][op])
             mapped_ops = [(row[1], row[4]) for row
                           in all_modifications_ast.OperationTable
@@ -170,6 +179,7 @@ class Z3Result:
             impls = [tup[0] for tup in mapped_ops
                      if (tup[1][0] <= domain[0] and
                          tup[1][1] >= domain[1])]
+
 
             # Setup the list of variable names, and make the z3 booleans
             name_bools = ["{}_is_{}".format(name, impl) for impl in impls]
@@ -232,6 +242,9 @@ class Z3Result:
                     continue
 
                 target_name, oper = tup
+                if oper not in self.operation_choices[target_name]:
+                    continue
+
                 bool_name = self.operation_choices[target_name][oper]
                 error = form.to_z3(this_eps)
                 z3_error = "(* (bool_to_real {}) {})".format(bool_name, error)
@@ -252,8 +265,10 @@ class Z3Result:
         error_name = "total_error"
         errors = "\n  ".join([v for v
                               in sorted(self.expression_errors.values())])
-        z3_errors = "(define-fun {} () Real (+\n  {}))".format(error_name, errors)
-        self.query_string_list.append(z3_errors)
+        decl = "(declare-const {} Real)".format(error_name)
+        z3_error = "(assert (= {} (+\n {})))".format(error_name, errors)
+        self.query_string_list.append(decl)
+        self.query_string_list.append(z3_error)
         self.query_string_list.append("")
         return error_name
 
@@ -297,7 +312,7 @@ class Z3Result:
 
             cost_name = "{}_operation_cost".format(name)
             op = self.ssa.definitions[name].op
-            impls = self.ssa.search_space["operations"][op]
+            impls = self.operation_choices[name]
             op_costs = [all_modifications_ast.OperationToCost[oper]
                         for oper in impls]
             bool_names = [bools[oper] for oper in impls]
@@ -318,8 +333,8 @@ class Z3Result:
         self.query_string_list.append("; total cost for expression")
 
         cost_name = "total_cost"
-        costs = "\n  ".join([v for v in sorted(self.operation_costs.values())])
-        costs = "\n  ".join([v for v in sorted(self.bit_width_costs.values())])
+        costs = "\n  ".join([v for v in sorted(self.operation_costs.values())]
+                            + [v for v in sorted(self.bit_width_costs.values())])
         z3_costs = "(define-fun {} () Int (+\n  {}))".format(cost_name, costs)
         self.query_string_list.append(z3_costs)
         self.query_string_list.append("")

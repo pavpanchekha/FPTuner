@@ -96,7 +96,8 @@ class FPTaylorResult:
 
         # Error when FPTaylor complains about infinity and domain errors
         # todo: handle when this occurs
-        if len(err_lines) != 0:
+        # todo: put this back in
+        if False and len(err_lines) != 0:
             if not logger.should_log(Logger.HIGH):
                 logger.llog(logger.NONE, "Query:\n{}", self.query)
                 logger.llog(Logger.NONE, "Command: {}", command)
@@ -167,6 +168,10 @@ class FPTaylorResult:
                 first = "Absolute error (exact):"
                 if line.startswith(first):
                     self.abs_error = float(line[len(first):])
+                    continue
+                second = "Relative error (exact):"
+                if line.startswith(second):
+                    self.rel_error = float(line[len(second):])
                     break
                 continue
 

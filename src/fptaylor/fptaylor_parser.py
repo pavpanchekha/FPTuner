@@ -85,7 +85,7 @@ class FPTaylorParser(Parser):
         rndop = "rnd[{},{},{},{},{}]({}".format(
             p[2], p[4], p[6], p[8], p[10], p.expression.op)
         if rndop not in all_modifications_ast.FPTaylorToOperation:
-            logger.warning("Dropping round specification: {}", rndop)
+            # logger.warning("Dropping round specification: {}", rndop)
             return p.expression
         op = all_modifications_ast.FPTaylorToOperation[rndop]
         p.expression.op = op

@@ -6,6 +6,7 @@ from fptaylor_lexer import FPTaylorLexer
 from fptaylor_parser import FPTaylorParser
 from gelpia_result import GelpiaResult
 
+import fractions
 
 logger = Logger(level=Logger.HIGH, color=Logger.cyan)
 
@@ -103,14 +104,21 @@ class FPTaylorForm:
                 parts_str.append("{}".format(err))
         return sum(parts), " + ".join(parts_str)
 
+    def get_number(self, n):
+        frac = fractions.Fraction(n)
+        if frac.denominator == 1:
+            return "{}".format(frac.numerator)
+        return "(/ {} {})".format(frac.numerator, frac.denominator)
+
     def to_z3(self, eps):
         parts_str = list()
         for exp, maximum in self.maximums.items():
-            maximum_string = "{:20f}".format(maximum).strip()
+            maximum_string = self.get_number(maximum)
             if exp == "eps":
                 err = "(* {} {})".format(eps, maximum_string)
             else:
-                err = "(* {} {})".format((2**exp), maximum_string)
+                num = self.get_number(2**exp)
+                err = "(* {} {})".format(num, maximum_string)
 
             parts_str.append(err)
 

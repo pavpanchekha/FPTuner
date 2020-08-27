@@ -42,7 +42,7 @@ def main(argv):
                   "log": logs}
 
     # Setup the search space
-    search_space = {"bit_widths": args.bit_widths,
+    search_space = {"bit_widths": ["fp64"], #args.bit_widths,
                     "operations": operations}
 
     lexer = FPCoreLexer()
@@ -75,7 +75,14 @@ def main(argv):
 
         for fpcore in fpcores:
             try:
+                signatures = list()
+                names = list()
                 ssa = fpcore.to_single_assignment(search_space)
+                if args.nightly:
+                    print("<h1>{}</h1>".format(ssa.name))
+                else:
+                    print(ssa.name)
+
                 ssa.get_fptaylor_forms()
                 ssa.get_fptaylor_maximums()
                 first_header = None
@@ -83,6 +90,18 @@ def main(argv):
                 for e in args.error:
                     zr = Z3Result(ssa, e)
                     tr = TunedExpression(ssa, zr)
+
+                    if args.cfile:
+                        func_name = "{}_error_{}".format(ssa.name, str(e).replace(".","_").replace("-","m"))
+                        filename = func_name + ".c"
+                        tr.name = func_name
+                        content = tr.to_c_function()
+                        names.append(func_name)
+                        signatures.append(tr.signature)
+                        with open(filename, "w") as f:
+                            f.write('#include "impls.h"\n\n')
+                            f.write(content)
+
                     header, row = tr.tsv()
 
                     if first_header is None:
@@ -98,29 +117,62 @@ def main(argv):
                         if res.abs_error is None:
                             logger.error("FPTaylor did not find an error value")
                             res.abs_error = float("nan")
+                            row.append("nan")
+                            row.append("N/A")
                             row.append("N/A")
                         else:
                             logger("FPTaylor error bound: {}", res.abs_error)
+                            row.append(str(res.abs_error))
                             row.append(str(res.abs_error <= e))
-                        row.append(str(res.high_second_order))
+                            row.append(str(res.high_second_order))
                     rows.append(row)
 
                 if args.check:
+                    first_header.append("FPTaylorError")
                     first_header.append("FPTaylorCheck")
                     first_header.append("HighSecondOrder")
 
                 if args.nightly:
-                    print("<h1>{}</h1>".format(ssa.name))
                     print("<table>")
                     print("<tr><th>" + "</th><th>".join(first_header) + "</th></tr>")
                     for row in rows:
                         print("<tr><td>" + "</td><td>".join(row) + "</td></tr>")
                     print("</table>")
                 else:
-                    print(ssa.name)
                     print("\t".join(first_header))
                     for row in rows:
                         print("\t".join(row))
+
+                if args.cfile:
+                    time_name = "{}_time.c".format(ssa.name)
+                    time_contents = ['#include "timing.h"',
+                                     '#include "xmalloc.h"',
+                                     '#include <float.h>',
+                                     '#include <math.h>',
+                                     '#include <stdio.h>']
+                    for name,domain in ssa.inputs.items():
+                        time_contents.append("const fp64 {}_LOW = {};".format(name, domain[0]))
+                        time_contents.append("const fp64 {}_HIGH = {};".format(name, domain[1]))
+                    time_contents.extend(["double "+s+";" for s in signatures])
+                    time_contents.append("#define FUNC_COUNT ({})".format(len(signatures)))
+                    functype = {1:"unop_fp64", 2:"binop_fp64", 3:"triop_fp64"}[len(ssa.inputs)]
+                    time_contents.append("{} FUNCTIONS[FUNC_COUNT] = {{{}}};".format(functype, ",".join(names)))
+                    time_contents.append("char* NAMES[FUNC_COUNT] = {{{}}};".format(",".join(['"'+n+'"' for n in names])))
+                    time_contents.extend(["int main(int argc, char** argv){",
+                                          "size_t log2_values = 18;",
+                                          "size_t secs = 10;",
+                                          "size_t runs = 10;",
+                                          "if (argc > 1) { log2_values = strtoul(argv[1], NULL, 10); }",
+                                          "if (argc > 2) { secs = strtoul(argv[2], NULL, 10); }",
+                                          "if (argc > 3) { runs = strtoul(argv[3], NULL, 10); }",
+                                          "register_performance_handler();",
+                                          "time_{}({},".format(functype, ",".join(["{}_LOW,{}_HIGH".format(n,n) for n in ssa.inputs])),
+                                          "FUNCTIONS, NAMES, FUNC_COUNT, log2_values, runs, secs);"
+                                          "return 0;",
+                                          "}"])
+                    with open(time_name, "w") as f:
+                        f.write("\n".join(time_contents))
+
 
             except DomainError as e:
                 if e.lower is None and e.upper is None:
@@ -140,6 +192,7 @@ def main(argv):
             except BadPreError as e:
                 logger.error("Unable to process precondition: '{}'", e.pre)
 
+                
     if args.nightly:
         print("</body>")
 
