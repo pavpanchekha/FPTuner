@@ -48,23 +48,44 @@ fp64 ord_12_exp_fp64(fp64 x);
 fp32 ord_13_exp_fp32(fp32 x);
 fp64 ord_13_exp_fp64(fp64 x);
 
-fp32 ord_14_exp_fp32(fp32 x);
-fp64 ord_14_exp_fp64(fp64 x);
+fp32 rord_01_exp_fp32(fp32 x);
+fp64 rord_01_exp_fp64(fp64 x);
 
-fp32 ord_15_exp_fp32(fp32 x);
-fp64 ord_15_exp_fp64(fp64 x);
+fp32 rord_02_exp_fp32(fp32 x);
+fp64 rord_02_exp_fp64(fp64 x);
 
-fp32 ord_16_exp_fp32(fp32 x);
-fp64 ord_16_exp_fp64(fp64 x);
+fp32 rord_03_exp_fp32(fp32 x);
+fp64 rord_03_exp_fp64(fp64 x);
 
-fp32 ord_17_exp_fp32(fp32 x);
-fp64 ord_17_exp_fp64(fp64 x);
+fp32 rord_04_exp_fp32(fp32 x);
+fp64 rord_04_exp_fp64(fp64 x);
 
-fp32 ord_18_exp_fp32(fp32 x);
-fp64 ord_18_exp_fp64(fp64 x);
+fp32 rord_05_exp_fp32(fp32 x);
+fp64 rord_05_exp_fp64(fp64 x);
 
-fp32 ord_19_exp_fp32(fp32 x);
-fp64 ord_19_exp_fp64(fp64 x);
+fp32 rord_06_exp_fp32(fp32 x);
+fp64 rord_06_exp_fp64(fp64 x);
+
+fp32 rord_07_exp_fp32(fp32 x);
+fp64 rord_07_exp_fp64(fp64 x);
+
+fp32 rord_08_exp_fp32(fp32 x);
+fp64 rord_08_exp_fp64(fp64 x);
+
+fp32 rord_09_exp_fp32(fp32 x);
+fp64 rord_09_exp_fp64(fp64 x);
+
+fp32 rord_10_exp_fp32(fp32 x);
+fp64 rord_10_exp_fp64(fp64 x);
+
+fp32 rord_11_exp_fp32(fp32 x);
+fp64 rord_11_exp_fp64(fp64 x);
+
+fp32 rord_12_exp_fp32(fp32 x);
+fp64 rord_12_exp_fp64(fp64 x);
+
+fp32 rord_13_exp_fp32(fp32 x);
+fp64 rord_13_exp_fp64(fp64 x);
 
 
 
