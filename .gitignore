@@ -1,5 +1,6 @@
 /cost-measurement/bin/
 /function-generation/*.c
+/function-generation/*.fpt
 /function-generation/*.tmp
 /requirements/FPTaylor/
 /requirements/debug_eniroment.sh

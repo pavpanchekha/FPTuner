@@ -1,8 +1,9 @@
 GENERATORS=$(wildcard generate-*-cfile.sollya)
 CFILES=$(patsubst generate-%-cfile.sollya,ord_%.c,${GENERATORS})
+TFILES=$(patsubst generate-%-cfile.sollya,ord_%.c.tmp,${GENERATORS})
 
 .PHONY: all
-all: ${CFILES}
+all: ${CFILES} ${TFILES}
 
 
 ord_%.c.tmp: generate-%-cfile.sollya

@@ -1,12 +1,10 @@
-max_order = 19;
-difference_accuracy = 2^(-100);
-I = [0.0; log(2)/2];
-prec=2048!;
+max_order = 13;
+algo_analysis_bound = 2^(-100);
+prec = 2048!;
+I = [0.0; log(2)];
+
 
 print("#include \"exp.h\"");
-print("");
-print("");
-print("// Generated for input range:", I);
 print("");
 print("");
 
@@ -19,22 +17,38 @@ fptaylor_args = "--fp-power2-model true "@
                   "--opt-max-iters 100000000 "@
                   "--opt-timeout 6000 ";
 
+tsv_header = "Function\tAlgoAbs\tAlgoRel\tRndAbs\tRndRel\tTotAbs\tTotRel";
+func_names = [||];
+algo_abs = [||];
+algo_rel = [||];
+rnd_abs = [||];
+rnd_rel = [||];
+tot_abs = [||];
+tot_rel = [||];
+
 
 f = exp(x);
 monomials = [|0|];
-order = 0;
-for power from 1 to max_order do begin
-    order = order + 1;
-    monomials = monomials:.power;
+
+for order from 1 to max_order do begin
+    monomials = monomials:.order;
     extra = "0";
     if order > 9 then {
        extra = "";
     };
 
-    p = fpminimax(f, monomials, [|single...|], I, floating, relative);
-    filename = "exp.fpt";
     display = decimal!;
-    midpointmode=off!;
+    fname = "ord_"@extra@order@"_exp_fp32";
+
+    p = fpminimax(f, monomials, [|single...|], I, floating, relative);
+    abs_algo_err = supnorm(p, f, I, absolute, algo_analysis_bound);
+    rel_algo_err = supnorm(p, f, I, relative, algo_analysis_bound);
+    if !(abs_algo_err == abs_algo_err) then { abs_algo_err = [NaN; NaN]; };
+    if !(rel_algo_err == rel_algo_err) then { rel_algo_err = [NaN; NaN]; };
+
+    filename = fname@".fpt";
+    display = decimal!;
+    midpointmode = off!;
     mul_horner = bashevaluate("echo '"@horner(p)@"' | sed 's|x^2|(x*x)|g'");
     comma_I = bashevaluate("echo '"@I@"' | sed 's|;|,|g'");
     print("Variables") > filename;
@@ -43,48 +57,58 @@ for power from 1 to max_order do begin
     print("ret rnd32 =", mul_horner, ";") >> filename;
     print("Expressions") >> filename;
     print("ret;") >> filename;
-    abs_err = bashevaluate("fptaylor --abs-error true "@fptaylor_args@filename@" 2>&1 | grep 'Absolute error (exact): .*' | sed 's|Absolute error (exact): ||g'");
-    rel_err = bashevaluate("fptaylor --abs-error false --rel-error true "@fptaylor_args@filename@" 2>&1 | grep 'Relative error (exact): .*' | sed 's|Relative error (exact): ||g'");
-    abs_algo_err = supnorm(p, f, I, absolute, difference_accuracy);
-    rel_algo_err = supnorm(p, f, I, relative, difference_accuracy);
+    abs_err = bashevaluate("fptaylor --abs-error true "
+                           @fptaylor_args
+                           @filename
+                           @" 2>&1 | grep 'Absolute error (exact): .*'"
+                           @" | sed 's|Absolute error (exact): ||g'");
+    rel_err = bashevaluate("fptaylor --abs-error false --rel-error true "
+                           @fptaylor_args
+                           @filename
+                           @" 2>&1 | grep 'Relative error (exact): .*'"
+                           @" | sed 's|Relative error (exact): ||g'");
+    if abs_err == "" then { abs_err = "NaN"; };
+    if rel_err == "" then { rel_err = "NaN"; };
 
-    if abs_err == "" then { abs_err = "error"; };
-    if rel_err == "" then { rel_err = "error"; };
-
-    if abs_err == "error" || abs_algo_err == "error" then {
-       total_abs_err = "error";
-    } else {
-      total_abs_err = abs_algo_err + parse(abs_err);
-    };
-
-    if rel_err == "error" || rel_algo_err == "error" then {
-       total_rel_err = "error";
-    } else {
-      total_rel_err = rel_algo_err + parse(rel_err);
-    };
+    total_abs_err = abs_algo_err + parse(abs_err);
+    total_rel_err = rel_algo_err + parse(rel_err);
 
     display = hexadecimal!;
-    flt_horner = bashevaluate("echo '"@horner(p)@"' | sed 's|x^0x1p1|(x*x)|g' | sed 's|\\([0-9]\\) |\\1f |g' | sed 's|\\([0-9]\\))|\\1f)|g' | sed 's|\\([0-9]\\)$|\\1f|g'");
-    display = decimal!;
+    flt_horner = bashevaluate("echo '"@horner(p)@"'"
+                              @" | sed 's|x^0x1p1|(x*x)|g'"
+                              @" | sed 's|\\([0-9]\\) |\\1f |g'"
+                              @" | sed 's|\\([0-9]\\))|\\1f)|g'"
+                              @" | sed 's|\\([0-9]\\)$|\\1f|g'");
 
-    midpointmode=on!;
-    print("fp32 ord_"@extra@order@"_exp_fp32(fp32 x)");
-    print("{");
-    print("  // Absolute algorithmic error:", abs_algo_err);
-    print("  // Relative algorithmic error:", rel_algo_err);
-    print("  // Absolute rounding error:", abs_err);
-    print("  // Relative rounding error:", rel_err);
-    print("  // Total absolute error:", total_abs_err);
-    print("  // Total relative error:", total_rel_err);
-    print("  return ", flt_horner, ";");
+    print("fp32 "@fname@"(fp32 x) {");
+    print("  return "@flt_horner@";");
     print("}");
     print("");
 
+    func_names = func_names:.fname;
+    algo_abs = algo_abs:.sup(abs_algo_err);
+    algo_rel = algo_rel:.sup(rel_algo_err);
+    rnd_abs = rnd_abs:.abs_err;
+    rnd_rel = rnd_rel:.rel_err;
+    tot_abs = tot_abs:.sup(total_abs_err);
+    tot_rel = tot_rel:.sup(total_rel_err);
+
+
+
+
+    display = decimal!;
+    fname = "ord_"@extra@order@"_exp_fp64";
+
     p = fpminimax(f, monomials, [|double...|], I, floating, relative);
-    filename = "exp.fpt";
+    abs_algo_err = supnorm(p, f, I, absolute, algo_analysis_bound);
+    rel_algo_err = supnorm(p, f, I, relative, algo_analysis_bound);
+    if !(abs_algo_err == abs_algo_err) then { abs_algo_err = [NaN; NaN]; };
+    if !(rel_algo_err == rel_algo_err) then { rel_algo_err = [NaN; NaN]; };
+
+    filename = fname@".fpt";
     display = decimal!;
     midpointmode = off!;
-    mul_horner = bashevaluate("echo '"@horner(p)@"' | sed 's|x^2|(x*x)|g' | sed 's|0x1p1|(x*x)|g'");
+    mul_horner = bashevaluate("echo '"@horner(p)@"' | sed 's|x^2|(x*x)|g'");
     comma_I = bashevaluate("echo '"@I@"' | sed 's|;|,|g'");
     print("Variables") > filename;
     print("real x in", comma_I, ";") >> filename;
@@ -92,43 +116,59 @@ for power from 1 to max_order do begin
     print("ret rnd64 =", mul_horner, ";") >> filename;
     print("Expressions") >> filename;
     print("ret;") >> filename;
-    abs_err = bashevaluate("fptaylor --abs-error true "@fptaylor_args@filename@" 2>&1 | grep 'Absolute error (exact): .*' | sed 's|Absolute error (exact): ||g'");
-    rel_err = bashevaluate("fptaylor --abs-error false --rel-error true "@fptaylor_args@filename@" 2>&1 | grep 'Relative error (exact): .*' | sed 's|Relative error (exact): ||g'");
-    abs_algo_err = supnorm(p, f, I, absolute, difference_accuracy);
-    rel_algo_err = supnorm(p, f, I, relative, difference_accuracy);
+    abs_err = bashevaluate("fptaylor --abs-error true "
+                           @fptaylor_args
+                           @filename
+                           @" 2>&1 | grep 'Absolute error (exact): .*'"
+                           @" | sed 's|Absolute error (exact): ||g'");
+    rel_err = bashevaluate("fptaylor --abs-error false --rel-error true "
+                           @fptaylor_args
+                           @filename
+                           @" 2>&1 | grep 'Relative error (exact): .*'"
+                           @" | sed 's|Relative error (exact): ||g'");
+    if abs_err == "" then { abs_err = "NaN"; };
+    if rel_err == "" then { rel_err = "NaN"; };
 
-    if abs_err == "" then { abs_err = "error"; };
-    if rel_err == "" then { rel_err = "error"; };
-
-    if abs_err == "error" || abs_algo_err == "error" then {
-       total_abs_err = "error";
-    } else {
-      total_abs_err = abs_algo_err + parse(abs_err);
-    };
-
-    if rel_err == "error" || rel_algo_err == "error" then {
-       total_rel_err = "error";
-    } else {
-      total_rel_err = rel_algo_err + parse(rel_err);
-    };
+    total_abs_err = abs_algo_err + parse(abs_err);
+    total_rel_err = rel_algo_err + parse(rel_err);
 
     display = hexadecimal!;
-    flt_horner = bashevaluate("echo '"@horner(p)@"' | sed 's|x^0x1p1|(x*x)|g'");
-    display = decimal!;
+    flt_horner = bashevaluate("echo '"@horner(p)@"'"
+                              @" | sed 's|x^0x1p1|(x*x)|g'");
 
-    midpointmode=on!;
-    print("fp64 ord_"@extra@order@"_exp_fp64(fp64 x)");
-    print("{");
-    print("  // Absolute algorithmic error:", abs_algo_err);
-    print("  // Relative algorithmic error:", rel_algo_err);
-    print("  // Absolute rounding error:", abs_err);
-    print("  // Relative rounding error:", rel_err);
-    print("  // Total absolute error:", total_abs_err);
-    print("  // Total relative error:", total_rel_err);
-    print("  return ", flt_horner, ";");
+    print("fp64 "@fname@"(fp64 x) {");
+    print("  return "@flt_horner@";");
     print("}");
     print("");
 
+    func_names = func_names:.fname;
+    algo_abs = algo_abs:.sup(abs_algo_err);
+    algo_rel = algo_rel:.sup(rel_algo_err);
+    rnd_abs = rnd_abs:.abs_err;
+    rnd_rel = rnd_rel:.rel_err;
+    tot_abs = tot_abs:.sup(total_abs_err);
+    tot_rel = tot_rel:.sup(total_rel_err);
+
     print("");
 
+end;
+
+
+display = decimal!;
+midpointmode = off!;
+prec = 60!;
+
+print("// Generated for input range: "@I*1.0);
+print("");
+
+print("// "@tsv_header);
+for i from 0 to 2*max_order-1 do begin
+    print("// "
+          @func_names[i]@"\t"
+          @algo_abs[i]@"\t"
+          @algo_rel[i]@"\t"
+          @rnd_abs[i]@"\t"
+          @rnd_rel[i]@"\t"
+          @tot_abs[i]@"\t"
+          @tot_rel[i]);
 end;
