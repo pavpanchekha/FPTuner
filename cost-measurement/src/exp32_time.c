@@ -12,7 +12,7 @@
 const fp32 LOW = 0.0f;
 const fp32 HIGH = 0.69314718055994531f;
 
-#define FUNC_COUNT (27)
+#define FUNC_COUNT (2)
 
 unop_fp32 FUNCTIONS[FUNC_COUNT] = {ord_01_exp_fp32,
                                    ord_02_exp_fp32,
@@ -70,6 +70,34 @@ char* NAMES[FUNC_COUNT] = {"ord_01_exp_fp32 ",
                            "rord_13_exp_fp32",
                            "exp_32          "};
 
+char* ERRORS[FUNC_COUNT] = {"unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown"};
+
 
 
 
@@ -92,7 +120,7 @@ int main(int argc, char** argv)
   register_performance_handler();
 
   time_unop_fp32(LOW, HIGH,
-                 FUNCTIONS, NAMES, FUNC_COUNT,
+                 FUNCTIONS, NAMES, ERRORS, FUNC_COUNT,
                  log2_values, runs, secs);
 
 

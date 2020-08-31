@@ -1,4 +1,5 @@
-CFLAGS=-Wall -Wextra -Wconversion -O3 -march=native -mtune=native -DNDEBUG
+CFLAGS=-Wall -Wextra -Wconversion -O3 -march=native -mtune=native
+#-DNDEBUG
 
 ALL_SOURCES = $(wildcard src/*.c)
 

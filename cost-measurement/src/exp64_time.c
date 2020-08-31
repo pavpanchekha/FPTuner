@@ -70,6 +70,34 @@ char* NAMES[FUNC_COUNT] = {"ord_01_exp_fp64 ",
                            "rord_13_exp_fp64",
                            "exp_64          "};
 
+char* ERRORS[FUNC_COUNT] = {"unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown",
+                            "unknown"};
+
 
 
 
@@ -92,7 +120,7 @@ int main(int argc, char** argv)
   register_performance_handler();
 
   time_unop_fp64(LOW, HIGH,
-                 FUNCTIONS, NAMES, FUNC_COUNT,
+                 FUNCTIONS, NAMES, ERRORS, FUNC_COUNT,
                  log2_values, runs, secs);
 
 

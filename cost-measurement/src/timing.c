@@ -9,14 +9,34 @@
 
 
 
-static volatile int RUNNING = 0;
+volatile sig_atomic_t RUNNING = 0;
 
 
-
-
-static void sigprof_handler(int sig)
+void print_data(size_t values, size_t secs, size_t run, size_t count, char** names, char** error_bounds, size_t** runs_data)
 {
-  assert(sig = SIGPROF);
+  printf("values\t %zu\n", values);
+  printf("secs\t %zu\n", secs);
+  printf("\n");
+  printf("function\terror_bound");
+  for (size_t done=0; done<run; done++) {
+    printf("\tcalls");
+  }
+  printf("\n");
+
+  for (size_t func=0; func<count; func++) {
+    printf("%s\t%s", names[func], error_bounds[func]);
+    for (size_t done=0; done<run; done++) {
+      printf("\t%zu", runs_data[done][func]);
+    }
+    printf("\n");
+  }
+}
+
+
+
+void sigprof_handler(int sig)
+{
+  assert(sig == SIGPROF);
   UNUSED(sig);
 
   RUNNING = 0;
@@ -37,7 +57,7 @@ void register_performance_handler(void)
 }
 
 
-static size_t count_unop_calls_fp32(unop_fp32 func, fp32* data, size_t log2_len, size_t secs)
+size_t count_unop_calls_fp32(unop_fp32 func, fp32* data, size_t log2_len, size_t secs)
 {
   size_t calls = 0;
   size_t idx = 0;
@@ -49,7 +69,7 @@ static size_t count_unop_calls_fp32(unop_fp32 func, fp32* data, size_t log2_len,
 
   evp.sigev_notify = SIGEV_SIGNAL;
   evp.sigev_signo = SIGPROF;
-
+  evp.sigev_value.sival_ptr = &timerid;
   status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
   assert(status==0);
   UNUSED(status);
@@ -73,7 +93,7 @@ static size_t count_unop_calls_fp32(unop_fp32 func, fp32* data, size_t log2_len,
 }
 
 
-static size_t count_unop_calls_fp64(unop_fp64 func, fp64* data, size_t log2_len, size_t secs)
+size_t count_unop_calls_fp64(unop_fp64 func, fp64* data, size_t log2_len, size_t secs)
 {
   size_t calls = 0;
   size_t idx = 0;
@@ -85,7 +105,7 @@ static size_t count_unop_calls_fp64(unop_fp64 func, fp64* data, size_t log2_len,
 
   evp.sigev_notify = SIGEV_SIGNAL;
   evp.sigev_signo = SIGPROF;
-
+  evp.sigev_value.sival_ptr = &timerid;
   status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
   assert(status==0);
   UNUSED(status);
@@ -109,7 +129,7 @@ static size_t count_unop_calls_fp64(unop_fp64 func, fp64* data, size_t log2_len,
 }
 
 
-static size_t count_binop_calls_fp32(binop_fp32 func, fp32* data_1, fp32* data_2,
+size_t count_binop_calls_fp32(binop_fp32 func, fp32* data_1, fp32* data_2,
                                      size_t log2_len, size_t secs)
 {
   size_t calls = 0;
@@ -122,7 +142,7 @@ static size_t count_binop_calls_fp32(binop_fp32 func, fp32* data_1, fp32* data_2
 
   evp.sigev_notify = SIGEV_SIGNAL;
   evp.sigev_signo = SIGPROF;
-
+  evp.sigev_value.sival_ptr = &timerid;
   status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
   assert(status==0);
   UNUSED(status);
@@ -146,7 +166,7 @@ static size_t count_binop_calls_fp32(binop_fp32 func, fp32* data_1, fp32* data_2
 }
 
 
-static size_t count_binop_calls_fp64(binop_fp64 func, fp64* data_1, fp64* data_2,
+size_t count_binop_calls_fp64(binop_fp64 func, fp64* data_1, fp64* data_2,
                                      size_t log2_len, size_t secs)
 {
   size_t calls = 0;
@@ -159,7 +179,7 @@ static size_t count_binop_calls_fp64(binop_fp64 func, fp64* data_1, fp64* data_2
 
   evp.sigev_notify = SIGEV_SIGNAL;
   evp.sigev_signo = SIGPROF;
-
+  evp.sigev_value.sival_ptr = &timerid;
   status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
   assert(status==0);
   UNUSED(status);
@@ -183,7 +203,7 @@ static size_t count_binop_calls_fp64(binop_fp64 func, fp64* data_1, fp64* data_2
 }
 
 
-static size_t count_triop_calls_fp32(triop_fp32 func, fp32* data_1, fp32* data_2, fp32* data_3,
+size_t count_triop_calls_fp32(triop_fp32 func, fp32* data_1, fp32* data_2, fp32* data_3,
                                      size_t log2_len, size_t secs)
 {
   size_t calls = 0;
@@ -196,7 +216,7 @@ static size_t count_triop_calls_fp32(triop_fp32 func, fp32* data_1, fp32* data_2
 
   evp.sigev_notify = SIGEV_SIGNAL;
   evp.sigev_signo = SIGPROF;
-
+  evp.sigev_value.sival_ptr = &timerid;
   status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
   assert(status==0);
   UNUSED(status);
@@ -220,7 +240,7 @@ static size_t count_triop_calls_fp32(triop_fp32 func, fp32* data_1, fp32* data_2
 }
 
 
-static size_t count_triop_calls_fp64(triop_fp64 func, fp64* data_1, fp64* data_2, fp64* data_3,
+size_t count_triop_calls_fp64(triop_fp64 func, fp64* data_1, fp64* data_2, fp64* data_3,
                                      size_t log2_len, size_t secs)
 {
   size_t calls = 0;
@@ -233,7 +253,7 @@ static size_t count_triop_calls_fp64(triop_fp64 func, fp64* data_1, fp64* data_2
 
   evp.sigev_notify = SIGEV_SIGNAL;
   evp.sigev_signo = SIGPROF;
-
+  evp.sigev_value.sival_ptr = &timerid;
   status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
   assert(status==0);
   UNUSED(status);
@@ -257,7 +277,7 @@ static size_t count_triop_calls_fp64(triop_fp64 func, fp64* data_1, fp64* data_2
 }
 
 
-static fp32 rand_fp32(fp32 low, fp32 high)
+fp32 rand_fp32(fp32 low, fp32 high)
 {
   const fp32 scale = (low-high) / ((fp32) RAND_MAX);
   fp32 rnd = (fp32) rand();
@@ -265,7 +285,7 @@ static fp32 rand_fp32(fp32 low, fp32 high)
 }
 
 
-static fp64 rand_fp64(fp64 low, fp64 high)
+fp64 rand_fp64(fp64 low, fp64 high)
 {
   const fp64 scale = (low-high) / ((fp64) RAND_MAX);
   fp64 rnd = (fp64) rand();
@@ -274,7 +294,7 @@ static fp64 rand_fp64(fp64 low, fp64 high)
 
 
 void time_unop_fp32(fp32 low, fp32 high,
-                    unop_fp32* functions, char** names, size_t count,
+                    unop_fp32* functions, char** names, char** error_bounds, size_t count,
                     size_t log2_values, size_t runs, size_t secs)
 {
   size_t values = ((size_t) 1) << log2_values;
@@ -287,7 +307,6 @@ void time_unop_fp32(fp32 low, fp32 high,
   fp32* A = (fp32*) xmalloc(sizeof(fp32)*values);
 
   for(size_t run=0; run<runs; run++) {
-
     for (size_t i=0; i<values; i++) {
       A[i] = rand_fp32(low, high);
     }
@@ -296,31 +315,14 @@ void time_unop_fp32(fp32 low, fp32 high,
       const unop_fp32 f = functions[func];
       runs_data[run][func] = count_unop_calls_fp32(f, A, log2_values, secs);
     }
-
-    printf("values\t %zu\n", values);
-    printf("secs\t %zu\n", secs);
-    printf("\n");
-    printf("function   ");
-    for (size_t done=0; done<=run; done++) {
-      printf("\tcalls    ");
-    }
-    printf("\n");
-
-    for (size_t func=0; func<count; func++) {
-      printf("%s", names[func]);
-      for (size_t done=0; done<=run; done++) {
-        printf("\t%zu", runs_data[done][func]);
-      }
-      printf("\n");
-    }
-
-    printf("\n\n\n\n");
   }
+
+  print_data(values, secs, runs, count, names, error_bounds, runs_data);
 }
 
 
 void time_unop_fp64(fp64 low, fp64 high,
-                    unop_fp64* functions, char** names, size_t count,
+                    unop_fp64* functions, char** names, char** error_bounds, size_t count,
                     size_t log2_values, size_t runs, size_t secs)
 {
   size_t values = ((size_t) 1) << log2_values;
@@ -342,30 +344,13 @@ void time_unop_fp64(fp64 low, fp64 high,
       const unop_fp64 f = functions[func];
       runs_data[run][func] = count_unop_calls_fp64(f, A, log2_values, secs);
     }
-
-    printf("values\t %zu\n", values);
-    printf("secs\t %zu\n", secs);
-    printf("\n");
-    printf("function   ");
-    for (size_t done=0; done<=run; done++) {
-      printf("\tcalls    ");
-    }
-    printf("\n");
-
-    for (size_t func=0; func<count; func++) {
-      printf("%s", names[func]);
-      for (size_t done=0; done<=run; done++) {
-        printf("\t%zu", runs_data[done][func]);
-      }
-      printf("\n");
-    }
-
-    printf("\n\n\n\n");
   }
+
+  print_data(values, secs, runs, count, names, error_bounds, runs_data);
 }
 
 void time_binop_fp32(fp32 low_1, fp32 high_1, fp32 low_2, fp32 high_2,
-                     binop_fp32* functions, char** names, size_t count,
+                     binop_fp32* functions, char** names, char** error_bounds, size_t count,
                      size_t log2_values, size_t runs, size_t secs)
 {
   size_t values = ((size_t) 1) << log2_values;
@@ -389,31 +374,14 @@ void time_binop_fp32(fp32 low_1, fp32 high_1, fp32 low_2, fp32 high_2,
       const binop_fp32 f = functions[func];
       runs_data[run][func] = count_binop_calls_fp32(f, A, B, log2_values, secs);
     }
-
-    printf("values\t %zu\n", values);
-    printf("secs\t %zu\n", secs);
-    printf("\n");
-    printf("function   ");
-    for (size_t done=0; done<=run; done++) {
-      printf("\tcalls    ");
-    }
-    printf("\n");
-
-    for (size_t func=0; func<count; func++) {
-      printf("%s", names[func]);
-      for (size_t done=0; done<=run; done++) {
-        printf("\t%zu", runs_data[done][func]);
-      }
-      printf("\n");
-    }
-
-    printf("\n\n\n\n");
   }
+
+  print_data(values, secs, runs, count, names, error_bounds, runs_data);
 }
 
 
 void time_binop_fp64(fp64 low_1, fp64 high_1, fp64 low_2, fp64 high_2,
-                     binop_fp64* functions, char** names, size_t count,
+                     binop_fp64* functions, char** names, char** error_bounds, size_t count,
                      size_t log2_values, size_t runs, size_t secs)
 {
   size_t values = ((size_t) 1) << log2_values;
@@ -437,31 +405,14 @@ void time_binop_fp64(fp64 low_1, fp64 high_1, fp64 low_2, fp64 high_2,
       const binop_fp64 f = functions[func];
       runs_data[run][func] = count_binop_calls_fp64(f, A, B, log2_values, secs);
     }
-
-    printf("values\t %zu\n", values);
-    printf("secs\t %zu\n", secs);
-    printf("\n");
-    printf("function   ");
-    for (size_t done=0; done<=run; done++) {
-      printf("\tcalls    ");
-    }
-    printf("\n");
-
-    for (size_t func=0; func<count; func++) {
-      printf("%s", names[func]);
-      for (size_t done=0; done<=run; done++) {
-        printf("\t%zu", runs_data[done][func]);
-      }
-      printf("\n");
-    }
-
-    printf("\n\n\n\n");
   }
+
+  print_data(values, secs, runs, count, names, error_bounds, runs_data);
 }
 
 
 void time_triop_fp32(fp32 low_1, fp32 high_1, fp32 low_2, fp32 high_2, fp32 low_3, fp32 high_3,
-                     triop_fp32* functions, char** names, size_t count,
+                     triop_fp32* functions, char** names, char** error_bounds, size_t count,
                      size_t log2_values, size_t runs, size_t secs)
 {
   size_t values = ((size_t) 1) << log2_values;
@@ -487,31 +438,14 @@ void time_triop_fp32(fp32 low_1, fp32 high_1, fp32 low_2, fp32 high_2, fp32 low_
       const triop_fp32 f = functions[func];
       runs_data[run][func] = count_triop_calls_fp32(f, A, B, C, log2_values, secs);
     }
-
-    printf("values\t %zu\n", values);
-    printf("secs\t %zu\n", secs);
-    printf("\n");
-    printf("function   ");
-    for (size_t done=0; done<=run; done++) {
-      printf("\tcalls    ");
-    }
-    printf("\n");
-
-    for (size_t func=0; func<count; func++) {
-      printf("%s", names[func]);
-      for (size_t done=0; done<=run; done++) {
-        printf("\t%zu", runs_data[done][func]);
-      }
-      printf("\n");
-    }
-
-    printf("\n\n\n\n");
   }
+
+  print_data(values, secs, runs, count, names, error_bounds, runs_data);
 }
 
 
 void time_triop_fp64(fp64 low_1, fp64 high_1, fp64 low_2, fp64 high_2, fp64 low_3, fp64 high_3,
-                     triop_fp64* functions, char** names, size_t count,
+                     triop_fp64* functions, char** names, char** error_bounds, size_t count,
                      size_t log2_values, size_t runs, size_t secs)
 {
   size_t values = ((size_t) 1) << log2_values;
@@ -537,25 +471,7 @@ void time_triop_fp64(fp64 low_1, fp64 high_1, fp64 low_2, fp64 high_2, fp64 low_
       const triop_fp64 f = functions[func];
       runs_data[run][func] = count_triop_calls_fp64(f, A, B, C, log2_values, secs);
     }
-
-    printf("values\t %zu\n", values);
-    printf("secs\t %zu\n", secs);
-    printf("\n");
-    printf("function   ");
-    for (size_t done=0; done<=run; done++) {
-      printf("\tcalls    ");
-    }
-    printf("\n");
-
-    for (size_t func=0; func<count; func++) {
-      printf("%s", names[func]);
-      for (size_t done=0; done<=run; done++) {
-        printf("\t%zu", runs_data[done][func]);
-      }
-      printf("\n");
-    }
-
-    printf("\n\n\n\n");
   }
-}
 
+  print_data(values, secs, runs, count, names, error_bounds, runs_data);
+}
