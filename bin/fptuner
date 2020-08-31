@@ -94,7 +94,7 @@ def main(argv):
                 z3_errors = []
                 for e in args.error:
                     zr = Z3Result(ssa, e)
-                    z3_errors.append(str(float(zr.model["total_error"].as_fraction()))))
+                    z3_errors.append(str(float(zr.model["total_error"].as_fraction())))
                     tr = TunedExpression(ssa, zr)
 
                     if args.cfile:
