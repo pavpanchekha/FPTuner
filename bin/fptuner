@@ -91,8 +91,10 @@ def main(argv):
                 ssa.get_fptaylor_maximums()
                 first_header = None
                 rows = []
+                z3_errors = []
                 for e in args.error:
                     zr = Z3Result(ssa, e)
+                    z3_errors.append(str(float(zr.model["total_error"].as_fraction()))))
                     tr = TunedExpression(ssa, zr)
 
                     if args.cfile:
@@ -163,7 +165,7 @@ def main(argv):
                     functype = {1:"unop_fp64", 2:"binop_fp64", 3:"triop_fp64"}[len(ssa.inputs)]
                     time_contents.append("{} FUNCTIONS[FUNC_COUNT] = {{{}}};".format(functype, ",".join(names)))
                     time_contents.append("char* NAMES[FUNC_COUNT] = {{{}}};".format(",".join(['"'+n+'"' for n in names])))
-                    time_contents.append("char* ERRORS[FUNC_COUNT] = {{{}}};".format(",".join(['"'+str(e)+'"' for e in args.error])))
+                    time_contents.append("char* ERRORS[FUNC_COUNT] = {{{}}};".format(",".join(['"'+str(e)+'"' for e in z3_errors])))
                     time_contents.extend(["int main(int argc, char** argv){",
                                           "size_t log2_values = 18;",
                                           "size_t secs = 1;",
