@@ -12,7 +12,7 @@
 const fp32 LOW = 0.0f;
 const fp32 HIGH = 0.69314718055994531f;
 
-#define FUNC_COUNT (2)
+#define FUNC_COUNT (27)
 
 unop_fp32 FUNCTIONS[FUNC_COUNT] = {ord_01_exp_fp32,
                                    ord_02_exp_fp32,

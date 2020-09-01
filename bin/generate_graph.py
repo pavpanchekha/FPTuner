@@ -15,6 +15,7 @@ sys.path.append(path.join(GIT_DIR, "src", "fpcore_parser", "src"))
 
 def graph(main_file):
     # > cd cost-measurement
+    start = os.getcwd()
     os.chdir(COST_DIR)
 
     # > make
@@ -48,6 +49,11 @@ def graph(main_file):
         averages.append(avg)
         errors.append(float(error))
 
+    # dump data
+    with open("{}.data".format(main_file.rstrip(".c")), 'w') as f:
+        f.write("errors = {}\n".format(errors))
+        f.write("averages = {}\n".format(averages))
+
     # plot
     fig, ax = plt.subplots()
     ax.scatter(errors, averages)
@@ -60,6 +66,7 @@ def graph(main_file):
 
     fig.savefig("{}.png".format(main_file.rstrip(".c")))
 
+    os.chdir(start)
 
 
 

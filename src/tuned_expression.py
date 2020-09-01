@@ -61,8 +61,8 @@ class TunedExpression():
         parts = ["{}".format(self.error_bound)]
         idx = 0
         for name in self.definitions:
-            header.append("{}-type".format(idx))
-            parts.append(self.types[name])
+            #header.append("{}-type".format(idx))
+            #parts.append(self.types[name])
             if name in self.operators:
                 op = self.operators[name]
                 header.append("{}-op".format(idx))

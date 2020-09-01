@@ -4,6 +4,7 @@
 #include "xmalloc.h"
 
 #include <signal.h>
+#include <pthread.h>
 #include <time.h>
 
 
@@ -34,10 +35,9 @@ void print_data(size_t values, size_t secs, size_t run, size_t count, char** nam
 
 
 
-void sigprof_handler(int sig)
+void sigprof_handler(union sigval val)
 {
-  assert(sig == SIGPROF);
-  UNUSED(sig);
+  UNUSED(val);
 
   RUNNING = 0;
 }
@@ -45,17 +45,40 @@ void sigprof_handler(int sig)
 
 void register_performance_handler(void)
 {
-  struct sigaction action;
-
-  action.sa_handler = sigprof_handler;
-  sigemptyset(&action.sa_mask); /* block sigs of type being handled */
-  action.sa_flags = SA_RESTART; /* restart syscalls if possible */
-
-  int status = sigaction(SIGPROF, &action, NULL);
-  assert(status == 0);
-  UNUSED(status);
 }
 
+timer_t start_timer(size_t secs)
+{
+  int status;
+
+  pthread_attr_t attr;
+  pthread_attr_init( &attr );
+
+  struct sched_param parm;
+  parm.sched_priority = 255;
+  pthread_attr_setschedparam(&attr, &parm);
+
+  struct sigevent sig;
+  sig.sigev_notify = SIGEV_THREAD;
+  sig.sigev_signo = SIGPROF;
+  sig.sigev_notify_function = sigprof_handler;
+  sig.sigev_value.sival_int = 20;
+  sig.sigev_notify_attributes = &attr;
+
+  timer_t timerid;
+  status = timer_create(CLOCK_REALTIME, &sig, &timerid);
+  assert(status == 0);
+
+  struct itimerspec in, out;
+  in.it_value.tv_sec = 1;
+  in.it_value.tv_nsec = 0;
+  in.it_interval.tv_sec = (long int) secs;
+  in.it_interval.tv_nsec = 0;
+  status = timer_settime(timerid, 0, &in, &out);
+  assert(status == 0);
+
+  return timerid;
+}
 
 size_t count_unop_calls_fp32(unop_fp32 func, fp32* data, size_t log2_len, size_t secs)
 {
@@ -63,22 +86,9 @@ size_t count_unop_calls_fp32(unop_fp32 func, fp32* data, size_t log2_len, size_t
   size_t idx = 0;
   size_t len = ((size_t) 1) << log2_len;
   int status;
-  timer_t timerid;
-  struct sigevent evp;
-  struct itimerspec its;
-
-  evp.sigev_notify = SIGEV_SIGNAL;
-  evp.sigev_signo = SIGPROF;
-  evp.sigev_value.sival_ptr = &timerid;
-  status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
-  assert(status==0);
-  UNUSED(status);
-
-  its.it_value.tv_sec = (long int) secs;
-  its.it_value.tv_nsec = 0;
 
   RUNNING = 1;
-  timer_settime(timerid, 0, &its, NULL);
+  timer_t timerid = start_timer(secs);
   while (RUNNING) {
     func(data[idx]);
     idx = (idx+1) % len;
@@ -86,8 +96,7 @@ size_t count_unop_calls_fp32(unop_fp32 func, fp32* data, size_t log2_len, size_t
   };
 
   status = timer_delete(timerid);
-  assert(status==0);
-  UNUSED(status);
+  assert(status == 0);
 
   return calls;
 }
@@ -99,22 +108,9 @@ size_t count_unop_calls_fp64(unop_fp64 func, fp64* data, size_t log2_len, size_t
   size_t idx = 0;
   size_t len = ((size_t) 1) << log2_len;
   int status;
-  timer_t timerid;
-  struct sigevent evp;
-  struct itimerspec its;
-
-  evp.sigev_notify = SIGEV_SIGNAL;
-  evp.sigev_signo = SIGPROF;
-  evp.sigev_value.sival_ptr = &timerid;
-  status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
-  assert(status==0);
-  UNUSED(status);
-
-  its.it_value.tv_sec = (long int) secs;
-  its.it_value.tv_nsec = 0;
 
   RUNNING = 1;
-  timer_settime(timerid, 0, &its, NULL);
+  timer_t timerid = start_timer(secs);
   while (RUNNING) {
     func(data[idx]);
     idx = (idx+1) % len;
@@ -122,36 +118,22 @@ size_t count_unop_calls_fp64(unop_fp64 func, fp64* data, size_t log2_len, size_t
   };
 
   status = timer_delete(timerid);
-  assert(status==0);
-  UNUSED(status);
+  assert(status == 0);
 
   return calls;
 }
 
 
 size_t count_binop_calls_fp32(binop_fp32 func, fp32* data_1, fp32* data_2,
-                                     size_t log2_len, size_t secs)
+                              size_t log2_len, size_t secs)
 {
   size_t calls = 0;
   size_t idx = 0;
   size_t len = ((size_t) 1) << log2_len;
   int status;
-  timer_t timerid;
-  struct sigevent evp;
-  struct itimerspec its;
-
-  evp.sigev_notify = SIGEV_SIGNAL;
-  evp.sigev_signo = SIGPROF;
-  evp.sigev_value.sival_ptr = &timerid;
-  status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
-  assert(status==0);
-  UNUSED(status);
-
-  its.it_value.tv_sec = (long int) secs;
-  its.it_value.tv_nsec = 0;
 
   RUNNING = 1;
-  timer_settime(timerid, 0, &its, NULL);
+  timer_t timerid = start_timer(secs);
   while (RUNNING) {
     func(data_1[idx], data_2[idx]);
     idx = (idx+1) % len;
@@ -159,36 +141,22 @@ size_t count_binop_calls_fp32(binop_fp32 func, fp32* data_1, fp32* data_2,
   };
 
   status = timer_delete(timerid);
-  assert(status==0);
-  UNUSED(status);
+  assert(status == 0);
 
   return calls;
 }
 
 
 size_t count_binop_calls_fp64(binop_fp64 func, fp64* data_1, fp64* data_2,
-                                     size_t log2_len, size_t secs)
+                              size_t log2_len, size_t secs)
 {
   size_t calls = 0;
   size_t idx = 0;
   size_t len = ((size_t) 1) << log2_len;
   int status;
-  timer_t timerid;
-  struct sigevent evp;
-  struct itimerspec its;
-
-  evp.sigev_notify = SIGEV_SIGNAL;
-  evp.sigev_signo = SIGPROF;
-  evp.sigev_value.sival_ptr = &timerid;
-  status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
-  assert(status==0);
-  UNUSED(status);
-
-  its.it_value.tv_sec = (long int) secs;
-  its.it_value.tv_nsec = 0;
 
   RUNNING = 1;
-  timer_settime(timerid, 0, &its, NULL);
+  timer_t timerid = start_timer(secs);
   while (RUNNING) {
     func(data_1[idx], data_2[idx]);
     idx = (idx+1) % len;
@@ -196,36 +164,22 @@ size_t count_binop_calls_fp64(binop_fp64 func, fp64* data_1, fp64* data_2,
   };
 
   status = timer_delete(timerid);
-  assert(status==0);
-  UNUSED(status);
+  assert(status == 0);
 
   return calls;
 }
 
 
 size_t count_triop_calls_fp32(triop_fp32 func, fp32* data_1, fp32* data_2, fp32* data_3,
-                                     size_t log2_len, size_t secs)
+                              size_t log2_len, size_t secs)
 {
   size_t calls = 0;
   size_t idx = 0;
   size_t len = ((size_t) 1) << log2_len;
   int status;
-  timer_t timerid;
-  struct sigevent evp;
-  struct itimerspec its;
-
-  evp.sigev_notify = SIGEV_SIGNAL;
-  evp.sigev_signo = SIGPROF;
-  evp.sigev_value.sival_ptr = &timerid;
-  status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
-  assert(status==0);
-  UNUSED(status);
-
-  its.it_value.tv_sec = (long int) secs;
-  its.it_value.tv_nsec = 0;
 
   RUNNING = 1;
-  timer_settime(timerid, 0, &its, NULL);
+  timer_t timerid = start_timer(secs);
   while (RUNNING) {
     func(data_1[idx], data_2[idx], data_3[idx]);
     idx = (idx+1) % len;
@@ -233,36 +187,22 @@ size_t count_triop_calls_fp32(triop_fp32 func, fp32* data_1, fp32* data_2, fp32*
   };
 
   status = timer_delete(timerid);
-  assert(status==0);
-  UNUSED(status);
+  assert(status == 0);
 
   return calls;
 }
 
 
 size_t count_triop_calls_fp64(triop_fp64 func, fp64* data_1, fp64* data_2, fp64* data_3,
-                                     size_t log2_len, size_t secs)
+                              size_t log2_len, size_t secs)
 {
   size_t calls = 0;
   size_t idx = 0;
   size_t len = ((size_t) 1) << log2_len;
   int status;
-  timer_t timerid;
-  struct sigevent evp;
-  struct itimerspec its;
-
-  evp.sigev_notify = SIGEV_SIGNAL;
-  evp.sigev_signo = SIGPROF;
-  evp.sigev_value.sival_ptr = &timerid;
-  status = timer_create(CLOCK_MONOTONIC, &evp, &timerid);
-  assert(status==0);
-  UNUSED(status);
-
-  its.it_value.tv_sec = (long int) secs;
-  its.it_value.tv_nsec = 0;
 
   RUNNING = 1;
-  timer_settime(timerid, 0, &its, NULL);
+  timer_t timerid = start_timer(secs);
   while (RUNNING) {
     func(data_1[idx], data_2[idx], data_3[idx]);
     idx = (idx+1) % len;
@@ -270,8 +210,7 @@ size_t count_triop_calls_fp64(triop_fp64 func, fp64* data_1, fp64* data_2, fp64*
   };
 
   status = timer_delete(timerid);
-  assert(status==0);
-  UNUSED(status);
+  assert(status == 0);
 
   return calls;
 }
@@ -279,17 +218,33 @@ size_t count_triop_calls_fp64(triop_fp64 func, fp64* data_1, fp64* data_2, fp64*
 
 fp32 rand_fp32(fp32 low, fp32 high)
 {
-  const fp32 scale = (low-high) / ((fp32) RAND_MAX);
-  fp32 rnd = (fp32) rand();
-  return low + rnd * scale;
+  assert(low < high);
+
+  fp32 ret;
+
+  do {
+    const fp32 scale = (high-low) / ((fp32) RAND_MAX);
+    fp32 rnd = (fp32) rand();
+    ret = low + rnd * scale;
+  } while (ret < low || ret > high);
+
+  return ret;
 }
 
 
 fp64 rand_fp64(fp64 low, fp64 high)
 {
-  const fp64 scale = (low-high) / ((fp64) RAND_MAX);
-  fp64 rnd = (fp64) rand();
-  return low + rnd * scale;
+  assert(low < high);
+
+  fp64 ret;
+
+  do {
+    const fp64 scale = (high-low) / ((fp64) RAND_MAX);
+    fp64 rnd = (fp64) rand();
+    ret = low + rnd * scale;
+  } while(ret < low || ret > high);
+
+  return ret;
 }
 
 

@@ -9,6 +9,9 @@ requirements: requirements/build.sh
 .PHONY: clean
 clean:
 	find src -type d -name "__pycache__" -exec ${RM} -r {} +
+	find bin -type f -name "*.html" -exec ${RM} {} +
+	find cost-measurement -type f -name "*.png" -exec ${RM} {} +
+	find cost-measurement -type f -name "*.data" -exec ${RM} {} +
 
 .PHONY: clean-requirements
 clean-requirements:

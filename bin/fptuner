@@ -52,14 +52,6 @@ def main(argv):
     lexer = FPCoreLexer()
     parser = FPCoreParser()
 
-    # Optionally print html header
-    if args.nightly:
-        today = date.today()
-        (Y, m, d) = today.year, today.month, today.day
-        print("<!doctype html>")
-        print("<title>FPTuner Results for {}-{}-{}</title>".format(Y, m, d))
-        print("<body>")
-
     for query_file in args.query_files:
         try:
             with open(query_file, "r") as f:
@@ -144,7 +136,7 @@ def main(argv):
                     for row in rows:
                         print("<tr><td>" + "</td><td>".join(row) + "</td></tr>")
                     print("</table>")
-                    print("<img src/'{}_time.png'>".format(ssa.name))
+                    print("<img src='{}_time.png'>".format(ssa.name))
                 else:
                     print("\t".join(first_header))
                     for row in rows:
@@ -168,7 +160,7 @@ def main(argv):
                     time_contents.append("char* ERRORS[FUNC_COUNT] = {{{}}};".format(",".join(['"'+str(e)+'"' for e in z3_errors])))
                     time_contents.extend(["int main(int argc, char** argv){",
                                           "size_t log2_values = 18;",
-                                          "size_t secs = 1;",
+                                          "size_t secs = 10;",
                                           "size_t runs = 3;",
                                           "if (argc > 1) { log2_values = strtoul(argv[1], NULL, 10); }",
                                           "if (argc > 2) { secs = strtoul(argv[2], NULL, 10); }",
@@ -181,9 +173,9 @@ def main(argv):
                     with open(time_name, "w") as f:
                         f.write("\n".join(time_contents))
                     cfiles = glob.glob("*.c")
-                    destfiles = ["cost-measurement/kerns/{}".format(c) for c in cfiles]
+                    destfiles = [path.join(GIT_DIR, "cost-measurement/kerns/{}".format(c)) for c in cfiles]
                     try:
-                        os.mkdir("cost-measurement/kerns")
+                        os.mkdir(path.join(GIT_DIR,"cost-measurement/kerns"))
                     except FileExistsError:
                         pass
                     for src,dest in zip(cfiles, destfiles):
@@ -208,9 +200,7 @@ def main(argv):
             except BadPreError as e:
                 logger.error("Unable to process precondition: '{}'", e.pre)
 
-                
-    if args.nightly:
-        print("</body>")
+
 
 
 if __name__ == "__main__":
