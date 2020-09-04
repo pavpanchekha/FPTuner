@@ -30,6 +30,11 @@ import shutil
 
 logger = Logger(level=Logger.HIGH, color=Logger.green)
 
+def sanitize_name(name):
+    bad_chars = {":", ".", " "}
+    for c in bad_chars:
+        name = nmae.replace(c, "_")
+    return name
 
 def main(argv):
     args = fptuner_argument_parser.parse_args(argv)
@@ -90,7 +95,8 @@ def main(argv):
                     tr = TunedExpression(ssa, zr)
 
                     if args.cfile:
-                        func_name = "{}_error_{}".format(ssa.name, str(e).replace(".","_").replace("-","m"))
+                        name = sanitize_name(ssa.name)
+                        func_name = "{}_error_{}".format(name, str(e).replace(".","_").replace("-","m"))
                         filename = func_name + ".c"
                         tr.name = func_name
                         content = tr.to_c_function()

@@ -1,4 +1,8 @@
+/bin/*.html
+/cost-measurement/*.data
+/cost-measurement/*.png
 /cost-measurement/bin/
+/cost-measurement/kerns
 /function-generation/*.c
 /function-generation/*.fpt
 /function-generation/*.tmp

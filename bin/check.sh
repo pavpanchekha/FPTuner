@@ -30,6 +30,5 @@ cat <<EOF >> $date.html
 </body>
 EOF
 
-scp $date.html uwplse.org:/var/www/fptuner/
-scp ${SCRIPT_LOCATION}/cost-measurement/*.png $date.html uwplse.org:/var/www/fptuner/
+scp ${SCRIPT_LOCATION}/../cost-measurement/*.png $date.html uwplse.org:/var/www/fptuner/
 

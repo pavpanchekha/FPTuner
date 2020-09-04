@@ -41,15 +41,20 @@ class GelpiaResult:
         "executable": RUST_EXECUTABLE,
     }
 
-    def __init__(self, inputs, expr):
-        # Format inputs, target expression, and set as member
-        # todo: this float cast can loose information
-        lines = ["{} = [{}, {}];".format(name,
-                                         float(Fraction(domain[0].source)),
-                                         float(Fraction(domain[1].source)))
-                 for name, domain in inputs.items()]
-        lines.append(expr.infix_str())
-        self.query = "\n".join(lines)
+    def __init__(self, inputs, expr, raw_query=None):
+        if raw_query is None:
+            # Format inputs, target expression, and set as member
+            # todo: this float cast can loose information
+            lines = ["{} = [{}, {}];".format(name,
+                                             float(Fraction(domain[0].source)),
+                                             float(Fraction(domain[1].source)))
+                     for name, domain in inputs.items()]
+            lines.append(expr.infix_str())
+            self.query = "\n".join(lines)
+
+        else:
+            self.query = raw_query
+
         logger.log("query:\n{}", self.query)
 
         # Run and set results as member

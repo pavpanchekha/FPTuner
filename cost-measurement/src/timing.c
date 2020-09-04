@@ -76,6 +76,7 @@ timer_t start_timer(size_t secs)
   in.it_interval.tv_nsec = 0;
   status = timer_settime(timerid, 0, &in, &out);
   assert(status == 0);
+  UNUSED(status);
 
   return timerid;
 }
@@ -97,6 +98,7 @@ size_t count_unop_calls_fp32(unop_fp32 func, fp32* data, size_t log2_len, size_t
 
   status = timer_delete(timerid);
   assert(status == 0);
+  UNUSED(status);
 
   return calls;
 }
@@ -119,6 +121,7 @@ size_t count_unop_calls_fp64(unop_fp64 func, fp64* data, size_t log2_len, size_t
 
   status = timer_delete(timerid);
   assert(status == 0);
+  UNUSED(status);
 
   return calls;
 }
@@ -142,6 +145,7 @@ size_t count_binop_calls_fp32(binop_fp32 func, fp32* data_1, fp32* data_2,
 
   status = timer_delete(timerid);
   assert(status == 0);
+  UNUSED(status);
 
   return calls;
 }
@@ -165,6 +169,7 @@ size_t count_binop_calls_fp64(binop_fp64 func, fp64* data_1, fp64* data_2,
 
   status = timer_delete(timerid);
   assert(status == 0);
+  UNUSED(status);
 
   return calls;
 }
@@ -188,6 +193,7 @@ size_t count_triop_calls_fp32(triop_fp32 func, fp32* data_1, fp32* data_2, fp32*
 
   status = timer_delete(timerid);
   assert(status == 0);
+  UNUSED(status);
 
   return calls;
 }
@@ -211,6 +217,7 @@ size_t count_triop_calls_fp64(triop_fp64 func, fp64* data_1, fp64* data_2, fp64*
 
   status = timer_delete(timerid);
   assert(status == 0);
+  UNUSED(status);
 
   return calls;
 }
