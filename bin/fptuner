@@ -33,7 +33,7 @@ logger = Logger(level=Logger.HIGH, color=Logger.green)
 def sanitize_name(name):
     bad_chars = {":", ".", " "}
     for c in bad_chars:
-        name = nmae.replace(c, "_")
+        name = name.replace(c, "_")
     return name
 
 def main(argv):
