@@ -123,18 +123,15 @@ def main(argv):
                             res.abs_error = float("nan")
                             row.append("nan")
                             row.append("N/A")
-                            row.append("N/A")
                         else:
                             logger("FPTaylor error bound: {}", res.abs_error)
                             row.append(str(res.abs_error))
-                            row.append(str(res.abs_error <= e))
-                            row.append(str(res.high_second_order))
+                            row.append(str(res.abs_error <= e || res.high_second_order))
                     rows.append(row)
 
                 if args.check:
                     first_header.append("FPTaylorError")
                     first_header.append("FPTaylorCheck")
-                    first_header.append("HighSecondOrder")
 
                 if args.nightly:
                     print("<table>")

@@ -4,6 +4,8 @@ set -e -x
 
 SCRIPT_LOCATION=$(readlink -f $(dirname $0))
 
+rm -f ${SCRIPT_LOCATION}/../cost-measurement/kerns/*.c
+
 date=$(date +%s)
 
 FPTUNER="${SCRIPT_LOCATION}/fptuner --nightly --cfile"
