@@ -126,7 +126,7 @@ def main(argv):
                         else:
                             logger("FPTaylor error bound: {}", res.abs_error)
                             row.append(str(res.abs_error))
-                            row.append(str(res.abs_error <= e || res.high_second_order))
+                            row.append(str(res.abs_error <= e or res.high_second_order))
                     rows.append(row)
 
                 if args.check:

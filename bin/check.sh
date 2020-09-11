@@ -4,7 +4,10 @@ set -e -x
 
 SCRIPT_LOCATION=$(readlink -f $(dirname $0))
 
-rm -f ${SCRIPT_LOCATION}/../cost-measurement/kerns/*.c
+if [ "$(hostname)" = "warfa" ]; then
+    #git clean -dfx
+    echo "Clean"
+fi
 
 date=$(date +%s)
 
@@ -32,5 +35,6 @@ cat <<EOF >> $date.html
 </body>
 EOF
 
-scp ${SCRIPT_LOCATION}/../cost-measurement/*.png $date.html uwplse.org:/var/www/fptuner/
-
+if [ "$(hostname)" = "warfa" ]; then
+    scp ${SCRIPT_LOCATION}/../cost-measurement/*.png $date.html uwplse.org:/var/www/fptuner/
+fi
