@@ -5,8 +5,7 @@ set -e -x
 SCRIPT_LOCATION=$(readlink -f $(dirname $0))
 
 if [ "$(hostname)" = "warfa" ]; then
-    #git clean -dfx
-    echo "Clean"
+    git clean -dfx
 fi
 
 date=$(date +%s)
