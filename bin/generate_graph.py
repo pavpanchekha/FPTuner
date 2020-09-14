@@ -19,16 +19,17 @@ def graph(main_file):
     os.chdir(COST_DIR)
 
     # > make
-    with subprocess.Popen("make", stdout=subprocess.PIPE) as p:
+    with subprocess.Popen("make", stdout=subprocess.PIPE, stderr=subprocess.PIPE) as p:
         raw_out, raw_error = p.communicate()
-        assert(p.returncode == 0, raw_error.decode("utf8"))
+        assert p.returncode == 0, raw_error.decode("utf8")
 
     # > ./bin/<main_file>
     with subprocess.Popen("./bin/{}".format(main_file.rstrip(".c")),
-                          stdout=subprocess.PIPE) as p:
+                          stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE) as p:
         raw_out, raw_error = p.communicate()
         out = raw_out.decode("utf8")
-        assert(p.returncode == 0, raw_error.decode("utf8"))
+        assert p.returncode == 0, raw_error.decode("utf8")
 
     # parse output
     rows = out.splitlines()
