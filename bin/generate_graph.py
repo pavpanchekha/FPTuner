@@ -20,14 +20,15 @@ def graph(main_file):
 
     # > make
     with subprocess.Popen("make", stdout=subprocess.PIPE) as p:
-        p.communicate()
-        assert(p.returncode == 0)
+        raw_out, raw_error = p.communicate()
+        assert(p.returncode == 0, raw_error.decode("utf8"))
 
     # > ./bin/<main_file>
     with subprocess.Popen("./bin/{}".format(main_file.rstrip(".c")),
                           stdout=subprocess.PIPE) as p:
-        raw_out, _ = p.communicate()
+        raw_out, raw_error = p.communicate()
         out = raw_out.decode("utf8")
+        assert(p.returncode == 0, raw_error.decode("utf8"))
 
     # parse output
     rows = out.splitlines()
