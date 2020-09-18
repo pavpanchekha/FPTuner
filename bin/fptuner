@@ -31,7 +31,7 @@ import shutil
 logger = Logger(level=Logger.HIGH, color=Logger.green)
 
 def sanitize_name(name):
-    bad_chars = {":", ".", " "}
+    bad_chars = {".", ":", " ", "-"}
     for c in bad_chars:
         name = name.replace(c, "_")
     return name
@@ -46,9 +46,12 @@ def main(argv):
             if row[0] == "exp"]
     logs = [row[1] for row in all_modifications_ast.OperationTable
             if row[0] == "log"]
+    tans = [row[1] for row in all_modifications_ast.OperationTable
+            if row[0] == "tan"]
     operations = {"sin": sins,
                   "exp": exps,
-                  "log": logs}
+                  "log": logs,
+                  "tan": tans}}
 
     # Setup the search space
     search_space = {"bit_widths": ["fp64"], #args.bit_widths,
@@ -139,14 +142,14 @@ def main(argv):
                     for row in rows:
                         print("<tr><td>" + "</td><td>".join(row) + "</td></tr>")
                     print("</table>")
-                    print("<img src='{}_time.png'>".format(ssa.name))
+                    print("<img src='{}_time.png'>".format(sanitize_name(ssa.name)))
                 else:
                     print("\t".join(first_header))
                     for row in rows:
                         print("\t".join(row))
 
                 if args.cfile:
-                    time_name = "{}_time.c".format(ssa.name)
+                    time_name = "{}_time.c".format(sanitize_name(ssa.name))
                     time_contents = ['#include "timing.h"',
                                      '#include "xmalloc.h"',
                                      '#include <float.h>',
@@ -168,9 +171,11 @@ def main(argv):
                                           "if (argc > 1) { log2_values = strtoul(argv[1], NULL, 10); }",
                                           "if (argc > 2) { secs = strtoul(argv[2], NULL, 10); }",
                                           "if (argc > 3) { runs = strtoul(argv[3], NULL, 10); }",
-                                          "register_performance_handler();",
-                                          "time_{}({},".format(functype, ",".join(["{}_LOW,{}_HIGH".format(n,n) for n in ssa.inputs])),
-                                          "FUNCTIONS, NAMES, ERRORS, FUNC_COUNT, log2_values, runs, secs);"
+                                          "timing_data_fp64* data = time_{}({},".format(functype,
+                                                                                        ",".join(["{}_LOW,{}_HIGH".format(n,n) for n in ssa.inputs])),
+                                          "FUNC_COUNT, FUNCTIONS, NAMES, ERRORS, log2_values, runs, secs);"
+                                          "print_timing_data_fp64(data);",
+                                          "free_timing_data_fp64(data);",
                                           "return 0;",
                                           "}"])
                     with open(time_name, "w") as f:

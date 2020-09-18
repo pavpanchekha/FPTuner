@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import os
 import subprocess
 import sys
+import json
 
 PYTHON_DIR = path.abspath(path.dirname(__file__))
 GIT_DIR = path.split(PYTHON_DIR)[0]
@@ -32,23 +33,17 @@ def graph(main_file):
         assert p.returncode == 0, raw_error.decode("utf8")
 
     # parse output
-    rows = out.splitlines()
-    rows = [row.split("\t") for row in rows]
+    data = json.loads(out)
     averages = list()
     errors = list()
-    secs = None
-    for row in rows:
-        if row[0] in {"", "values", "function"}:
-            continue
-        if row[0] == "secs":
-            secs = int(row[1])
-            continue
-        name = row[0]
-        error = row[1]
-        counts = [int(col) for col in row[2:]]
-        times = [secs/c for c in counts]
-        avg = sum(times) / len(times) * 1e9
-        averages.append(avg)
+    secs = data["secs"]
+    for f in data["functions_data"]:
+        name = f["name"]
+        error = f["error_bound"]
+        counts = f["counts"]
+        avg_time_s = sum(counts) / (len(counts) * secs)
+        avg_time_ns = avg_time_s / 1e9
+        averages.append(avg_time_ns)
         errors.append(float(error))
 
     # dump data
