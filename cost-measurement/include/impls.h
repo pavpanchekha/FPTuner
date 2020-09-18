@@ -6,6 +6,11 @@
 #include "sin.h"
 #include "tan.h"
 
+#include "ord_exp.h"
+
 #include <math.h>
+
+
+
 
 #endif

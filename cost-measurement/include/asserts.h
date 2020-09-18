@@ -56,6 +56,6 @@
 
 #define UNIMPLEMENTED() assert(0)
 
-
+#define assert_zero(x) assert((x) == 0); UNUSED(x);
 
 #endif

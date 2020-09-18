@@ -14,6 +14,15 @@ typedef float fp32;
 STATIC_ASSERT(sizeof(double)*CHAR_BIT == 64, "double must be 64 bits");
 typedef double fp64;
 
+typedef fp32(*unop_fp32)(fp32);
+typedef fp64(*unop_fp64)(fp64);
+
+typedef fp32(*binop_fp32)(fp32, fp32);
+typedef fp64(*binop_fp64)(fp64, fp64);
+
+typedef fp32(*triop_fp32)(fp32, fp32, fp32);
+typedef fp64(*triop_fp64)(fp64, fp64, fp64);
+
 
 
 
