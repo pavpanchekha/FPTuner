@@ -51,7 +51,7 @@ def main(argv):
     operations = {"sin": sins,
                   "exp": exps,
                   "log": logs,
-                  "tan": tans}}
+                  "tan": tans}
 
     # Setup the search space
     search_space = {"bit_widths": ["fp64"], #args.bit_widths,
