@@ -552,7 +552,7 @@ timing_data_fp64* time_quadop_fp64(fp64 low_1, fp64 high_1,
     fill_rand_fp64(low_4, high_4, values, D);
 
     for(size_t func=0; func<funcs; func++) {
-      triop_fp64 f = functions[func];
+      quadop_fp64 f = functions[func];
       size_t calls = 0;
       size_t idx = 0;
 
@@ -609,7 +609,7 @@ timing_data_fp64* time_hexop_fp64(fp64 low_1, fp64 high_1,
     fill_rand_fp64(low_6, high_6, values, F);
 
     for(size_t func=0; func<funcs; func++) {
-      triop_fp64 f = functions[func];
+      hexop_fp64 f = functions[func];
       size_t calls = 0;
       size_t idx = 0;
 
