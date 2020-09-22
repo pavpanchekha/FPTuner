@@ -42,6 +42,7 @@ cat <<EOF >> $date/index.html
 EOF
 
 mv ${SCRIPT_LOCATION}/../cost-measurement/*.png $date
+mv ${SCRIPT_LOCATION}/../cost-measurement/*.data $date
 
 if [ "$(hostname)" = "warfa" ]; then
     scp -r $date uwplse.org:/var/www/fptuner/
