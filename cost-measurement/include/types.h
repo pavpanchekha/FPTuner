@@ -23,6 +23,12 @@ typedef fp64(*binop_fp64)(fp64, fp64);
 typedef fp32(*triop_fp32)(fp32, fp32, fp32);
 typedef fp64(*triop_fp64)(fp64, fp64, fp64);
 
+typedef fp32(*quadop_fp32)(fp32, fp32, fp32, fp32);
+typedef fp64(*quadop_fp64)(fp64, fp64, fp64, fp64);
+
+typedef fp32(*hexop_fp32)(fp32, fp32, fp32, fp32, fp32, fp32);
+typedef fp64(*hexop_fp64)(fp64, fp64, fp64, fp64, fp64, fp64);
+
 
 
 

@@ -343,9 +343,9 @@ timing_data_fp64* time_unop_fp64(fp64 low_1, fp64 high_1,
 
 
 timing_data_fp32* time_binop_fp32(fp32 low_1, fp32 high_1,
-                             fp32 low_2, fp32 high_2,
-                             size_t funcs, binop_fp32* functions, char** names, char** error_bounds,
-                             size_t log2_values, size_t runs, size_t secs)
+                                  fp32 low_2, fp32 high_2,
+                                  size_t funcs, binop_fp32* functions, char** names, char** error_bounds,
+                                  size_t log2_values, size_t runs, size_t secs)
 {
   size_t values = ((size_t) 1) << log2_values;
   fp32* A = (fp32*) xmalloc(sizeof(fp32)*values);
@@ -386,9 +386,9 @@ timing_data_fp32* time_binop_fp32(fp32 low_1, fp32 high_1,
 
 
 timing_data_fp64* time_binop_fp64(fp64 low_1, fp64 high_1,
-                             fp64 low_2, fp64 high_2,
-                             size_t funcs, binop_fp64* functions, char** names, char** error_bounds,
-                             size_t log2_values, size_t runs, size_t secs)
+                                  fp64 low_2, fp64 high_2,
+                                  size_t funcs, binop_fp64* functions, char** names, char** error_bounds,
+                                  size_t log2_values, size_t runs, size_t secs)
 {
   size_t values = ((size_t) 1) << log2_values;
   fp64* A = (fp64*) xmalloc(sizeof(fp64)*values);
@@ -429,10 +429,10 @@ timing_data_fp64* time_binop_fp64(fp64 low_1, fp64 high_1,
 
 
 timing_data_fp32* time_triop_fp32(fp32 low_1, fp32 high_1,
-                             fp32 low_2, fp32 high_2,
-                             fp32 low_3, fp32 high_3,
-                             size_t funcs, triop_fp32* functions, char** names, char** error_bounds,
-                             size_t log2_values, size_t runs, size_t secs)
+                                  fp32 low_2, fp32 high_2,
+                                  fp32 low_3, fp32 high_3,
+                                  size_t funcs, triop_fp32* functions, char** names, char** error_bounds,
+                                  size_t log2_values, size_t runs, size_t secs)
 {
   size_t values = ((size_t) 1) << log2_values;
   fp32* A = (fp32*) xmalloc(sizeof(fp32)*values);
@@ -477,10 +477,10 @@ timing_data_fp32* time_triop_fp32(fp32 low_1, fp32 high_1,
 
 
 timing_data_fp64* time_triop_fp64(fp64 low_1, fp64 high_1,
-                             fp64 low_2, fp64 high_2,
-                             fp64 low_3, fp64 high_3,
-                             size_t funcs, triop_fp64* functions, char** names, char** error_bounds,
-                             size_t log2_values, size_t runs, size_t secs)
+                                  fp64 low_2, fp64 high_2,
+                                  fp64 low_3, fp64 high_3,
+                                  size_t funcs, triop_fp64* functions, char** names, char** error_bounds,
+                                  size_t log2_values, size_t runs, size_t secs)
 {
   size_t values = ((size_t) 1) << log2_values;
   fp64* A = (fp64*) xmalloc(sizeof(fp64)*values);
@@ -509,6 +509,114 @@ timing_data_fp64* time_triop_fp64(fp64 low_1, fp64 high_1,
       timer_t timerid = start_timer(secs);
       while (RUNNING) {
         f(A[idx], B[idx], C[idx]);
+        idx = (idx+1) % values;
+        calls += 1;
+      };
+
+      int status = timer_delete(timerid);
+      assert_zero(status);
+
+      data->data[func].counts[run] = calls;
+    }
+  }
+
+  return data;
+}
+
+
+timing_data_fp64* time_quadop_fp64(fp64 low_1, fp64 high_1,
+                                   fp64 low_2, fp64 high_2,
+                                   fp64 low_3, fp64 high_3,
+                                   fp64 low_4, fp64 high_4,
+                                   size_t funcs, quadop_fp64* functions, char** names, char** error_bounds,
+                                   size_t log2_values, size_t runs, size_t secs)
+{
+  size_t values = ((size_t) 1) << log2_values;
+  fp64* A = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* B = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* C = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* D = (fp64*) xmalloc(sizeof(fp64)*values);
+
+  timing_data_fp64* data = malloc_timing_data_fp64(funcs, names, error_bounds, values, runs, secs, 3);
+  data->lows[0] = low_1;
+  data->lows[1] = low_2;
+  data->lows[2] = low_3;
+  data->highs[0] = high_1;
+  data->highs[1] = high_2;
+  data->highs[2] = high_3;
+
+  for(size_t run=0; run<runs; run++) {
+    fill_rand_fp64(low_1, high_1, values, A);
+    fill_rand_fp64(low_2, high_2, values, B);
+    fill_rand_fp64(low_3, high_3, values, C);
+    fill_rand_fp64(low_4, high_4, values, D);
+
+    for(size_t func=0; func<funcs; func++) {
+      triop_fp64 f = functions[func];
+      size_t calls = 0;
+      size_t idx = 0;
+
+      RUNNING = 1;
+      timer_t timerid = start_timer(secs);
+      while (RUNNING) {
+        f(A[idx], B[idx], C[idx], D[idx]);
+        idx = (idx+1) % values;
+        calls += 1;
+      };
+
+      int status = timer_delete(timerid);
+      assert_zero(status);
+
+      data->data[func].counts[run] = calls;
+    }
+  }
+
+  return data;
+}
+
+
+timing_data_fp64* time_hexop_fp64(fp64 low_1, fp64 high_1,
+                                  fp64 low_2, fp64 high_2,
+                                  fp64 low_3, fp64 high_3,
+                                  fp64 low_4, fp64 high_4,
+                                  fp64 low_5, fp64 high_5,
+                                  fp64 low_6, fp64 high_6,
+                                  size_t funcs, hexop_fp64* functions, char** names, char** error_bounds,
+                                  size_t log2_values, size_t runs, size_t secs)
+{
+  size_t values = ((size_t) 1) << log2_values;
+  fp64* A = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* B = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* C = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* D = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* E = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* F = (fp64*) xmalloc(sizeof(fp64)*values);
+
+  timing_data_fp64* data = malloc_timing_data_fp64(funcs, names, error_bounds, values, runs, secs, 3);
+  data->lows[0] = low_1;
+  data->lows[1] = low_2;
+  data->lows[2] = low_3;
+  data->highs[0] = high_1;
+  data->highs[1] = high_2;
+  data->highs[2] = high_3;
+
+  for(size_t run=0; run<runs; run++) {
+    fill_rand_fp64(low_1, high_1, values, A);
+    fill_rand_fp64(low_2, high_2, values, B);
+    fill_rand_fp64(low_3, high_3, values, C);
+    fill_rand_fp64(low_4, high_4, values, D);
+    fill_rand_fp64(low_5, high_5, values, E);
+    fill_rand_fp64(low_6, high_6, values, F);
+
+    for(size_t func=0; func<funcs; func++) {
+      triop_fp64 f = functions[func];
+      size_t calls = 0;
+      size_t idx = 0;
+
+      RUNNING = 1;
+      timer_t timerid = start_timer(secs);
+      while (RUNNING) {
+        f(A[idx], B[idx], C[idx], D[idx], E[idx], F[idx]);
         idx = (idx+1) % values;
         calls += 1;
       };

@@ -160,7 +160,7 @@ def main(argv):
                         time_contents.append("const fp64 {}_HIGH = {};".format(name, domain[1]))
                     time_contents.extend(["double "+s+";" for s in signatures])
                     time_contents.append("#define FUNC_COUNT ({})".format(len(signatures)))
-                    functype = {1:"unop_fp64", 2:"binop_fp64", 3:"triop_fp64"}[len(ssa.inputs)]
+                    functype = {1:"unop_fp64", 2:"binop_fp64", 3:"triop_fp64", 4:"quadop_fp64", 6:"hexop_fp64"}[len(ssa.inputs)]
                     time_contents.append("{} FUNCTIONS[FUNC_COUNT] = {{{}}};".format(functype, ",".join(names)))
                     time_contents.append("char* NAMES[FUNC_COUNT] = {{{}}};".format(",".join(['"'+n+'"' for n in names])))
                     time_contents.append("char* ERRORS[FUNC_COUNT] = {{{}}};".format(",".join(['"'+str(e)+'"' for e in z3_errors])))

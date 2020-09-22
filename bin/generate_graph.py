@@ -41,7 +41,7 @@ def graph(main_file):
         name = f["name"]
         error = f["error_bound"]
         counts = f["counts"]
-        avg_time_s = sum(counts) / (len(counts) * secs)
+        avg_time_s = (len(counts) * secs) / sum(counts)
         avg_time_ns = avg_time_s / 1e9
         averages.append(avg_time_ns)
         errors.append(float(error))
