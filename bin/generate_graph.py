@@ -28,6 +28,7 @@ def graph(main_file):
     # > ./bin/<main_file>
     command = "taskset -c 0 ./bin/{}".format(main_file.rstrip(".c")),
     with subprocess.Popen(command,
+                          shell=True,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE) as p:
         raw_out, raw_error = p.communicate()
