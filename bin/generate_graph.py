@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import os
 import subprocess
 import sys
+import shlex
 import json
 
 PYTHON_DIR = path.abspath(path.dirname(__file__))
@@ -25,7 +26,8 @@ def graph(main_file):
         assert p.returncode == 0, raw_error.decode("utf8")
 
     # > ./bin/<main_file>
-    with subprocess.Popen("./bin/{}".format(main_file.rstrip(".c")),
+    command = "taskset -c 0 ./bin/{}".format(main_file.rstrip(".c")),
+    with subprocess.Popen(command,
                           stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE) as p:
         raw_out, raw_error = p.communicate()

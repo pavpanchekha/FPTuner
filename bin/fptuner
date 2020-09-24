@@ -121,8 +121,21 @@ def main(argv):
                     if args.check:
                         query = tr.to_fptaylor()
                         res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
-                        if res.abs_error is None:
+                        if res.div_by_zero:
+                            logger.error("FPTaylor thinks division by zero is possible")
+                            row.append("nan")
+                            row.append("DivByZero")
+                        elif res.log_of_non_positive:
+                            logger.error("FPTaylor thinks log of a non positive number is possible")
+                            row.append("nan")
+                            row.append("LogNonPos")
+                        elif res.inf_val:
+                            logger.error("FPTaylor thinks an infinite value is possible")
+                            row.append("nan")
+                            row.append("InfVal")
+                        elif res.abs_error is None:
                             logger.error("FPTaylor did not find an error value")
+                            res.write_file("failed_{}_{}.txt".format(sanitize_name(ssa.name), str(e).replace(".","_").replace("-","m")))
                             res.abs_error = float("nan")
                             row.append("nan")
                             row.append("N/A")

@@ -32,22 +32,49 @@ class FPTaylorResult:
         "--fp-power2-model": "true",
         "--opt": "gelpia",
         "--opt-exact": "true",
-        "--opt-f-rel-tol": "0",
-        "--opt-f-abs-tol": "0",
-        "--opt-x-rel-tol": "0",
-        "--opt-x-abs-tol": "0",
-        "--opt-max-iters": "0",
-        "--opt-timeout": "0",
+        "--opt-f-rel-tol": "1e-100",
+        "--opt-f-abs-tol": "1e-100",
+        "--opt-x-rel-tol": "1e-100",
+        "--opt-x-abs-tol": "1e-100",
+        "--opt-max-iters": "4000000000",
+        "--opt-timeout": "60",
+    }
+
+    BACKUP_CONFIG = {
+        "--abs-error": "true",
+        "--fp-power2-model": "true",
+        "--opt": "bb",
+        "--opt-exact": "true",
+        "--opt-f-rel-tol": "1e-100",
+        "--opt-f-abs-tol": "1e-100",
+        "--opt-x-rel-tol": "1e-100",
+        "--opt-x-abs-tol": "1e-100",
+        "--opt-max-iters": "4000000000",
+        "--opt-timeout": "60",
     }
 
     def __init__(self, query, config=None):
         logger.llog(logger.HIGH, "Query:\n{}", query)
+        self.file_log = ["Query:\n{}".format(query)]
         self.abs_error = None
+        self.rel_error = None
         self.high_second_order = None
+        self.div_by_zero = None
+        self.log_of_non_positive = None
+        self.inf_val = None
         self.query = query
         self.config = config or FPTaylorResult.ERROR_FORM_CONFIG
         self._run()
         self._extract_fptaylor_forms()
+        if self.abs_error is None and self.config == FPTaylorResult.CHECK_CONFIG:
+            self.config = config or FPTaylorResult.BACKUP_CONFIG
+            self._run()
+            self._extract_fptaylor_forms()
+
+    def write_file(self, filename):
+        contents = "\n".join(self.file_log)
+        with open(filename, 'w') as f:
+            f.write(contents)
 
     def _run(self):
         # Open a tempfile we can hand to FPTaylor.
@@ -62,6 +89,7 @@ class FPTaylorResult:
             flags = " ".join([k+" "+v for k, v in self.config.items()])
             command = "fptaylor {} {}".format(flags, f.name)
             logger.llog(Logger.HIGH, "Command: {}", command)
+            self.file_log.append("Command: {}".format(command))
 
             # Call FPTaylor
             with subprocess.Popen(shlex.split(command),
@@ -84,6 +112,8 @@ class FPTaylorResult:
                                        self.retcode)
 
         logger.llog(Logger.HIGH, "stdout:\n{}", self.out.strip())
+        self.file_log.append("stdout:\n{}".format(self.out.strip()))
+        self.file_log.append("stderr:\n{}".format(self.err.strip()))
 
         # Grab when FPTaylor warns about second order error
         err_lines = self.err.splitlines()
@@ -93,6 +123,15 @@ class FPTaylorResult:
         err_lines = [line for line in err_lines if line.strip() != ""]
         err_lines = [line for line in err_lines if high_msg not in line]
         err_lines = [line for line in err_lines if help_msg not in line]
+
+        div_msg = "Potential exception detected: Division by zero at:"
+        self.div_by_zero = any([div_msg in line for line in err_lines])
+
+        log_msg = "Potential exception detected: Log of non-positive number at:"
+        self.log_of_non_positive = any([log_msg in line for line in err_lines])
+
+        inf_msg = "**ERROR**: num_of_float: inf"
+        self.inf_val = any([inf_msg in line for line in err_lines])
 
         # Error when FPTaylor complains about infinity and domain errors
         # todo: handle when this occurs
