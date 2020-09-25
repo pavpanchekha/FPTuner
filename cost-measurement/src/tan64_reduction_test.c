@@ -15,7 +15,7 @@
 
 
 
-const fp64 CYCLES = 100;
+#define CYCLES (100)
 const fp64 LOW = -CYCLES*M_PI;
 const fp64 HIGH = CYCLES*M_PI;
 

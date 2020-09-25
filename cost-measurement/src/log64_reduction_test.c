@@ -17,7 +17,7 @@
 
 
 const fp64 LOW = 1e-16;
-const fp64 HIGH = 628;;
+const fp64 HIGH = 628;
 
 #define FUNC_COUNT (22)
 
