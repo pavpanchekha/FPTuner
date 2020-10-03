@@ -4,6 +4,7 @@
 /cost-measurement/bin/
 /cost-measurement/kerns
 /function-generation/*.c
+/function-generation/*.h
 /function-generation/*.fpt
 /function-generation/*.tmp
 /requirements/FPTaylor/

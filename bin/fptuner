@@ -14,7 +14,7 @@ import check_requirements
 
 from datetime import date
 from fpcore_logging import Logger
-from exceptions import DomainError, UnsupportedError, NoPreError, BadPreError
+from exceptions import DomainError, UnsupportedError, NoPreError, BadPreError, FPTunerError
 from fpcore_lexer import FPCoreLexer
 from fpcore_parser import FPCoreParser
 from z3_result import Z3Result
@@ -31,7 +31,7 @@ import shutil
 logger = Logger(level=Logger.HIGH, color=Logger.green)
 
 def sanitize_name(name):
-    bad_chars = {".", ":", " ", "-"}
+    bad_chars = {".", ":", " ", "-", ",", "$"}
     for c in bad_chars:
         name = name.replace(c, "_")
     return name
@@ -93,7 +93,11 @@ def main(argv):
                 rows = []
                 z3_errors = []
                 for e in args.error:
-                    zr = Z3Result(ssa, e)
+                    try:
+                        zr = Z3Result(ssa, e)
+                    except FPTunerError:
+                        ## If we can't get this error bound, all tighter ones will fail
+                        break
                     z3_errors.append(str(float(zr.model["total_error"].as_fraction())))
                     tr = TunedExpression(ssa, zr)
 
@@ -173,7 +177,7 @@ def main(argv):
                         time_contents.append("const fp64 {}_HIGH = {};".format(name, domain[1]))
                     time_contents.extend(["double "+s+";" for s in signatures])
                     time_contents.append("#define FUNC_COUNT ({})".format(len(signatures)))
-                    functype = {1:"unop_fp64", 2:"binop_fp64", 3:"triop_fp64", 4:"quadop_fp64", 6:"hexop_fp64"}[len(ssa.inputs)]
+                    functype = {1:"unop_fp64", 2:"binop_fp64", 3:"triop_fp64", 4:"quadop_fp64", 5:"quintop_fp64", 6:"hexop_fp64"}[len(ssa.inputs)]
                     time_contents.append("{} FUNCTIONS[FUNC_COUNT] = {{{}}};".format(functype, ",".join(names)))
                     time_contents.append("char* NAMES[FUNC_COUNT] = {{{}}};".format(",".join(['"'+n+'"' for n in names])))
                     time_contents.append("char* ERRORS[FUNC_COUNT] = {{{}}};".format(",".join(['"'+str(e)+'"' for e in z3_errors])))

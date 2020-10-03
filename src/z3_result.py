@@ -170,8 +170,6 @@ class Z3Result:
             gr = GelpiaResult(self.ssa.inputs, arg.expand(self.ssa))
             domain = [gr.min_lower, gr.max_upper]
             op = self.ssa.definitions[name].op
-            if op == "exp" and (domain[0] < 0.0 or domain[1] > 0.61):
-                logger.warning("Domain: {}", domain)
             all_ops = set(self.ssa.search_space["operations"][op])
             mapped_ops = [(row[1], row[4]) for row
                           in all_modifications_ast.OperationTable

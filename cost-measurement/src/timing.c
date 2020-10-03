@@ -537,13 +537,15 @@ timing_data_fp64* time_quadop_fp64(fp64 low_1, fp64 high_1,
   fp64* C = (fp64*) xmalloc(sizeof(fp64)*values);
   fp64* D = (fp64*) xmalloc(sizeof(fp64)*values);
 
-  timing_data_fp64* data = malloc_timing_data_fp64(funcs, names, error_bounds, values, runs, secs, 3);
+  timing_data_fp64* data = malloc_timing_data_fp64(funcs, names, error_bounds, values, runs, secs, 4);
   data->lows[0] = low_1;
   data->lows[1] = low_2;
   data->lows[2] = low_3;
+    data->lows[3] = low_4;
   data->highs[0] = high_1;
   data->highs[1] = high_2;
   data->highs[2] = high_3;
+    data->highs[3] = high_4;
 
   for(size_t run=0; run<runs; run++) {
     fill_rand_fp64(low_1, high_1, values, A);
@@ -575,6 +577,63 @@ timing_data_fp64* time_quadop_fp64(fp64 low_1, fp64 high_1,
 }
 
 
+timing_data_fp64* time_quintop_fp64(fp64 low_1, fp64 high_1,
+                                    fp64 low_2, fp64 high_2,
+                                    fp64 low_3, fp64 high_3,
+                                    fp64 low_4, fp64 high_4,
+                                    fp64 low_5, fp64 high_5,
+                                    size_t funcs, quintop_fp64* functions, char** names, char** error_bounds,
+                                    size_t log2_values, size_t runs, size_t secs)
+{
+  size_t values = ((size_t) 1) << log2_values;
+  fp64* A = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* B = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* C = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* D = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* E = (fp64*) xmalloc(sizeof(fp64)*values);
+
+  timing_data_fp64* data = malloc_timing_data_fp64(funcs, names, error_bounds, values, runs, secs, 5);
+  data->lows[0] = low_1;
+  data->lows[1] = low_2;
+  data->lows[2] = low_3;
+  data->lows[2] = low_4;
+  data->lows[4] = low_5;
+  data->highs[0] = high_1;
+  data->highs[1] = high_2;
+  data->highs[2] = high_3;
+  data->highs[3] = high_4;
+  data->highs[4] = high_5;
+
+  for(size_t run=0; run<runs; run++) {
+    fill_rand_fp64(low_1, high_1, values, A);
+    fill_rand_fp64(low_2, high_2, values, B);
+    fill_rand_fp64(low_3, high_3, values, C);
+    fill_rand_fp64(low_4, high_4, values, D);
+    fill_rand_fp64(low_5, high_5, values, E);
+
+    for(size_t func=0; func<funcs; func++) {
+      quintop_fp64 f = functions[func];
+      size_t calls = 0;
+      size_t idx = 0;
+
+      RUNNING = 1;
+      timer_t timerid = start_timer(secs);
+      while (RUNNING) {
+        f(A[idx], B[idx], C[idx], D[idx], E[idx]);
+        idx = (idx+1) % values;
+        calls += 1;
+      };
+
+      int status = timer_delete(timerid);
+      assert_zero(status);
+
+      data->data[func].counts[run] = calls;
+    }
+  }
+
+  return data;
+}
+
 timing_data_fp64* time_hexop_fp64(fp64 low_1, fp64 high_1,
                                   fp64 low_2, fp64 high_2,
                                   fp64 low_3, fp64 high_3,
@@ -592,13 +651,19 @@ timing_data_fp64* time_hexop_fp64(fp64 low_1, fp64 high_1,
   fp64* E = (fp64*) xmalloc(sizeof(fp64)*values);
   fp64* F = (fp64*) xmalloc(sizeof(fp64)*values);
 
-  timing_data_fp64* data = malloc_timing_data_fp64(funcs, names, error_bounds, values, runs, secs, 3);
+  timing_data_fp64* data = malloc_timing_data_fp64(funcs, names, error_bounds, values, runs, secs, 6);
   data->lows[0] = low_1;
   data->lows[1] = low_2;
   data->lows[2] = low_3;
+  data->lows[3] = low_4;
+  data->lows[4] = low_5;
+  data->lows[5] = low_6;
   data->highs[0] = high_1;
   data->highs[1] = high_2;
   data->highs[2] = high_3;
+  data->highs[3] = high_4;
+  data->highs[4] = high_5;
+  data->highs[5] = high_6;
 
   for(size_t run=0; run<runs; run++) {
     fill_rand_fp64(low_1, high_1, values, A);
@@ -617,6 +682,79 @@ timing_data_fp64* time_hexop_fp64(fp64 low_1, fp64 high_1,
       timer_t timerid = start_timer(secs);
       while (RUNNING) {
         f(A[idx], B[idx], C[idx], D[idx], E[idx], F[idx]);
+        idx = (idx+1) % values;
+        calls += 1;
+      };
+
+      int status = timer_delete(timerid);
+      assert_zero(status);
+
+      data->data[func].counts[run] = calls;
+    }
+  }
+
+  return data;
+}
+
+
+timing_data_fp64* time_octop_fp64(fp64 low_1, fp64 high_1,
+                                  fp64 low_2, fp64 high_2,
+                                  fp64 low_3, fp64 high_3,
+                                  fp64 low_4, fp64 high_4,
+                                  fp64 low_5, fp64 high_5,
+                                  fp64 low_6, fp64 high_6,
+                                  fp64 low_7, fp64 high_7,
+                                  fp64 low_8, fp64 high_8,
+                                  size_t funcs, octop_fp64* functions, char** names, char** error_bounds,
+                                  size_t log2_values, size_t runs, size_t secs)
+{
+  size_t values = ((size_t) 1) << log2_values;
+  fp64* A = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* B = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* C = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* D = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* E = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* F = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* G = (fp64*) xmalloc(sizeof(fp64)*values);
+  fp64* H = (fp64*) xmalloc(sizeof(fp64)*values);
+
+  timing_data_fp64* data = malloc_timing_data_fp64(funcs, names, error_bounds, values, runs, secs, 8);
+  data->lows[0] = low_1;
+  data->lows[1] = low_2;
+  data->lows[2] = low_3;
+  data->lows[3] = low_4;
+  data->lows[4] = low_5;
+  data->lows[5] = low_6;
+  data->lows[6] = low_7;
+  data->lows[7] = low_8;
+  data->highs[0] = high_1;
+  data->highs[1] = high_2;
+  data->highs[2] = high_3;
+  data->highs[3] = high_4;
+  data->highs[4] = high_5;
+  data->highs[5] = high_6;
+  data->highs[6] = high_7;
+  data->highs[7] = high_8;
+
+  for(size_t run=0; run<runs; run++) {
+    fill_rand_fp64(low_1, high_1, values, A);
+    fill_rand_fp64(low_2, high_2, values, B);
+    fill_rand_fp64(low_3, high_3, values, C);
+    fill_rand_fp64(low_4, high_4, values, D);
+    fill_rand_fp64(low_5, high_5, values, E);
+    fill_rand_fp64(low_6, high_6, values, F);
+    fill_rand_fp64(low_7, high_7, values, G);
+    fill_rand_fp64(low_8, high_8, values, H);
+
+    for(size_t func=0; func<funcs; func++) {
+      octop_fp64 f = functions[func];
+      size_t calls = 0;
+      size_t idx = 0;
+
+      RUNNING = 1;
+      timer_t timerid = start_timer(secs);
+      while (RUNNING) {
+        f(A[idx], B[idx], C[idx], D[idx], E[idx], F[idx], G[idx], H[idx]);
         idx = (idx+1) % values;
         calls += 1;
       };

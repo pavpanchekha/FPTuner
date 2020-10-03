@@ -10,28 +10,80 @@ date=$(date +%s)
 
 FPTUNER="${SCRIPT_LOCATION}/fptuner --nightly --cfile"
 
+
+run ()
+{
+    ${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/$1 -e ${@:2} | tee -a $date/index.html
+    echo -e "\n\n\n\n"
+}
+
 mkdir $date
 cat <<EOF > $date/index.html
 <!doctype html>
 <title>FPTuner Results for $(date +%Y-%m-%d)</title>
 <body>
 EOF
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/azimuth.fpcore -e 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/complex_sine_and_cosine.fpcore  -e 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/exp1x.fpcore  -e 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/exp1x_log.fpcore  -e 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/hartman3.fpcore -e 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/hartman6.fpcore -e 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/i6.fpcore -e 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/logexp2.fpcore  -e 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 1e-14 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/logexp.fpcore  -e 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 1e-14 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/nmse_example_3_7.fpcore  -e 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/nmse_problem_3_3_7.fpcore  -e 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/nmse_problem_3_4_2.fpcore  -e 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/nmse_problem_3_4_4.fpcore  -e 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/nmse_section_3_11.fpcore  -e 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 1e-14 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/sphere.fpcore -e 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 | tee -a $date/index.html
-${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/Statistics_Distribution_Poisson_Internal_probability_from_math_functions_0_1_5_2.fpcore  -e 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 | tee -a $date/index.html
+
+# run azimuth.fpcore 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
+# run complex_sine_and_cosine.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
+# run exp1x.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13
+# run exp1x_log.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13
+# run hartman3.fpcore 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
+# run hartman6.fpcore 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
+# run i6.fpcore 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
+# run logexp2.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 1e-14
+# run logexp.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 1e-14
+# run nmse_example_3_7.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
+# run nmse_problem_3_3_7.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
+# run nmse_problem_3_4_2.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8
+# run nmse_problem_3_4_4.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13
+# run nmse_section_3_11.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 1e-14
+# run sphere.fpcore 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
+# run Statistics_Distribution_Poisson_Internal_probability_from_math_functions_0_1_5_2.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9
+
+DECIMATION=( 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 1e-14 )
+
+run azimuth.fpcore ${DECIMATION[@]}
+run complex_sine_and_cosine.fpcore ${DECIMATION[@]}
+run Data_HyperLogLog_Type_size_from_hyperloglog_0_3_4_A.fpcore ${DECIMATION[@]}
+run Data_Number_Erf_dmerfcx_from_erf_2_0_0_0.fpcore ${DECIMATION[@]}
+run Data_Random_Distribution_Normal_normalF_from_random_fu_0_2_6_2.fpcore ${DECIMATION[@]}
+run Diagrams_ThreeD_Transform_aboutX_from_diagrams_lib_1_3_0_3_A.fpcore ${DECIMATION[@]}
+run Diagrams_ThreeD_Transform_aboutX_from_diagrams_lib_1_3_0_3_B.fpcore ${DECIMATION[@]}
+run Diagrams_ThreeD_Transform_aboutY_from_diagrams_lib_1_3_0_3.fpcore ${DECIMATION[@]}
+run Diagrams_TwoD_Path_Metafont_Internal_hobbyF_from_diagrams_contrib_1_3_0_5.fpcore ${DECIMATION[@]}
+run exp1x_32.fpcore ${DECIMATION[@]}
+run exp1x.fpcore ${DECIMATION[@]}
+run exp1x_log.fpcore ${DECIMATION[@]}
+run hartman3.fpcore ${DECIMATION[@]}
+run hartman6.fpcore ${DECIMATION[@]}
+run i6.fpcore ${DECIMATION[@]}
+run Linear_Quaternion_cexp_from_linear_1_19_1_3.fpcore ${DECIMATION[@]}
+run logexp2.fpcore ${DECIMATION[@]}
+run logexp.fpcore ${DECIMATION[@]}
+run nmse_example_3_10.fpcore ${DECIMATION[@]}
+run nmse_example_3_3.fpcore ${DECIMATION[@]}
+run nmse_example_3_4.fpcore ${DECIMATION[@]}
+run nmse_example_3_7.fpcore ${DECIMATION[@]}
+run nmse_example_3_8.fpcore ${DECIMATION[@]}
+run nmse_problem_3_3_2.fpcore ${DECIMATION[@]}
+run nmse_problem_3_3_6.fpcore ${DECIMATION[@]}
+run nmse_problem_3_3_7.fpcore ${DECIMATION[@]}
+run nmse_problem_3_4_2.fpcore ${DECIMATION[@]}
+run nmse_problem_3_4_4.fpcore ${DECIMATION[@]}
+run nmse_section_3_11.fpcore ${DECIMATION[@]}
+run nmse_section_3_5.fpcore ${DECIMATION[@]}
+run Numeric_SpecFunctions_invIncompleteBetaWorker_from_math_functions_0_1_5_2_B.fpcore ${DECIMATION[@]}
+run Numeric_SpecFunctions_logBeta_from_math_functions_0_1_5_2_A.fpcore ${DECIMATION[@]}
+run Numeric_SpecFunctions_logBeta_from_math_functions_0_1_5_2_B.fpcore ${DECIMATION[@]}
+run Numeric_SpecFunctions_logGammaL_from_math_functions_0_1_5_2.fpcore ${DECIMATION[@]}
+run Numeric_SpecFunctions_slogFactorial_from_math_functions_0_1_5_2_B.fpcore ${DECIMATION[@]}
+run Numeric_SpecFunctions_stirlingError_from_math_functions_0_1_5_2.fpcore ${DECIMATION[@]}
+run sphere.fpcore ${DECIMATION[@]}
+run Statistics_Distribution_Beta_cdensity_from_math_functions_0_1_5_2.fpcore ${DECIMATION[@]}
+run Statistics_Distribution_Binomial_directEntropy_from_math_functions_0_1_5_2.fpcore ${DECIMATION[@]}
+run Statistics_Distribution_Poisson_clogProbability_from_math_functions_0_1_5_2.fpcore ${DECIMATION[@]}
+run Statistics_Distribution_Poisson_Internal_probability_from_math_functions_0_1_5_2.fpcore ${DECIMATION[@]}
 
 cat <<EOF >> $date/index.html
 </body>

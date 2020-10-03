@@ -82,11 +82,30 @@ timing_data_fp64* time_quadop_fp64(fp64 low_1, fp64 high_1,
                                    size_t count, quadop_fp64* functions, char** names, char** error_bounds,
                                    size_t log2_values, size_t runs, size_t secs);
 
+timing_data_fp64* time_quintop_fp64(fp64 low_1, fp64 high_1,
+                                    fp64 low_2, fp64 high_2,
+                                    fp64 low_3, fp64 high_3,
+                                    fp64 low_4, fp64 high_4,
+                                    fp64 low_5, fp64 high_5,
+                                    size_t count, quintop_fp64* functions, char** names, char** error_bounds,
+                                    size_t log2_values, size_t runs, size_t secs);
+
 timing_data_fp64* time_hexop_fp64(fp64 low_1, fp64 high_1,
-                                   fp64 low_2, fp64 high_2,
-                                   fp64 low_3, fp64 high_3,
-                                   fp64 low_4, fp64 high_4,
-                                   fp64 low_5, fp64 high_5,
-                                   fp64 low_6, fp64 high_6,
-                                   size_t count, hexop_fp64* functions, char** names, char** error_bounds,
-                                   size_t log2_values, size_t runs, size_t secs);
+                                  fp64 low_2, fp64 high_2,
+                                  fp64 low_3, fp64 high_3,
+                                  fp64 low_4, fp64 high_4,
+                                  fp64 low_5, fp64 high_5,
+                                  fp64 low_6, fp64 high_6,
+                                  size_t count, hexop_fp64* functions, char** names, char** error_bounds,
+                                  size_t log2_values, size_t runs, size_t secs);
+
+timing_data_fp64* time_octop_fp64(fp64 low_1, fp64 high_1,
+                                  fp64 low_2, fp64 high_2,
+                                  fp64 low_3, fp64 high_3,
+                                  fp64 low_4, fp64 high_4,
+                                  fp64 low_5, fp64 high_5,
+                                  fp64 low_6, fp64 high_6,
+                                  fp64 low_7, fp64 high_7,
+                                  fp64 low_8, fp64 high_8,
+                                  size_t count, octop_fp64* functions, char** names, char** error_bounds,
+                                  size_t log2_values, size_t runs, size_t secs);
