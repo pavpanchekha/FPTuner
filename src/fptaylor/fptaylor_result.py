@@ -25,6 +25,22 @@ class FPTaylorResult:
         "--unique-indices": "true",
     }
 
+    BOUNDS_CONFIG = {
+        "--abs-error": "false",
+        "--rel-error": "false",
+        "--find-bounds": "true",
+        "--fp-power2-model": "true",
+        "--opt": "gelpia",
+        "--opt-exact": "true",
+        "--opt-f-rel-tol": "1e-100",
+        "--opt-f-abs-tol": "1e-100",
+        "--opt-x-rel-tol": "1e-100",
+        "--opt-x-abs-tol": "1e-100",
+        "--opt-max-iters": "4000000000",
+        "--opt-timeout": "60",
+        "--intermediate-opt": "true",
+    }
+
     # Default configuration for FPTaylor when being used to check answers given
     # by FPTuner. Try for the best answer possible.
     CHECK_CONFIG = {
@@ -38,6 +54,7 @@ class FPTaylorResult:
         "--opt-x-abs-tol": "1e-100",
         "--opt-max-iters": "4000000000",
         "--opt-timeout": "60",
+        "--intermediate-opt": "true",
     }
 
     BACKUP_CONFIG = {
@@ -51,17 +68,20 @@ class FPTaylorResult:
         "--opt-x-abs-tol": "1e-100",
         "--opt-max-iters": "4000000000",
         "--opt-timeout": "60",
+        "--intermediate-opt": "true",
     }
 
     def __init__(self, query, config=None):
         logger.llog(logger.HIGH, "Query:\n{}", query)
         self.file_log = ["Query:\n{}".format(query)]
+        self.second_order = 0.0
         self.abs_error = None
         self.rel_error = None
         self.high_second_order = None
         self.div_by_zero = None
         self.log_of_non_positive = None
         self.inf_val = None
+        self.bounds = None
         self.query = query
         self.config = config or FPTaylorResult.ERROR_FORM_CONFIG
         self._run()
@@ -117,10 +137,14 @@ class FPTaylorResult:
 
         # Grab when FPTaylor warns about second order error
         err_lines = self.err.splitlines()
-        high_msg = "**WARNING**: Large second-order error:"
-        help_msg = "**WARNING**: Try intermediate-opt"
-        self.high_second_order = any([high_msg in line for line in err_lines])
         err_lines = [line for line in err_lines if line.strip() != ""]
+
+        high_msg = "**WARNING**: Large second-order error:"
+        self.high_second_order = any([high_msg in line for line in err_lines])
+        if self.high_second_order:
+            logger.warning("Large second order error:\n{}", self.file_log)
+
+        help_msg = "**WARNING**: Try intermediate-opt"
         err_lines = [line for line in err_lines if high_msg not in line]
         err_lines = [line for line in err_lines if help_msg not in line]
 
@@ -204,13 +228,25 @@ class FPTaylorResult:
                 continue
 
             if state == "capture error":
-                first = "Absolute error (exact):"
-                if line.startswith(first):
-                    self.abs_error = float(line[len(first):])
+                zeroth = "total2:"
+                if lines.startswith(zeroth):
+                    self.second_order = float(line[len(zeroth):])
                     continue
-                second = "Relative error (exact):"
+                first = "Bounds (floating-point):"
+                if line.startswith(first):
+                    raw_bounds = line[len(first):]
+                    raw_lower, raw_upper = tuple(raw_bounds.split(", "))
+                    lower = float(raw_lower[2:])
+                    upper = float(raw_upper[:-1])
+                    self.bounds = lower, upper
+                    continue
+                second = "Absolute error (exact):"
                 if line.startswith(second):
-                    self.rel_error = float(line[len(second):])
+                    self.abs_error = float(line[len(second):])
+                    continue
+                third = "Relative error (exact):"
+                if line.startswith(third):
+                    self.rel_error = float(line[len(third):])
                     break
                 continue
 
