@@ -229,8 +229,8 @@ class FPTaylorResult:
 
             if state == "capture error":
                 zeroth = "total2:"
-                if lines.startswith(zeroth):
-                    self.second_order = float(line[len(zeroth):])
+                if line.startswith(zeroth):
+                    self.second_order = float(line[len(zeroth):].split()[0])
                     continue
                 first = "Bounds (floating-point):"
                 if line.startswith(first):
