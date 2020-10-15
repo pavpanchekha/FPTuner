@@ -8,6 +8,7 @@ from gelpia_result import GelpiaResult
 import ast_modifications.all_modifications_ast as all_modifications_ast
 
 import fractions
+import math
 import z3
 
 logger = Logger(level=Logger.HIGH, color=Logger.magenta)
