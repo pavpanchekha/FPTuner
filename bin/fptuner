@@ -28,13 +28,85 @@ import os
 import glob
 import shutil
 
-logger = Logger(level=Logger.HIGH, color=Logger.green)
+logger = Logger(level=Logger.LOW, color=Logger.green)
 
 def sanitize_name(name):
     bad_chars = {".", ":", " ", "-", ",", "$"}
     for c in bad_chars:
         name = name.replace(c, "_")
     return name
+
+def try_error_bound(e, args, ssa, names, signatures, rows, first_header):
+    # Iterate untill all checks pass
+    for error_bound in [e/(2**i) for i in range(1000)]:
+        print("trying: {}".format(error_bound))
+        # 1. Tune to ther error bound
+        try:
+            zr = Z3Result(ssa, error_bound)
+        except FPTunerError:
+            ## If we can't get this error bound, all tighter ones will fail
+            logger.error("Unable to satisfy error bound")
+            return None, None
+        tr = TunedExpression(ssa, zr)
+
+        # 2. Check that second order error is preserved
+        print("Checking 2nd order error")
+        query = tr.to_fptaylor()
+        res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
+        if res.div_by_zero or res.log_of_non_positive or res.inf_val:
+            logger("FPTaylor thinks exceptional circumstances are possible")
+            logger("Retrying with lower bound")
+            continue
+        elif res.abs_error is None:
+            logger("FPTaylor did not find an error value")
+            logger("Retrying with lower bound")
+            continue
+        elif res.abs_error > e:
+            logger("FPTaylor error bound: {}", res.abs_error)
+            logger("FPTaylor second order error: {}", res.second_order)
+            logger("Retrying with lower bound")
+            continue
+
+        # 3. Check that domains are still valid
+        print("Checking domains")
+        valid = tr.check_domains()
+        if not valid:
+            logger("Domains are not sound")
+            logger("Retrying with lower bound")
+            continue
+        else:
+            break
+
+    # Generate c file
+    if args.cfile:
+        name = sanitize_name(ssa.name)
+        func_name = "{}_error_{}".format(name, str(e).replace(".","_").replace("-","m"))
+        filename = func_name + ".c"
+        tr.name = func_name
+        content = tr.to_c_function()
+        names.append(func_name)
+        signatures.append(tr.signature)
+        with open(filename, "w") as f:
+            f.write('#include "impls.h"\n\n')
+            f.write(content)
+
+    # Add to data rows
+    header, row = tr.tsv()
+
+    if first_header is None:
+        first_header = header
+    elif first_header != header:
+        logger.error("Header mismatch: \n{} \n{}",
+                     first_header, header)
+        sys.exit(1)
+
+    row.append(str(res.abs_error))
+    rows.append(row)
+
+    return header, res.abs_error
+
+
+
 
 def main(argv):
     args = fptuner_argument_parser.parse_args(argv)
@@ -93,65 +165,11 @@ def main(argv):
                 rows = []
                 z3_errors = []
                 for e in args.error:
-                    try:
-                        zr = Z3Result(ssa, e)
-                    except FPTunerError:
-                        ## If we can't get this error bound, all tighter ones will fail
-                        break
-                    z3_errors.append(str(float(zr.model["total_error"].as_fraction())))
-                    tr = TunedExpression(ssa, zr)
-
-                    if args.cfile:
-                        name = sanitize_name(ssa.name)
-                        func_name = "{}_error_{}".format(name, str(e).replace(".","_").replace("-","m"))
-                        filename = func_name + ".c"
-                        tr.name = func_name
-                        content = tr.to_c_function()
-                        names.append(func_name)
-                        signatures.append(tr.signature)
-                        with open(filename, "w") as f:
-                            f.write('#include "impls.h"\n\n')
-                            f.write(content)
-
-                    header, row = tr.tsv()
-
+                    header, achieved_error = try_error_bound(e, args, ssa, names, signatures, rows, first_header)
                     if first_header is None:
                         first_header = header
-                    elif first_header != header:
-                        logger.error("Header mismatch: \n{} \n{}",
-                                     first_header, header)
-                        sys.exit(1)
-
-                    if args.check:
-                        query = tr.to_fptaylor()
-                        res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
-                        if res.div_by_zero:
-                            logger.error("FPTaylor thinks division by zero is possible")
-                            row.append("nan")
-                            row.append("DivByZero")
-                        elif res.log_of_non_positive:
-                            logger.error("FPTaylor thinks log of a non positive number is possible")
-                            row.append("nan")
-                            row.append("LogNonPos")
-                        elif res.inf_val:
-                            logger.error("FPTaylor thinks an infinite value is possible")
-                            row.append("nan")
-                            row.append("InfVal")
-                        elif res.abs_error is None:
-                            logger.error("FPTaylor did not find an error value")
-                            res.write_file("failed_{}_{}.txt".format(sanitize_name(ssa.name), str(e).replace(".","_").replace("-","m")))
-                            res.abs_error = float("nan")
-                            row.append("nan")
-                            row.append("N/A")
-                        else:
-                            logger("FPTaylor error bound: {}", res.abs_error)
-                            row.append(str(res.abs_error))
-                            row.append(str(res.abs_error-res.second_order <= e))
-                    rows.append(row)
-
-                if args.check:
-                    first_header.append("FPTaylorError")
-                    first_header.append("FPTaylorCheck")
+                    if achieved_error is None:
+                        break
 
                 if args.nightly:
                     print("<table>")

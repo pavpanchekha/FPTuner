@@ -190,6 +190,8 @@ OperationTable = [
     # ("tan", "tan",          "tan",                                       13, [-inf, inf]),
 ]
 
+Implementations = [row[1] for row in OperationTable]
+ImplToDomain = dict([(row[1], row[4]) for row in OperationTable])
 OperationToFPTaylor = dict([(row[1],row[2]) for row in OperationTable])
 FPTaylorToOperation = dict([(row[2],row[1]) for row in OperationTable])
 OperationToCost = dict([(row[1],row[3]) for row in OperationTable])

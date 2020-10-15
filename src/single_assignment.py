@@ -64,7 +64,7 @@ class SingleAssignment:
                 if key == "default":
                     lines.append("        {} => {}".format(key, form))
                     continue
-                lines.append("        {} => {}".format(key[1], form))
+                lines.append("        {} => {}".format(key, form))
 
         return lines
 
@@ -264,3 +264,4 @@ class SingleAssignment:
         for name, forms in self.fptaylor_forms.items():
             for key, form in forms.items():
                 form.abs_maximize(self.inputs, memoized)
+        #print(str(self))

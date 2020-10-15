@@ -141,8 +141,6 @@ class FPTaylorResult:
 
         high_msg = "**WARNING**: Large second-order error:"
         self.high_second_order = any([high_msg in line for line in err_lines])
-        if self.high_second_order:
-            logger.warning("Large second order error:\n{}", self.file_log)
 
         help_msg = "**WARNING**: Try intermediate-opt"
         err_lines = [line for line in err_lines if high_msg not in line]
@@ -240,14 +238,24 @@ class FPTaylorResult:
                     upper = float(raw_upper[:-1])
                     self.bounds = lower, upper
                     continue
-                second = "Absolute error (exact):"
+                second = "bounds:"
                 if line.startswith(second):
-                    self.abs_error = float(line[len(second):])
+                    if self.bounds is not None:
+                        continue
+                    raw_bounds = line[len(second):]
+                    raw_lower, raw_upper = tuple(raw_bounds.split(", "))
+                    lower = float(raw_lower[2:])
+                    upper = float(raw_upper[:-1])
+                    self.bounds = lower, upper
                     continue
-                third = "Relative error (exact):"
+                third = "Absolute error (exact):"
                 if line.startswith(third):
-                    self.rel_error = float(line[len(third):])
-                    break
+                    self.abs_error = float(line[len(third):])
+                    continue
+                fourth = "Relative error (exact):"
+                if line.startswith(fourth):
+                    self.rel_error = float(line[len(fourth):])
+                    continue
                 continue
 
         # Combine both dicts in order

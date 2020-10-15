@@ -13,7 +13,7 @@ FPTUNER="${SCRIPT_LOCATION}/fptuner --nightly --cfile"
 
 run ()
 {
-    ${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/$1 -e ${@:2} | tee -a $date/index.html
+    \time -f %e ${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/$1 -e ${@:2} | tee -a $date/index.html
     echo -e "\n\n\n\n"
 }
 

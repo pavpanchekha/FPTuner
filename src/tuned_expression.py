@@ -2,12 +2,14 @@
 
 from fpcore_logging import Logger
 from fpcore_ast import Operation, Variable
+from fptaylor_result import FPTaylorResult
 
 import ast_modifications.all_modifications_ast as all_modifications_ast
 
+
 import sys
 
-logger = Logger()
+logger = Logger(level=Logger.LOW)
 
 
 class TunedExpression():
@@ -33,6 +35,51 @@ class TunedExpression():
         self.inplace_operators()
         self.inline_untyped()
         self.get_info()
+
+    def check_domains(self):
+        lines = ["{"]
+
+        lines.append("Variables")
+        for name, domain in self.inputs.items():
+            lines.append("  real {} in [{}, {}];".format(name, *domain))
+        lines.append("")
+
+        lines.append("Definitions")
+        for name, value in self.definitions.items():
+            typ = self.types[name]
+            rnd = TunedExpression.TYPES_TO_ROUNDS[typ]
+            vstr = value.infix_str()
+            if (type(value) == Operation
+                and value.op in all_modifications_ast.OperationToFPTaylor):
+                fptop = all_modifications_ast.OperationToFPTaylor[value.op]
+                if value.op != fptop:
+                    vstr = vstr.replace(value.op, fptop)
+                    while vstr.count("(") != vstr.count(")"):
+                        vstr += ")"
+            lines.append("  {} {}= {};".format(name, rnd, vstr))
+        lines.append("")
+
+        lines.append("Expressions")
+
+        preamble = "\n".join(lines)
+
+        for name, value in self.definitions.items():
+            if type(value) is Operation and value.op in all_modifications_ast.Implementations:
+                logger("Checking domain for {}", value)
+                valid_domain = all_modifications_ast.ImplToDomain[value.op]
+                query = "{}\n  {};\n}}".format(preamble, value.args[0])
+                fpt = FPTaylorResult(query, FPTaylorResult.BOUNDS_CONFIG)
+                assert(fpt.bounds is not None)
+                actual_domain = fpt.bounds
+                logger("  valid domain: {}", valid_domain)
+                logger("  floating point domain: {}", actual_domain)
+                if actual_domain[0] < valid_domain[0]:
+                    logger("  lower bound violated")
+                    return False
+                if actual_domain[1] > valid_domain[1]:
+                    logger("  upper bound violated")
+                    return False
+        return True
 
     def __str__(self):
         lines = [
