@@ -73,12 +73,14 @@ class TunedExpression():
                 actual_domain = fpt.bounds
                 logger("  valid domain: {}", valid_domain)
                 logger("  floating point domain: {}", actual_domain)
-                if actual_domain[0] < valid_domain[0]:
-                    logger("  lower bound violated")
+                if actual_domain[0] < valid_domain[0] or actual_domain[1] > valid_domain[1]:
+                    logger("  bound violated")
+                    if value.op.startswith("ord"):
+                        logger("  trying with rord")
+                        value.op = "r" + value.op
+                        return None
                     return False
-                if actual_domain[1] > valid_domain[1]:
-                    logger("  upper bound violated")
-                    return False
+
         return True
 
     def __str__(self):

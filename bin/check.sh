@@ -13,7 +13,7 @@ FPTUNER="${SCRIPT_LOCATION}/fptuner --nightly --cfile"
 
 run ()
 {
-    \time -f %e ${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/$1 -e ${@:2} | tee -a $date/index.html
+    \time -f %e ${FPTUNER} ${SCRIPT_LOCATION}/../benchmarks/check_benchmarks/$1 -e ${@:2} -v low | tee -a $date/index.html
     echo -e "\n\n\n\n"
 }
 
@@ -84,6 +84,12 @@ run Statistics_Distribution_Beta_cdensity_from_math_functions_0_1_5_2.fpcore ${D
 run Statistics_Distribution_Binomial_directEntropy_from_math_functions_0_1_5_2.fpcore ${DECIMATION[@]}
 run Statistics_Distribution_Poisson_clogProbability_from_math_functions_0_1_5_2.fpcore ${DECIMATION[@]}
 run Statistics_Distribution_Poisson_Internal_probability_from_math_functions_0_1_5_2.fpcore ${DECIMATION[@]}
+
+pushd ${SCRIPT_LOCATION}/../cost-measurement/
+python3 ${SCRIPT_LOCATION}/generate_aggregated_graph.py $(wildcard *.data)
+popd
+echo "<h1>Aggregated Graph</h1>" >> $date/index.html
+echo "<img src='aggregate.png'>" >> $date/index.html
 
 cat <<EOF >> $date/index.html
 </body>

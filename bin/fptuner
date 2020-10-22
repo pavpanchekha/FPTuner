@@ -24,6 +24,7 @@ from fptaylor_result import FPTaylorResult
 import ast_modifications.all_modifications_ast as all_modifications_ast
 import fptuner_argument_parser
 import generate_graph
+import generate_aggregated_graph
 import os
 import glob
 import shutil
@@ -49,32 +50,46 @@ def try_error_bound(e, args, ssa, names, signatures, rows, first_header):
             return None, None
         tr = TunedExpression(ssa, zr)
 
-        # 2. Check that second order error is preserved
-        print("Checking 2nd order error")
-        query = tr.to_fptaylor()
-        res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
-        if res.div_by_zero or res.log_of_non_positive or res.inf_val:
-            logger("FPTaylor thinks exceptional circumstances are possible")
-            logger("Retrying with lower bound")
-            continue
-        elif res.abs_error is None:
-            logger("FPTaylor did not find an error value")
-            logger("Retrying with lower bound")
-            continue
-        elif res.abs_error > e:
+        # If a domain check fails we may be able to replace the op and retry
+        try_with_lower_bound = False
+        while True:
+
+            # 2. Check that second order error is preserved
+            print("Checking 2nd order error")
+            query = tr.to_fptaylor()
+            res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
             logger("FPTaylor error bound: {}", res.abs_error)
             logger("FPTaylor second order error: {}", res.second_order)
-            logger("Retrying with lower bound")
-            continue
+            if res.div_by_zero or res.log_of_non_positive or res.inf_val:
+                logger("FPTaylor thinks exceptional circumstances are possible")
+                logger("Retrying with lower bound")
+                try_with_lower_bound = True
+                break
+            elif res.abs_error is None:
+                logger("FPTaylor did not find an error value")
+                logger("Retrying with lower bound")
+                try_with_lower_bound = True
+                break
+            elif res.abs_error > e:
+                logger("Retrying with lower bound")
+                try_with_lower_bound = True
+                break
 
-        # 3. Check that domains are still valid
-        print("Checking domains")
-        valid = tr.check_domains()
-        if not valid:
-            logger("Domains are not sound")
-            logger("Retrying with lower bound")
-            continue
-        else:
+            # 3. Check that domains are still valid
+            print("Checking domains")
+            valid = tr.check_domains()
+            if valid is None:
+                logger("Replaced operation and retrying")
+                continue
+            elif not valid:
+                logger("Domains are not sound")
+                logger("Retrying with lower bound")
+                try_with_lower_bound = True
+                break
+            else:
+                break
+
+        if not try_with_lower_bound:
             break
 
     # Generate c file
@@ -132,6 +147,7 @@ def main(argv):
     lexer = FPCoreLexer()
     parser = FPCoreParser()
 
+    graph_datafiles = list()
     for query_file in args.query_files:
         try:
             with open(query_file, "r") as f:
@@ -163,13 +179,14 @@ def main(argv):
                 ssa.get_fptaylor_maximums()
                 first_header = None
                 rows = []
-                z3_errors = []
+                fptaylor_errors = []
                 for e in args.error:
                     header, achieved_error = try_error_bound(e, args, ssa, names, signatures, rows, first_header)
                     if first_header is None:
                         first_header = header
                     if achieved_error is None:
                         break
+                    fptaylor_errors.append(achieved_error)
 
                 if args.nightly:
                     print("<table>")
@@ -198,7 +215,7 @@ def main(argv):
                     functype = {1:"unop_fp64", 2:"binop_fp64", 3:"triop_fp64", 4:"quadop_fp64", 5:"quintop_fp64", 6:"hexop_fp64"}[len(ssa.inputs)]
                     time_contents.append("{} FUNCTIONS[FUNC_COUNT] = {{{}}};".format(functype, ",".join(names)))
                     time_contents.append("char* NAMES[FUNC_COUNT] = {{{}}};".format(",".join(['"'+n+'"' for n in names])))
-                    time_contents.append("char* ERRORS[FUNC_COUNT] = {{{}}};".format(",".join(['"'+str(e)+'"' for e in z3_errors])))
+                    time_contents.append("char* ERRORS[FUNC_COUNT] = {{{}}};".format(",".join(['"'+str(e)+'"' for e in fptaylor_errors])))
                     time_contents.extend(["int main(int argc, char** argv){",
                                           "size_t log2_values = 18;",
                                           "size_t secs = 10;",
@@ -223,7 +240,7 @@ def main(argv):
                         pass
                     for src,dest in zip(cfiles, destfiles):
                         shutil.move(src, dest)
-                    generate_graph.graph(time_name)
+                    graph_datafiles.append(generate_graph.graph(time_name))
 
             except DomainError as e:
                 if e.lower is None and e.upper is None:
@@ -243,7 +260,8 @@ def main(argv):
             except BadPreError as e:
                 logger.error("Unable to process precondition: '{}'", e.pre)
 
-
+    if args.cfile:
+        generate_aggregated_graph.graph(graph_datafiles)
 
 
 if __name__ == "__main__":

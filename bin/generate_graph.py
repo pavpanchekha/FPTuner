@@ -50,7 +50,8 @@ def graph(main_file):
         errors.append(float(error))
 
     # dump data
-    with open("{}.data".format(main_file.rstrip(".c")), 'w') as f:
+    dump_file = "{}.data".format(main_file.rstrip(".c"))
+    with open(dump_file, 'w') as f:
         f.write("errors = {}\n".format(errors))
         f.write("averages = {}\n".format(averages))
 
@@ -68,7 +69,7 @@ def graph(main_file):
 
     os.chdir(start)
 
-
+    return dump_file
 
 if __name__ == "__main__":
     graph(sys.argv[1])
