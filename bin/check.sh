@@ -24,23 +24,6 @@ cat <<EOF > $date/index.html
 <body>
 EOF
 
-# run azimuth.fpcore 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
-# run complex_sine_and_cosine.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
-# run exp1x.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13
-# run exp1x_log.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13
-# run hartman3.fpcore 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
-# run hartman6.fpcore 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
-# run i6.fpcore 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
-# run logexp2.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 1e-14
-# run logexp.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 1e-14
-# run nmse_example_3_7.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
-# run nmse_problem_3_3_7.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
-# run nmse_problem_3_4_2.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8
-# run nmse_problem_3_4_4.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13
-# run nmse_section_3_11.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 1e-14
-# run sphere.fpcore 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10
-# run Statistics_Distribution_Poisson_Internal_probability_from_math_functions_0_1_5_2.fpcore 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9
-
 DECIMATION=( 1e2 1e1 1e0 1e-1 1e-2 1e-3 1e-4 1e-5 1e-6 1e-7 1e-8 1e-9 1e-10 1e-11 1e-12 1e-13 1e-14 )
 
 run azimuth.fpcore ${DECIMATION[@]}
@@ -56,7 +39,7 @@ run exp1x_32.fpcore ${DECIMATION[@]}
 run exp1x.fpcore ${DECIMATION[@]}
 run exp1x_log.fpcore ${DECIMATION[@]}
 run hartman3.fpcore ${DECIMATION[@]}
-run hartman6.fpcore ${DECIMATION[@]}
+# run hartman6.fpcore ${DECIMATION[@]}
 run i6.fpcore ${DECIMATION[@]}
 run Linear_Quaternion_cexp_from_linear_1_19_1_3.fpcore ${DECIMATION[@]}
 run logexp2.fpcore ${DECIMATION[@]}
