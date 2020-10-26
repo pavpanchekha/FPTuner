@@ -7,6 +7,7 @@ import subprocess
 import sys
 import shlex
 import json
+import math
 
 PYTHON_DIR = path.abspath(path.dirname(__file__))
 GIT_DIR = path.split(PYTHON_DIR)[0]
@@ -24,6 +25,7 @@ def graph(pointss, outname, dump_file=None):
     errors = list()
     speedups = list()
     for points in pointss:
+        print(points)
         error = math.exp(sum([math.log(x) for x, y in points]) / len(points))
         speedup = math.exp(-sum([math.log(y) for x, y in points]) / len(points))
         errors.append(error)
@@ -34,7 +36,7 @@ def graph(pointss, outname, dump_file=None):
         dump_file = path.join(COST_DIR, "{}.data".format(outname))
     with open(dump_file, 'w') as f:
         f.write("errors = {}\n".format(errors))
-        f.write("speedups = {}\n".format(averages))
+        f.write("speedups = {}\n".format(speedups))
 
     # plot
     fig, ax = plt.subplots()
@@ -48,7 +50,6 @@ def graph(pointss, outname, dump_file=None):
 
     fig.savefig("{}.png".format(outname))
 
-    os.chdir(start)
 
 def read_all(filenames):
     start = os.getcwd()
