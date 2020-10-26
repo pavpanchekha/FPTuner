@@ -37,9 +37,15 @@ def sanitize_name(name):
         name = name.replace(c, "_")
     return name
 
-def try_error_bound(e, args, ssa, names, signatures, rows, first_header):
+def try_error_bound(e, args, ssa, names, signatures, rows, first_header, start_error_bound=None):
     # Iterate untill all checks pass
+    finish_error_bound = None
+    if start_error_bound is not None:
+        while e > start_error_bound:
+            e = e/2
     for error_bound in [e/(2**i) for i in range(1000)]:
+        finish_error_bound = error_bound
+
         print("trying: {}".format(error_bound))
         # 1. Tune to ther error bound
         try:
@@ -47,7 +53,7 @@ def try_error_bound(e, args, ssa, names, signatures, rows, first_header):
         except FPTunerError:
             ## If we can't get this error bound, all tighter ones will fail
             logger.error("Unable to satisfy error bound")
-            return None, None
+            return None, None, None
         tr = TunedExpression(ssa, zr)
 
         # If a domain check fails we may be able to replace the op and retry
@@ -118,7 +124,7 @@ def try_error_bound(e, args, ssa, names, signatures, rows, first_header):
     row.append(str(res.abs_error))
     rows.append(row)
 
-    return header, res.abs_error
+    return header, res.abs_error, finish_error_bound
 
 
 
@@ -180,12 +186,14 @@ def main(argv):
                 first_header = None
                 rows = []
                 fptaylor_errors = []
+                start_error = None
                 for e in args.error:
-                    header, achieved_error = try_error_bound(e, args, ssa, names, signatures, rows, first_header)
+                    header, achieved_error, new_start_error = try_error_bound(e, args, ssa, names, signatures, rows, first_header, start_error)
                     if first_header is None:
                         first_header = header
                     if achieved_error is None:
                         break
+                    start_error = new_start_error
                     fptaylor_errors.append(achieved_error)
 
                 if args.nightly:
@@ -259,9 +267,6 @@ def main(argv):
 
             except BadPreError as e:
                 logger.error("Unable to process precondition: '{}'", e.pre)
-
-    if args.cfile:
-        generate_aggregated_graph.graph(graph_datafiles)
 
 
 if __name__ == "__main__":
