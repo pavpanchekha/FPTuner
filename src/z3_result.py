@@ -151,11 +151,15 @@ class Z3Result:
                 upper_clearance = acceptable_domain[1] - real_domain[1]
                 min_clearance = min(lower_clearance, upper_clearance)
                 # using zero now, need to be error(arg)
-                if math.isfinite(min_clearance):
-                    assertion = "(assert (=> {} (<= {} {})))".format(z3_name, 0, min_clearance)
+                arg_error = 0
+                if min_clearance < 0.0:
+                    assertion = "(assert (== {} false))".format(z3_name)
+                    self.query_string_list.append(assertion)
+                elif math.isfinite(min_clearance):
+                    assertion = "(assert (=> {} (<= {} {})))".format(z3_name, arg_error, min_clearance)
                     self.query_string_list.append(assertion)
                 else:
-                    assertion = "; (assert (=> {} (<= {} {})))".format(z3_name, 0, min_clearance)
+                    assertion = "; (assert (=> {} (<= {} {})))".format(z3_name, arg_error, min_clearance)
                     self.query_string_list.append(assertion)
 
             self.query_string_list.append("")

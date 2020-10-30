@@ -11,7 +11,7 @@ import subprocess
 import tempfile
 
 
-logger = Logger(level=Logger.MEDIUM, color=Logger.blue)
+logger = Logger(level=Logger.EXTRA, color=Logger.blue)
 
 
 class FPTaylorResult:
@@ -37,7 +37,7 @@ class FPTaylorResult:
         "--opt-x-rel-tol": "1e-100",
         "--opt-x-abs-tol": "1e-100",
         "--opt-max-iters": "4000000000",
-        "--opt-timeout": "60",
+        "--opt-timeout": "10",
         "--intermediate-opt": "true",
     }
 
@@ -47,13 +47,13 @@ class FPTaylorResult:
         "--abs-error": "true",
         "--fp-power2-model": "true",
         "--opt": "gelpia",
-        "--opt-exact": "true",
+        #"--opt-exact": "true",
         "--opt-f-rel-tol": "1e-100",
         "--opt-f-abs-tol": "1e-100",
         "--opt-x-rel-tol": "1e-100",
         "--opt-x-abs-tol": "1e-100",
         "--opt-max-iters": "4000000000",
-        "--opt-timeout": "60",
+        "--opt-timeout": "10",
         "--intermediate-opt": "true",
     }
 
@@ -67,12 +67,12 @@ class FPTaylorResult:
         "--opt-x-rel-tol": "1e-100",
         "--opt-x-abs-tol": "1e-100",
         "--opt-max-iters": "4000000000",
-        "--opt-timeout": "60",
+        "--opt-timeout": "10",
         "--intermediate-opt": "true",
     }
 
     def __init__(self, query, config=None):
-        logger.llog(logger.HIGH, "Query:\n{}", query)
+        logger("Query:\n{}", query)
         self.file_log = ["Query:\n{}".format(query)]
         self.second_order = 0.0
         self.abs_error = None
@@ -86,10 +86,13 @@ class FPTaylorResult:
         self.config = config or FPTaylorResult.ERROR_FORM_CONFIG
         self._run()
         self._extract_fptaylor_forms()
-        if self.abs_error is None and self.config == FPTaylorResult.CHECK_CONFIG:
-            self.config = config or FPTaylorResult.BACKUP_CONFIG
-            self._run()
-            self._extract_fptaylor_forms()
+        # if self.abs_error is None and self.config == FPTaylorResult.CHECK_CONFIG:
+        #     logger.llog(Logger.MEDIUM, "FPTaylor output:\n{}", self.out)
+        #     logger.llog(Logger.MEDIUM, "FPTaylor error:\n{}", self.err)
+        #     logger.llog(Logger.MEDIUM, "Using backup FPTaylor config")
+        #     self.config = config or FPTaylorResult.BACKUP_CONFIG
+        #     self._run()
+        #     self._extract_fptaylor_forms()
 
     def write_file(self, filename):
         contents = "\n".join(self.file_log)
@@ -108,7 +111,7 @@ class FPTaylorResult:
             # Put together the FPTaylor command
             flags = " ".join([k+" "+v for k, v in self.config.items()])
             command = "fptaylor {} {}".format(flags, f.name)
-            logger.llog(Logger.HIGH, "Command: {}", command)
+            logger("Command: {}", command)
             self.file_log.append("Command: {}".format(command))
 
             # Call FPTaylor
@@ -131,7 +134,7 @@ class FPTaylorResult:
                                        self.err,
                                        self.retcode)
 
-        logger.llog(Logger.HIGH, "stdout:\n{}", self.out.strip())
+        logger("stdout:\n{}", self.out.strip())
         self.file_log.append("stdout:\n{}".format(self.out.strip()))
         self.file_log.append("stderr:\n{}".format(self.err.strip()))
 
@@ -155,15 +158,6 @@ class FPTaylorResult:
         inf_msg = "**ERROR**: num_of_float: inf"
         self.inf_val = any([inf_msg in line for line in err_lines])
 
-        # Error when FPTaylor complains about infinity and domain errors
-        # todo: handle when this occurs
-        # todo: put this back in
-        if False and len(err_lines) != 0:
-            if not logger.should_log(Logger.HIGH):
-                logger.llog(logger.NONE, "Query:\n{}", self.query)
-                logger.llog(Logger.NONE, "Command: {}", command)
-                logger.llog(Logger.NONE, "stdout:\n{}", self.out.strip())
-            logger.error("stderr:\n{}", "\n".join(err_lines))
 
     def _extract_fptaylor_forms(self):
         # Since FPTaylor forms are listed seperate from their corresponding

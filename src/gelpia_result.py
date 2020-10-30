@@ -10,7 +10,10 @@ import gelpia
 import gelpia_logging
 
 
-logger = Logger(level=Logger.MEDIUM, color=Logger.green)
+logger = Logger(level=Logger.HIGH, color=Logger.green)
+
+
+GELPIA_CACHE = dict()
 
 
 class GelpiaResult:
@@ -35,7 +38,7 @@ class GelpiaResult:
         "grace": 0,
         "update": 0,
         "iters": 0,
-        "seed": 0,
+        "seed": 42,
         "debug": False,
         "src_dir": gelpia.SRC_DIR,
         "executable": RUST_EXECUTABLE,
@@ -55,7 +58,17 @@ class GelpiaResult:
         else:
             self.query = raw_query
 
-        logger.log("query:\n{}", self.query)
+        if self.query in GELPIA_CACHE:
+            logger.llog(Logger.MEDIUM, "Used gelpia query cache")
+            cached = GELPIA_CACHE[self.query]
+            self.max_lower = cached.max_lower
+            self.max_upper = cached.max_upper
+            self.min_lower = cached.min_lower
+            self.min_upper = cached.min_upper
+            self.abs_max = cached.abs_max
+            return
+
+        logger("query:\n{}", self.query)
 
         # Run and set results as member
         max_lower = Value("d", float("nan"))
@@ -75,16 +88,17 @@ class GelpiaResult:
 
         self.max_lower = max_lower.value
         self.max_upper = max_upper.value
-
         self.abs_max = max(self.max_upper, -self.min_lower)
 
         if isinf(self.abs_max):
             raise GelpiaInfError(self.query)
 
+        GELPIA_CACHE[self.query] = self
+
         logger.llog(Logger.HIGH, "min = [{}, {}]",
                     self.min_lower, self.min_upper)
         logger.llog(Logger.HIGH, "max = [{}, {}]",
                     self.max_lower, self.max_upper)
-        logger.llog(Logger.HIGH, "abs_max = {}",
+        logger.llog(Logger.HIGH, "abs_max = {}\n",
                     self.abs_max)
 

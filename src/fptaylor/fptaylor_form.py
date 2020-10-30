@@ -8,7 +8,7 @@ from gelpia_result import GelpiaResult
 
 import fractions
 
-logger = Logger(level=Logger.HIGH, color=Logger.cyan)
+logger = Logger(level=Logger.EXTRA)
 
 
 class FPTaylorForm:
@@ -80,14 +80,9 @@ class FPTaylorForm:
             new_forms[exp] = form.expand(ssa)
         self.forms = new_forms
 
-    def abs_maximize(self, inputs, memoized):
+    def abs_maximize(self, inputs):
         for exp, form in self.forms.items():
-            key = str(inputs) + str(form)
-            if key not in memoized:
-                memoized[key] = GelpiaResult(inputs, form).abs_max
-            else:
-                logger("Memoized result for: {}", key)
-            self.maximums[exp] = memoized[key]
+            self.maximums[exp] = GelpiaResult(inputs, form).abs_max
 
     def to_gurobi(self, bit_choices, denoms):
         parts = list()

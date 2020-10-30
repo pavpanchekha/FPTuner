@@ -11,7 +11,7 @@ from fptaylor_result import FPTaylorResult
 import ast_modifications.all_modifications_ast as all_modifications_ast
 import copy
 
-logger = Logger()
+logger = Logger(level=Logger.HIGH)
 
 
 class SingleAssignment:
@@ -202,6 +202,7 @@ class SingleAssignment:
         return match, unmatched
 
     def get_fptaylor_forms(self):
+        logger("Getting default FPTaylor forms")
         query = self.to_fptaylor()
         res = FPTaylorResult(query)
         fptaylor_forms = res.fptaylor_forms
@@ -229,6 +230,7 @@ class SingleAssignment:
             for oper in this_operations:
                 if oper == default_value.op:
                     continue
+                logger("Getting FPTaylor forms when {} is {}", target_name, oper)
                 oper_selection = self.default_oper_selection()
                 oper_selection[target_name] = oper
                 query = self.to_fptaylor(oper_selection=oper_selection)
@@ -260,8 +262,7 @@ class SingleAssignment:
                 forms[(target_name, oper)] = new
 
     def get_fptaylor_maximums(self):
-        memoized = dict()
         for name, forms in self.fptaylor_forms.items():
             for key, form in forms.items():
-                form.abs_maximize(self.inputs, memoized)
-        #print(str(self))
+                form.abs_maximize(self.inputs)
+

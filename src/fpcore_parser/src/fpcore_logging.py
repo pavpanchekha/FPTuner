@@ -110,6 +110,14 @@ class Logger():
         self_class.LOG_LEVEL = level
 
     @classmethod
+    def send_log_to_stderr(self_class):
+        # This should only be called once during the runtime
+        if self_class.LOG_FILE != sys.stdout:
+            msg = "Attempted to redirect log output twice"
+            raise RuntimeError(msg)
+        self_class.LOG_FILE = sys.stderr
+
+    @classmethod
     def set_log_filename(self_class, filename):
         # This should only be called once during the runtime
         if self_class.LOG_FILE != sys.stdout:
@@ -160,7 +168,8 @@ class Logger():
         #       Context managers won't help since a logger is meant to be
         #       made at the beginning of a module
         Logger.LOGGER_COUNT -= 1
-        if Logger.LOGGER_COUNT == 0 and Logger.LOG_FILE != sys.stdout:
+        if Logger.LOGGER_COUNT == 0 and (Logger.LOG_FILE != sys.stdout
+                                         or Logger.LOG_FILE != sys.stderr):
             Logger.LOG_FILE.close()
             Logger.LOG_FILE = None
 
@@ -231,7 +240,7 @@ class Logger():
             full_message = self._log(formatted_message, warn, sys.stderr)
 
             # If logging has been sent to a file also send message to that file
-            if Logger.LOG_FILE != sys.stdout:
+            if Logger.LOG_FILE != sys.stdout or Logger.LOG_FILE != sys.stderr:
                 print(Logger.strip_color(full_message), file=Logger.LOG_FILE)
 
     def error(self, message, *args):

@@ -49,13 +49,13 @@ def parse_args(argv):
 
     args = arg_parser.parse_args(argv[1:])
 
-    # Set verbosity, but override to none if using nightly
-    logger.set_log_level(Logger.str_to_level(args.verbosity))
-    if args.nightly:
-        logger.set_log_level(Logger.NONE)
+    # Set Log level
+    Logger.set_log_level(Logger.str_to_level(args.verbosity))
 
-    # Set logfile if it is present and not doing nightly
-    if not args.nightly and args.log_file is not None:
+    # Send to stderr if nightly, otherwise check for logfile
+    if args.nightly:
+        Logger.send_log_to_stderr()
+    elif args.log_file is not None:
         Logger.set_log_filename(args.log_file)
 
     # Set check if doing nightly
