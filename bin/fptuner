@@ -64,6 +64,9 @@ def found_config(error_bound, fptaylor_error, tuned_res, args, ssa, names, signa
                      first_header, header)
         sys.exit(1)
 
+    header = ["ErrorBound"] + header
+    row = [str(error_bound)] + row
+    header.append("FPTaylorError")
     row.append(str(fptaylor_error))
     rows.append(row)
 
@@ -115,7 +118,7 @@ def try_error_bound(error_bound, raw_query, args, ssa, names, signatures, rows, 
             logger.error("Unable to satisfy error bound")
             return None, None
         tuned_res = TunedExpression(ssa, zr)
-        tuned_res_str = " ".join(tuned_res.tsv()[1][1:-1])
+        tuned_res_str = " ".join(tuned_res.tsv()[1])
         logger("Chose config: {}", tuned_res_str)
 
         if tuned_res_str in z3_cache:

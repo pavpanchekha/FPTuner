@@ -34,7 +34,6 @@ class TunedExpression():
         self.get_error(zr)
         self.inplace_operators()
         self.inline_untyped()
-        self.get_info()
 
     def check_domains(self):
         lines = ["{"]
@@ -106,19 +105,13 @@ class TunedExpression():
         return "\n".join(lines)
 
     def tsv(self):
-        header = ["Error_bound"]
-        parts = ["{}".format(self.error_bound)]
         idx = 0
         for name in self.definitions:
-            #header.append("{}-type".format(idx))
-            #parts.append(self.types[name])
             if name in self.operators:
                 op = self.operators[name]
                 header.append("{}-op".format(idx))
                 parts.append(op)
             idx += 1
-        header.append("Error")
-        parts.append(str(float(self.error.as_fraction())))
         return header, parts
 
     def _get_input_type(self, name):
