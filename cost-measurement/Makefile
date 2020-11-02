@@ -23,6 +23,8 @@ TIME_KERNS_LOGFILES = $(patsubst kerns/%.c,log/%_log.txt,${TIME_KERNS_SOURCES})
 OBJ_KERNS_SOURCES = $(filter-out kerns/%time.c, $(filter-out kerns/%test.c, ${KERNS_SOURCES}))
 OBJ_KERNS_FILES = $(patsubst kerns/%,obj/%,$(patsubst %.c,%.o,${OBJ_KERNS_SOURCES}))
 
+GLIBC_MATH = -L$(abspath ./glibc_install/lib/) -Wl,-rpath=$(abspath ./glibc_install/lib/) -lm
+
 
 .PHONY: all
 all: ${TIME_FILES} ${TEST_FILES} ${TIME_KERNS_FILES}
@@ -43,21 +45,24 @@ log/%test_log.txt: bin/%test | log
 log/%time_log.txt: bin/%time | log
 	$^ > $@
 
-bin/%time: src/%time.c ${OBJ_FILES} | bin
-	$(CC) ${CFLAGS} -Iinclude $^ -lm -lrt -o $@
+bin/%time: src/%time.c ${OBJ_FILES} glibc_install/lib/libm.so | bin
+	$(CC) ${CFLAGS} -Iinclude $^ ${GLIBC_MATH} -lrt -o $@
 
-bin/%test: src/%test.c ${OBJ_FILES} | bin
-	$(CC) ${CFLAGS} -Iinclude $^ -lm -lrt -lmpfr -o $@
+bin/%test: src/%test.c ${OBJ_FILES} glibc_install/lib/libm.so | bin
+	$(CC) ${CFLAGS} -Iinclude $^ ${GLIBC_MATH} -lrt ${GLIBC_MATH}pfr -o $@
 
 obj/%.o: src/%.c | obj
 	$(CC) ${CFLAGS} -Iinclude $< -c -o $@
 
 
-bin/%time: kerns/%time.c ${OBJ_FILES} ${OBJ_KERNS_FILES} | bin
-	$(CC) ${CFLAGS} -Iinclude $^ -lm -lrt -o $@
+bin/%time: kerns/%time.c ${OBJ_FILES} ${OBJ_KERNS_FILES} glibc_install/lib/libm.so | bin
+	$(CC) ${CFLAGS} -Iinclude $^ ${GLIBC_MATH} -lrt -o $@
 
 obj/%.o: kerns/%.c | obj
 	$(CC) ${CFLAGS} -Iinclude $< -c -o $@
+
+glibc_install/lib/libm.so:
+	./compile_glibc.sh
 
 
 bin:
