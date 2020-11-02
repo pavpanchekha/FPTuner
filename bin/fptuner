@@ -56,23 +56,58 @@ def found_config(error_bound, fptaylor_error, tuned_res, args, ssa, names, signa
 
     # Add to data rows
     header, row = tuned_res.tsv()
+    header = ["ErrorBound"] + header + ["FPTaylorError"]
 
-    if first_header is None:
-        first_header = header
-    elif first_header != header:
+    if first_header is not None and first_header != header:
         logger.error("Header mismatch: \n{} \n{}",
                      first_header, header)
         sys.exit(1)
 
-    header = ["ErrorBound"] + header
-    row = [str(error_bound)] + row
-    header.append("FPTaylorError")
-    row.append(str(fptaylor_error))
+
+    row = [str(error_bound)] + row + [str(fptaylor_error)]
     rows.append(row)
 
     return header, fptaylor_error
 
 
+class fake():
+    pass
+
+
+def glibc_error(args, ssa, names, signatures, rows, first_header):
+    fake_zr = fake()
+    fake_zr.raw_max_error = "glibc"
+    fake_zr.bit_width_choices = {name:{"fp64":"all_64_bit"} for name in ssa.fptaylor_forms}
+    fake_zr.operation_choices = {name:{ssa.definitions[name].op:"all_glibc"} for name in ssa.operations}
+    fake_zr.model = {"all_64_bit": True,
+                     "all_glibc": True,
+                     "total_error": -1.0}
+    tuned_res = TunedExpression(ssa, fake_zr)
+
+    logger("Checking glibc 2nd order error")
+    query = tuned_res.to_fptaylor()
+    start = time.time()
+    res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
+    end = time.time()
+    logger("Time to get 2nd order error: {}", end - start)
+    logger("FPTaylor error bound: {}", res.abs_error)
+    logger("FPTaylor second order error: {}", res.second_order)
+    if (res.div_by_zero
+        or res.log_of_non_positive
+        or res.inf_val
+        or res.abs_error is None):
+        logger.error("Fatal error: glibc error bound not found")
+
+    # 3. Check that domains are still valid
+    logger("Checking domains")
+    start = time.time()
+    valid = tuned_res.check_domains()
+    end = time.time()
+    logger("Time to check domains: {}", end - start)
+    if valid is None or not valid:
+        logger.error("Fatal error: glibc causes domain violations")
+
+    return found_config("glibc", res.abs_error, tuned_res, args, ssa, names, signatures, rows, first_header)
 
 # raw_query -> { tuned_results_str -> (fptaylor_error, domains_passed) }
 TUNED_RES_CACHE = dict()
@@ -271,6 +306,9 @@ def main(argv):
                     if achieved_error is None:
                         break
                     fptaylor_errors.append(achieved_error)
+
+                achieved_error = glibc_error(args, ssa, names, signatures, rows, first_header)
+                fptaylor_errors.append(achieved_error)
 
                 if args.nightly:
                     print("<table>")

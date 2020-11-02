@@ -20,6 +20,7 @@ make
 make install
 
 cd ..
-rm -rf glibc_build glibc_src
-rm glibc_install/lib/librt.so.1
-rm glibc_install/lib/libc.so.6
+cd glibc_install
+mkdir butchered_libm
+cp lib/libm* butchered_libm
+
