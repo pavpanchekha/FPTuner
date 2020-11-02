@@ -18,29 +18,27 @@ sys.path.append(path.join(GIT_DIR, "src", "fpcore_parser", "src"))
 
 
 def aggregate_graph(filenames):
+    start = os.getcwd()
+    os.chdir(COST_DIR)
     pointss = read_all(filenames)
+    os.chdir(start)
     graph(pointss, "aggragate")
 
 def graph(errorss, speedupss, outname, dump_file=None):
     assert(len(errorss) == len(speedupss))
-    x_errors = list()
-    y_speedups = list()
-
-    for errors, speedups in zip(errorss, speedupss):
-        for e, s in zip(errors, speedups):
-            x_errors.append(e)
-            y_speedups.append(s)
+    x_errors = sum(errorss, [])
+    y_speedups = sum(speedupss, [])
 
     # dump data
-    if dump_file is None:
-        dump_file = path.join(COST_DIR, "{}.data".format(outname))
-    with open(dump_file, 'w') as f:
-        f.write("x_errors = {}\n".format(x_errors))
-        f.write("y_speedups = {}\n".format(y_speedups))
+    # if dump_file is None:
+    #     dump_file = path.join(COST_DIR, "{}.data".format(outname))
+    # with open(dump_file, 'w') as f:
+    #     f.write("x_errors = {}\n".format(x_errors))
+    #     f.write("y_speedups = {}\n".format(y_speedups))
 
     # plot
     fig, ax = plt.subplots()
-    ax.scatter(x_errors, y_speedups)
+    ax.scatter(x_errors, y_speedups, alpha=0.5)
     ax.set_xscale('log')
     ax.set_xlabel("Error")
     xmin, xmax = ax.set_xlim()
@@ -52,19 +50,18 @@ def graph(errorss, speedupss, outname, dump_file=None):
 
 
 def read_all(filenames):
-    start = os.getcwd()
-    os.chdir(COST_DIR)
+    errorss = list()
+    speedupss = list()
 
     data = list()
-    for fname in file_list:
+    for fname in filenames:
         with open(fname) as f:
-            raw_datum = read(f)
-            normalized = normalize(raw_datum)
-            data.append(normalized)
+            errors, speedups = normalize(*read(fd))
+            errorss.append(errors)
+            speedupss.append(speedups)
 
-    pointss = zip(*data)
+    return errorss, speedupss
 
-    os.chdir(start)
 
 
 def read(fd):
@@ -77,15 +74,8 @@ def read(fd):
 def normalize(errors, averages):
     last_e = errors[-1]
     last_a = averages[-1]
-    return [e/last_e for e in errors], [a/last_a for a in averages]
+    return [e/last_e for e in errors], [last_a/a for a in averages]
 
 if __name__ == "__main__":
-    errorss = list()
-    speedupss = list()
-    for l in sys.argv[1:]:
-        with open(l) as fd:
-            errors, speedups = normalize(*read(fd))
-            errorss.append(errors)
-            speedupss.append(speedups)
-    graph(errorss, speedupss, "aggregate", "aggregate.data")
-
+    errorss, speedupss = read_all(sys.argv[1:])
+    graph(errorss, speedupss, "aggregate")
