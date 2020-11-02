@@ -6,7 +6,7 @@ from fpcore_logging import Logger
 import sys
 
 
-logger = Logger()
+logger = Logger(level=Logger.EXTRA)
 
 
 def list_to_str(l, sep=" "):

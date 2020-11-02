@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 
-logger = Logger(color=Logger.yellow)
+logger = Logger(level=Logger.EXTRA)
 
 SRC_DIR = path.abspath(path.dirname(__file__))
 GIT_DIR = path.split(SRC_DIR)[0]
@@ -40,15 +40,6 @@ except ModuleNotFoundError:
     logger.error("Usually this can be installed with:")
     logger.error("  pip3 install --user z3-solver")
     sys.exit(1)
-
-# try:
-#     import gurobipy
-# except ModuleNotFoundError as e:
-#     logger.error(e)
-#     logger.error("Unable to find gurobi")
-#     logger.error("This can be installed from:")
-#     logger.error("  https://www.gurobi.com/")
-#     sys.exit(1)
 
 
 # Self built requirements

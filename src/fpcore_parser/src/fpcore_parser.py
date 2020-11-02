@@ -8,7 +8,7 @@ import fpcore_ast as ast
 import sys
 
 
-logger = Logger()
+logger = Logger(level=Logger.EXTRA)
 
 
 class FPCoreParser(Parser):

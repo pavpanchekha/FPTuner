@@ -10,7 +10,7 @@ import fpcore_ast
 import sys
 
 
-logger = Logger()
+logger = Logger(level=Logger.EXTRA)
 
 
 class FPTaylorParser(Parser):

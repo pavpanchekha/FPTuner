@@ -2,10 +2,6 @@
 
 from ast_modifications.ast_modifier import add_method
 from fpcore_ast import ASTNode, Atom, Operation
-from fpcore_logging import Logger
-
-
-logger = Logger()
 
 
 UNARY_PREFIX = {"+", "-"}

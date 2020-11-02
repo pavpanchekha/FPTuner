@@ -6,7 +6,7 @@ from sly import Lexer
 import sys
 
 
-logger = Logger()
+logger = Logger(level=Logger.EXTRA)
 
 
 class FPCoreLexer(Lexer):

@@ -9,7 +9,7 @@ from fpcore_logging import Logger
 from single_assignment import SingleAssignment
 
 
-logger = Logger()
+logger = Logger(level=Logger.EXTRA)
 
 
 SUPPORTED = {"*", "+", "-", "/", "atan", "cos", "exp", "log", "pow", "sin",

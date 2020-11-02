@@ -1,14 +1,12 @@
 
 
 from exceptions import FPTaylorLexError
-from fpcore_logging import Logger
 from fpcore_lexer import FPCoreLexer
 from sly import Lexer
 
 import sys
 
 
-logger = Logger()
 
 
 FPCoreLexer.UNARY_OPERATIONS.add("floor_power2")

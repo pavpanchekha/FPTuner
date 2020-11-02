@@ -1,11 +1,5 @@
 
 
-from fpcore_logging import Logger
-
-
-logger = Logger()
-
-
 class FPTunerError(Exception):
     pass
 

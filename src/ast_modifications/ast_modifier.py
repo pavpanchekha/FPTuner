@@ -1,11 +1,5 @@
 
 
-from fpcore_logging import Logger
-
-
-logger = Logger()
-
-
 def add_method(aClass):
     # Decorator to add/set a member function
     def inner(func):
