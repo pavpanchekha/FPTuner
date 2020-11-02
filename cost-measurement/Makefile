@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -Wconversion -O3 -march=native -mtune=native -DNDEBUG
+CFLAGS=-Wall -Wextra -Wconversion -O3 -march=native -mtune=native -fno-builtin -DNDEBUG
 
 ALL_SOURCES = $(wildcard src/*.c)
 
