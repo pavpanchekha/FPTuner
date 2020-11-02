@@ -21,26 +21,26 @@ def aggregate_graph(filenames):
     pointss = read_all(filenames)
     graph(pointss, "aggragate")
 
-def graph(pointss, outname, dump_file=None):
-    errors = list()
-    speedups = list()
-    for points in pointss:
-        print(points)
-        error = math.exp(sum([math.log(x) for x, y in points]) / len(points))
-        speedup = math.exp(-sum([math.log(y) for x, y in points]) / len(points))
-        errors.append(error)
-        speedups.append(speedup)
+def graph(errorss, speedupss, outname, dump_file=None):
+    assert(len(errorss) == len(speedupss))
+    x_errors = list()
+    y_speedups = list()
+
+    for errors, speedups in zip(errorss, speedupss):
+        for e, s in zip(errors, speedups):
+            x_errors.append(e)
+            y_speedups.append(s)
 
     # dump data
     if dump_file is None:
         dump_file = path.join(COST_DIR, "{}.data".format(outname))
     with open(dump_file, 'w') as f:
-        f.write("errors = {}\n".format(errors))
-        f.write("speedups = {}\n".format(speedups))
+        f.write("x_errors = {}\n".format(x_errors))
+        f.write("y_speedups = {}\n".format(y_speedups))
 
     # plot
     fig, ax = plt.subplots()
-    ax.scatter(errors, speedups)
+    ax.scatter(x_errors, y_speedups)
     ax.set_xscale('log')
     ax.set_xlabel("Error")
     xmin, xmax = ax.set_xlim()
@@ -72,16 +72,20 @@ def read(fd):
     errors = [float(x) for x in l[l.find("[") + 1:l.find("]")].split(", ")]
     l = fd.readline()
     averages = [float(x) for x in l[l.find("[") + 1:l.find("]")].split(", ")]
-    return list(zip(errors, averages))
+    return errors, averages
 
-def normalize(l):
-    last_x, last_y = l[-1]
-    return [(x / last_x, y / last_y) for x, y in l]
+def normalize(errors, averages):
+    last_e = errors[-1]
+    last_a = averages[-1]
+    return [e/last_e for e in errors], [a/last_a for a in averages]
 
 if __name__ == "__main__":
-    data = []
+    errorss = list()
+    speedupss = list()
     for l in sys.argv[1:]:
         with open(l) as fd:
-            data.append(normalize(read(fd)))
-    pointss = zip(*data)
-    graph(pointss, "aggregate")
+            errors, speedups = normalize(*read(fd))
+            errorss.append(errors)
+            speedupss.append(speedups)
+    graph(errorss, speedupss, "aggregate", "aggregate.data")
+
