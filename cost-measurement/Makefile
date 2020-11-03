@@ -23,7 +23,9 @@ TIME_KERNS_LOGFILES = $(patsubst kerns/%.c,log/%_log.txt,${TIME_KERNS_SOURCES})
 OBJ_KERNS_SOURCES = $(filter-out kerns/%time.c, $(filter-out kerns/%test.c, ${KERNS_SOURCES}))
 OBJ_KERNS_FILES = $(patsubst kerns/%,obj/%,$(patsubst %.c,%.o,${OBJ_KERNS_SOURCES}))
 
-GLIBC_MATH = -L$(abspath ./glibc_install/butchered_libm) -lm -Wl,-rpath=$(abspath ./glibc_install/butchered_libm)
+# Warf and glibc are fighting
+#GLIBC_MATH = -L$(abspath ./glibc_install/butchered_libm) -lm -Wl,-rpath=$(abspath ./glibc_install/butchered_libm)
+GLIBC_MATH = -lm
 
 
 
