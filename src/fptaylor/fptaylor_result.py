@@ -14,6 +14,9 @@ import tempfile
 logger = Logger(level=Logger.EXTRA, color=Logger.blue)
 
 
+# query, command -> FPTaylorResult
+FPTAYLOR_CACHE = dict()
+
 class FPTaylorResult:
     # Default configuration for FPTaylor when being used for finding FPTaylor
     # forms
@@ -72,6 +75,13 @@ class FPTaylorResult:
     }
 
     def __init__(self, query, config=None):
+        self.query = query
+        self.config = config or FPTaylorResult.ERROR_FORM_CONFIG
+        self.command = self.get_command()
+        key = (self.query, self.command)
+        if key in FPTAYLOR_CACHE:
+            self.set_from(FPTAYLOR_CACHE[key])
+            return
         logger("Query:\n{}", query)
         self.file_log = ["Query:\n{}".format(query)]
         self.second_order = 0.0
@@ -82,8 +92,6 @@ class FPTaylorResult:
         self.log_of_non_positive = None
         self.inf_val = None
         self.bounds = None
-        self.query = query
-        self.config = config or FPTaylorResult.ERROR_FORM_CONFIG
         self._run()
         self._extract_fptaylor_forms()
         # if self.abs_error is None and self.config == FPTaylorResult.CHECK_CONFIG:
@@ -93,6 +101,26 @@ class FPTaylorResult:
         #     self.config = config or FPTaylorResult.BACKUP_CONFIG
         #     self._run()
         #     self._extract_fptaylor_forms()
+
+    def get_command(self):
+        flags = " ".join(["{} {}".format(k, self.config[k])
+                          for k in sorted(self.config.keys())])
+        return "fptaylor {}".format(flags)
+
+    def set_from(self, fpt_res):
+        self.file_log = fpt_res.gile_log
+        self.second_order = fpt_res.second_order
+        self.abs_error = fpt_res.abs_error
+        self.rel_error = fpt_res.rel_error
+        self.high_second_order = fpt_res.high_second_order
+        self.div_by_zero = fpt_res.div_by_zero
+        self.log_of_non_positive = fpt_res.log_of_non_positive
+        self.inf_val = fpt_res.inf_val
+        self.bounds = fpt_res.bounds
+        self.out = fpt_res.out
+        self.err = fpt_res.err
+        self.retcode = fpt_res.retcode
+        self.fptaylor_forms = fpt_res.fptaylor_forms
 
     def write_file(self, filename):
         contents = "\n".join(self.file_log)
@@ -109,13 +137,12 @@ class FPTaylorResult:
             f.flush()
 
             # Put together the FPTaylor command
-            flags = " ".join([k+" "+v for k, v in self.config.items()])
-            command = "fptaylor {} {}".format(flags, f.name)
-            logger("Command: {}", command)
-            self.file_log.append("Command: {}".format(command))
+            run_command = "{} {}".format(self.command, f.name)
+            logger("Command: {}", run_command)
+            self.file_log.append("// Command: {}".format(run_command))
 
             # Call FPTaylor
-            with subprocess.Popen(shlex.split(command),
+            with subprocess.Popen(shlex.split(run_command),
                                   stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE) as p:
 
@@ -129,14 +156,14 @@ class FPTaylorResult:
         # If anything went wrong in the call unceremoniusly exit
         if self.retcode != 0:
             raise FPTaylorRuntimeError(self.query,
-                                       command,
+                                       run_command,
                                        self.out,
                                        self.err,
                                        self.retcode)
 
         logger("stdout:\n{}", self.out.strip())
-        self.file_log.append("stdout:\n{}".format(self.out.strip()))
-        self.file_log.append("stderr:\n{}".format(self.err.strip()))
+        self.file_log.append("\\ stdout:\n\\ {}".format(self.out.strip()))
+        self.file_log.append("\\ stderr:\n\\ {}".format(self.err.strip()))
 
         # Grab when FPTaylor warns about second order error
         err_lines = self.err.splitlines()
