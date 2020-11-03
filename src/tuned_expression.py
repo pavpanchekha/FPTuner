@@ -105,6 +105,8 @@ class TunedExpression():
         return "\n".join(lines)
 
     def tsv(self):
+        header = list()
+        parts = list()
         idx = 0
         for name in self.definitions:
             if name in self.operators:
