@@ -10,7 +10,7 @@ rm -rf glibc glibc_build glibc_install
 
 git clone git://sourceware.org/git/glibc.git
 cd glibc
-VERSION=ldd --version | head -n 1 | grep "[0-9]\.[0-9]*$" -o
+VERSION=`ldd --version | head -n 1 | grep "[0-9]\.[0-9]*$" -o`
 git checkout release/${VERSION}/master
 
 cd ..
