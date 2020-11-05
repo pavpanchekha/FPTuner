@@ -56,7 +56,7 @@ def read_all(filenames):
     data = list()
     for fname in filenames:
         with open(fname) as f:
-            errors, speedups = normalize(*read(fd))
+            errors, speedups = normalize(*read(f))
             errorss.append(errors)
             speedupss.append(speedups)
 
