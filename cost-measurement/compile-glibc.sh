@@ -16,7 +16,7 @@ git checkout release/${VERSION}/master
 cd ..
 mkdir -p glibc_build
 cd glibc_build
-../glibc/configure CFLAGS="-O3 -march=native-mtune=native -fno-builtin -DNDEBUG" --prefix=${INSTALL_PATH}
+../glibc/configure CFLAGS="-O3 -march=native -mtune=native -fno-builtin -DNDEBUG" --prefix=${INSTALL_PATH}
 make
 make install
 
