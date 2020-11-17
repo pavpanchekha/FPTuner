@@ -39,20 +39,21 @@ def graph(errorss, speedupss, outname, dump_file=None):
 
     # plot
     fig, ax = plt.subplots()
-    ax.scatter(x_errors, y_speedups, alpha=0.5)
+    ax.scatter(x_errors, y_speedups, alpha=0.5, s=100)
     ax.set_xscale('log')
-    ax.set_xlabel("Error")
+    ax.set_xlabel("Error", fontsize=20)
     xmin, xmax = ax.set_xlim()
     ax.set_xlim(xmax, xmin)
-    ax.set_ylabel("Speedup")
-    ax.set_title("Aggregate")
+    ax.set_ylabel("Speedup", fontsize=20)
+    ax.tick_params(labelsize=15)
+    #ax.set_title("Aggregate", fontsize=20)
 
-    ax.axhline(1, color="r")
+    ax.axhline(1, color="r", linewidth=2)
 
     x = [math.log(t) for t in x_errors]
     y = y_speedups
     m, b = np.poly1d(np.polyfit(x, y, 1))
-    ax.plot(np.unique(x_errors), m*(np.unique(x)) + b)
+    ax.plot(np.unique(x_errors), m*(np.unique(x)) + b, color="green", linewidth=3)
 
     fig.savefig("{}.png".format(outname))
 
