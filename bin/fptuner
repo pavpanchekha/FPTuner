@@ -30,7 +30,7 @@ import os
 import glob
 import shutil
 
-logger = Logger(level=Logger.LOW, color=Logger.green)
+logger = Logger(level=Logger.MEDIUM, color=Logger.green)
 
 def sanitize_name(name):
     bad_chars = {".", ":", " ", "-", ",", "$"}
@@ -84,14 +84,13 @@ def glibc_error(args, ssa, names, signatures, rows, first_header):
                      "total_error": -1.0}
     tuned_res = TunedExpression(ssa, fake_zr)
 
-    logger("Checking glibc 2nd order error")
+    logger("  Getting all glibc configuration")
     query = tuned_res.to_fptaylor()
     start = time.time()
     res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
     end = time.time()
-    logger("Time to get 2nd order error: {}", end - start)
-    logger("FPTaylor error bound: {}", res.abs_error)
-    logger("FPTaylor second order error: {}", res.second_order)
+    logger("    Time to get 2nd order error: {}", end - start)
+    logger("    FPTaylor error bound: {} (2nd order is {})", res.abs_error, res.second_order)
     if (res.div_by_zero
         or res.log_of_non_positive
         or res.inf_val
@@ -100,11 +99,11 @@ def glibc_error(args, ssa, names, signatures, rows, first_header):
         sys.exit(1)
 
     # 3. Check that domains are still valid
-    logger("Checking domains")
+    logger("    Checking domains")
     start = time.time()
     valid = tuned_res.check_domains()
     end = time.time()
-    logger("Time to check domains: {}", end - start)
+    logger("    Time to check domains: {}", end - start)
     if valid is None or not valid:
         logger.error("Fatal error: glibc causes domain violations")
         sys.exit(1)
@@ -127,7 +126,7 @@ def try_error_bound(error_bound, raw_query, args, ssa, names, signatures, rows, 
     for old_z3_error_bound in sorted(answers.keys(), reverse=True):
         fpt_err, dom_pass, tr = answers[old_z3_error_bound]
         if fpt_err is not None and fpt_err < error_bound and dom_pass == True:
-            logger("Used z3_error_cache\n")
+            logger("  Used z3_error_cache")
             return found_config(error_bound, fpt_err, tr, args, ssa, names, signatures, rows, first_header)
         if fpt_err is None or fpt_err > error_bound:
             z3_error_bound = min(old_z3_error_bound, z3_error_bound)
@@ -142,26 +141,26 @@ def try_error_bound(error_bound, raw_query, args, ssa, names, signatures, rows, 
     while True:
         z3_error_bound = z3_error_bound/2
 
-        logger("Trying: {}".format(z3_error_bound))
+        logger("  Trying z3_error_bound: {}".format(z3_error_bound))
         # 1. Tune to ther error bound
         try:
             start = time.time()
             zr = Z3Result(ssa, z3_error_bound)
             end = time.time()
             z3_times.append(end - start)
-            logger("Time to run z3: {}", end - start)
+            logger("    Time to run z3: {}", end - start)
         except FPTunerError:
             ## If we can't get this error bound, all tighter ones will fail
             logger.error("Unable to satisfy error bound")
             return None, None
         tuned_res = TunedExpression(ssa, zr)
         tuned_res_str = " ".join(tuned_res.tsv()[1])
-        logger("Chose config: {}", tuned_res_str)
+        logger("    Chose config: {}", tuned_res_str)
 
         if tuned_res_str in z3_cache:
             fpt_err, dom_pass = z3_cache[tuned_res_str]
             if fpt_err is None or fpt_err > error_bound or dom_pass == False:
-                logger("Used tuned_res_cache\n")
+                logger("  Used tuned_res_cache\n")
                 continue
 
         # If a domain check fails we may be able to replace the op and retry
@@ -169,52 +168,52 @@ def try_error_bound(error_bound, raw_query, args, ssa, names, signatures, rows, 
         while True:
 
             # 2. Check that second order error is preserved
-            logger("Checking 2nd order error")
+            logger("    Checking 2nd order error")
             query = tuned_res.to_fptaylor()
             start = time.time()
             res = FPTaylorResult(query, FPTaylorResult.CHECK_CONFIG)
             end = time.time()
             fptaylor_times.append(end - start)
-            logger("Time to get 2nd order error: {}", end - start)
-            logger("FPTaylor error bound: {}", res.abs_error)
-            logger("FPTaylor second order error: {}", res.second_order)
+            logger("    Time to get 2nd order error: {}", end - start)
+            logger("    FPTaylor error bound: {} (2nd order is {})", res.abs_error, res.second_order)
             answers[z3_error_bound] = (res.abs_error, None, tuned_res)
             z3_cache[tuned_res_str] = (res.abs_error, None)
             if res.div_by_zero or res.log_of_non_positive or res.inf_val:
-                logger("FPTaylor thinks exceptional circumstances are possible")
-                logger("Retrying with lower bound\n")
+                logger("  FPTaylor thinks exceptional circumstances are possible")
+                logger("  Retrying with lower bound")
                 try_with_lower_bound = True
                 break
             elif res.abs_error is None:
-                logger("FPTaylor did not find an error value")
-                logger("Retrying with lower bound\n")
+                logger("  FPTaylor did not find an error value")
+                logger("  Retrying with lower bound")
                 try_with_lower_bound = True
                 break
             elif res.abs_error > error_bound:
-                logger("Retrying with lower bound\n")
+                logger("  error_bound not met")
+                logger("  Retrying with lower bound")
                 try_with_lower_bound = True
                 break
 
             # 3. Check that domains are still valid
-            logger("Checking domains")
+            logger("    Checking domains")
             start = time.time()
             valid = tuned_res.check_domains()
             end = time.time()
             domain_times.append(end - start)
-            logger("Time to check domains: {}", end - start)
+            logger("    Time to check domains: {}", end - start)
             if valid is None:
-                logger("Replaced operation and retrying")
+                logger("      Replaced operation and retrying")
                 while valid is None:
                     start = time.time()
                     valid = tuned_res.check_domains()
                     end = time.time()
                     domain_times.append(end - start)
-                    logger("Time to check domains: {}", end - start)
-                logger("Finished replacing, trying 2nd order error")
+                    logger("        Time to check domains: {}", end - start)
+                logger("    Finished replacing, trying 2nd order error")
                 continue
             elif not valid:
-                logger("Domains are not sound")
-                logger("Retrying with lower bound")
+                logger("  Domains are not sound")
+                logger("  Retrying with lower bound")
                 try_with_lower_bound = True
                 answers[z3_error_bound] = (res.abs_error, False, tuned_res)
                 z3_cache[tuned_res_str] = (res.abs_error, False)
@@ -228,9 +227,10 @@ def try_error_bound(error_bound, raw_query, args, ssa, names, signatures, rows, 
         if not try_with_lower_bound:
             break
 
-    logger("Total z3 time: {}", sum(z3_times))
-    logger("Total fptaylor time: {}", sum(fptaylor_times))
-    logger("Total domain time: {}\n\n", sum(domain_times))
+    logger("  Total time to find configuration")
+    logger("    z3: {}", sum(z3_times))
+    logger("    fptaylor: {}", sum(fptaylor_times))
+    logger("    domain: {}", sum(domain_times))
 
     return found_config(error_bound, res.abs_error, tuned_res, args, ssa, names, signatures, rows, first_header)
 
@@ -283,6 +283,8 @@ def main(argv):
                 signatures = list()
                 names = list()
                 ssa = fpcore.to_single_assignment(search_space)
+                logger("-"*80)
+                logger("Starting fpcore {}", ssa.name)
                 if args.nightly:
                     print("<h1>{}</h1>".format(ssa.name), flush=True)
                 else:
@@ -302,6 +304,7 @@ def main(argv):
                 rows = []
                 fptaylor_errors = []
                 for e in args.error:
+                    logger("Getting configuration for {}", e)
                     header, achieved_error = try_error_bound(e, str(fpcore), args, ssa, names, signatures, rows, first_header)
                     if first_header is None:
                         first_header = header
@@ -311,18 +314,6 @@ def main(argv):
 
                 _, achieved_error = glibc_error(args, ssa, names, signatures, rows, first_header)
                 fptaylor_errors.append(achieved_error)
-
-                if args.nightly:
-                    print("<table>")
-                    print("<tr><th>" + "</th><th>".join(first_header) + "</th></tr>")
-                    for row in rows:
-                        print("<tr><td>" + "</td><td>".join(row) + "</td></tr>")
-                    print("</table>")
-                    print("<img src='{}_time.png'>".format(sanitize_name(ssa.name)))
-                else:
-                    print("\t".join(first_header))
-                    for row in rows:
-                        print("\t".join(row))
 
                 if args.cfile:
                     time_name = "{}_time.c".format(sanitize_name(ssa.name))
@@ -364,7 +355,23 @@ def main(argv):
                         pass
                     for src,dest in zip(cfiles, destfiles):
                         shutil.move(src, dest)
-                    graph_datafiles.append(generate_graph.graph(time_name))
+                    datafile, times = generate_graph.graph(time_name)
+                    graph_datafiles.append(datafile)
+                    first_header.append("Runtime(ns)")
+                    for row,t in zip(rows, times):
+                        row.append(str(t))
+
+                if args.nightly:
+                    print("<table>")
+                    print("<tr><th>" + "</th><th>".join(first_header) + "</th></tr>")
+                    for row in rows:
+                        print("<tr><td>" + "</td><td>".join(row) + "</td></tr>")
+                    print("</table>")
+                    print("<img src='{}_time.png'>".format(sanitize_name(ssa.name)))
+                else:
+                    print("\t".join(first_header))
+                    for row in rows:
+                        print("\t".join(row))
 
             except DomainError as e:
                 if e.lower is None and e.upper is None:
