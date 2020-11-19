@@ -153,8 +153,12 @@ class TunedExpression():
         for name, value in self.definitions.items():
             my_type = self.types[name]
             my_decl = TunedExpression.TYPES_TO_DECLS[my_type]
+            i = value.op.rfind("_")
+            if i > 0:
+                r = value.op[i+1:]
+                if r.isnumeric():
+                    value.op = value.op[:i]
             my_body = value.infix_str("({}) ".format(my_decl))
-
             line = "    {} {} = {};".format(my_decl, name, my_body)
             lines.append(line)
 

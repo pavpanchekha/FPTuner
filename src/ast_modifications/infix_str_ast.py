@@ -39,9 +39,4 @@ def infix_str(self, cast=None):
 
     # Everything else is a function call
     sep = ", {}".format(cast)
-    i = self.op.rfind("_")
-    if i > 0:
-        r = self.op[i+1:]
-        if r.isnumeric():
-            return "{}({})".format(self.op[:i], cast + sep.join(args))
-    return "{}({})".format(self.op[:i], cast + sep.join(args))
+    return "{}({})".format(self.op, cast + sep.join(args))
