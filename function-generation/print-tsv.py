@@ -6,6 +6,10 @@ if __name__ == "__main__":
     funcs = read_all_json(sys.argv[1])
 
 
+    print("cos")
+    coss = [f for f in funcs if f["function"] == "cos(x-pi/2)"]
+    print_tsv(coss)
+
     print("exp")
     exps = [f for f in funcs if f["function"] == "exp(x)"]
     print_tsv(exps)

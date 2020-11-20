@@ -27,18 +27,31 @@ import json
 import shlex
 import subprocess
 import tempfile
+import time
 import mpmath
 
 from pprint import pprint
 
 
-SOLLYA_PREC = 2**14
-SOLLYA_BOUND = 2**(-100)
+SOLLYA_PREC = 2**10
+SOLLYA_BOUND = 1e-100
 
 mpmath.mp.prec = SOLLYA_PREC
 
-GelpiaResult.CONFIG["epsilons"] = (1e-300, 1e-300, 1e-300)
-GelpiaResult.CONFIG["timeout"] = 60
+GelpiaResult.CONFIG["epsilons"] = (0, 0, 1e-4)
+GelpiaResult.CONFIG["timeout"] = 300
+
+FPTAYLOR_CONFIG = {"--fp-power2-model": "true",
+                   "--opt": "gelpia",
+                   "--opt-exact": "true",
+                   "--opt-f-rel-tol": str(GelpiaResult.CONFIG["epsilons"][2]),
+                   "--opt-f-abs-tol": str(GelpiaResult.CONFIG["epsilons"][1]),
+                   "--opt-x-rel-tol": 0,
+                   "--opt-x-abs-tol": str(GelpiaResult.CONFIG["epsilons"][0]),
+                   "--opt-max-iters": "4294967290",
+                   "--opt-timeout": "60",
+                   "--uncertainty": "true"}
+
 
 MANT = {'fp32': 24,
         'fp64': 53}
@@ -74,6 +87,7 @@ def replace_ints(d):
 
 
 def run_sollya(func, I, NI, SI, monomials, fptype):
+    start = time.time()
     stype = SOLLYA_TYPE[fptype]
     monomials_str = ", ".join([str(m) for m in monomials])
     lines = ['prec = {}!;'.format(SOLLYA_PREC),
@@ -129,44 +143,69 @@ def run_sollya(func, I, NI, SI, monomials, fptype):
             err = raw_err.decode("utf8")
             retcode = p.returncode
 
-    f = json.loads(out)
+    try:
+        f = json.loads(out)
+    except:
+        print("\n"*4)
+        print(script)
+        print("\n"*4)
+        print(out)
+        print("\n"*4)
+        print(err)
+        sys.exit(1)
 
     f["polynomial"]["hexadecimal"] = f["polynomial"]["hexadecimal"].replace("x^0x1p1", "(x*x)")
     f["polynomial"]["decimal"] = f["polynomial"]["decimal"].replace("x^2", "(x*x)")
 
+    f["sollya_time"] = time.time() - start
+
     try:
         flt = float(f["relative_error"]["algorithmic"]["sollya"])
-        int(flt)
     except ValueError:
         flt = None
     f["relative_error"]["algorithmic"]["sollya"] = flt
 
     try:
         flt = float(f["absolute_error"]["algorithmic"]["sollya"])
-        int(flt)
     except ValueError:
         flt = None
     f["absolute_error"]["algorithmic"]["sollya"] = flt
 
-    rel_err, abs_err = gelpia_errors(f["polynomial"]["decimal"],
-                                     func,
-                                     NI,
-                                     SI)
-    f["relative_error"]["algorithmic"]["gelpia"] = rel_err
-    f["absolute_error"]["algorithmic"]["gelpia"] = abs_err
+    f["relative_error"]["algorithmic"]["gelpia"] = None
+    f["absolute_error"]["algorithmic"]["gelpia"] = None
+    f["gelpia_time"] = 0
+    if f["absolute_error"]["algorithmic"]["sollya"] is None or f["relative_error"]["algorithmic"]["sollya"] is None:
+        gstart = time.time()
+        rel_err, abs_err = gelpia_errors(f["polynomial"]["decimal"],
+                                         func,
+                                         NI,
+                                         SI)
+        f["relative_error"]["algorithmic"]["gelpia"] = rel_err
+        f["absolute_error"]["algorithmic"]["gelpia"] = abs_err
+        f["gelpia_time"] = time.time() - gstart
+
+    assert(f["absolute_error"]["algorithmic"]["sollya"] is not None or f["absolute_error"]["algorithmic"]["gelpia"] is not None)
+    assert(f["relative_error"]["algorithmic"]["sollya"] is not None or f["relative_error"]["algorithmic"]["gelpia"] is not None)
 
     f["relative_error"]["rounding"] = dict()
     f["absolute_error"]["rounding"] = dict()
 
+    fstart = time.time()
     rel_err, abs_err = fptaylor_errors(f["polynomial"]["decimal"], NI, SI, fptype)
     f["relative_error"]["rounding"]["fptaylor"] = rel_err
     f["absolute_error"]["rounding"]["fptaylor"] = abs_err
+    f["fptaylor_time"] = time.time() - fstart
 
+    ostart = time.time()
     rel_err, abs_err = oliver_errors(f["polynomial"]["coefficients"], monomials, func, NI, SI, fptype)
     f["relative_error"]["rounding"]["oliver"] = rel_err
     f["absolute_error"]["rounding"]["oliver"] = abs_err
+    f["oliver_time"] = time.time() - ostart
 
     replace_ints(f)
+
+    elapsed = time.time() - start
+    f["generation_time"] = elapsed
 
     return f
 
@@ -227,26 +266,21 @@ def oliver_errors(coeffs, monomials, func, NI, SI, fptype):
 
     return rel_err, abs_err
 
-def fptaylor_errors(poly, NI, SI, fptype):
-    config = {"--fp-power2-model": "true",
-              "--opt": "gelpia",
-              "--opt-exact": "true",
-              "--opt-f-rel-tol": "1e-300",
-              "--opt-f-abs-tol": "1e-300",
-              "--opt-x-rel-tol": "1e-300",
-              "--opt-x-abs-tol": "1e-300",
-              "--opt-max-iters": "4294967290",
-              "--opt-timeout": "10"}
-
+def fptaylor_errors(poly, NI, SI, fptype, in_error=None):
+    config = FPTAYLOR_CONFIG
     rel_query_lines = ["Variables",
-                       "real x in [{},{}];".format(*NI),
+                       ("real x in [{},{}];".format(*NI)
+                        if in_error is None else
+                        "real x in [{},{}] +/- {};".format(*NI, in_error)),
                        "Definitions",
                        "ret rnd{}= {};".format(PREC[fptype], poly),
                        "Expressions",
                        "ret;"]
 
     abs_query_lines = ["Variables",
-                       "real x in [{},{}];".format(*SI),
+                       ("real x in [{},{}];".format(*SI)
+                        if in_error is None else
+                        "real x in [{},{}] +/- {};".format(*SI, in_error)),
                        "Definitions",
                        "ret rnd{}= {};".format(PREC[fptype], poly),
                        "Expressions",
@@ -258,15 +292,11 @@ def fptaylor_errors(poly, NI, SI, fptype):
     rel_fpt_res = FPTaylorResult(rel_query, {**config, **{"--rel-error": "true"}})
     abs_fpt_res = FPTaylorResult(abs_query, {**config, **{"--abs-error": "true"}})
 
-    try:
-        rel_err = rel_fpt_res.rel_error
-    except:
-        rel_err = None
+    rel_err = rel_fpt_res.rel_error
+    if rel_err is None:
+        rel_err = rel_fpt_res.abs_error
 
-    try:
-        abs_err = abs_fpt_res.abs_error
-    except:
-        abs_err = None
+    abs_err = abs_fpt_res.abs_error
 
     return abs_err, rel_err
 
@@ -309,15 +339,15 @@ def print_tsv(funcs):
         row = [str(r) for r in row]
         print("\t".join(row))
 
-def min_skpi_none(l):
+def min_skip_none(l):
     l = [i for i in l if i is not None]
     return min(l)
 
 def fptaylor_round_args(func):
-    min_rel_algo = min_skpi_none(func["relative_error"]["algorithmic"].values())
-    min_rel_rnd = min_skpi_none(func["relative_error"]["rounding"].values())
-    min_abs_algo = min_skpi_none(func["absolute_error"]["algorithmic"].values())
-    min_abs_rnd = min_skpi_none(func["absolute_error"]["rounding"].values())
+    min_rel_algo = min_skip_none(func["relative_error"]["algorithmic"].values())
+    min_rel_rnd = min_skip_none(func["relative_error"]["rounding"].values())
+    min_abs_algo = min_skip_none(func["absolute_error"]["algorithmic"].values())
+    min_abs_rnd = min_skip_none(func["absolute_error"]["rounding"].values())
 
     tot_rel_err = min_rel_algo + min_rel_rnd
     tot_abs_err = min_abs_algo + min_abs_rnd
@@ -329,4 +359,4 @@ def fptaylor_round_args(func):
     scale = tot_rel_err * mpmath.power(2, abs(eps))
     delta = mpmath.floor(mpmath.log(tot_abs_err / scale))
 
-    return [bits, typ, float(scale), eps, int(delta)]
+    return (bits, typ, int(scale), eps, int(delta))

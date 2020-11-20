@@ -2,6 +2,7 @@
 
 from generation_utils import *
 
+from generate_cos import *
 from generate_exp import *
 from generate_log import *
 from generate_sin import *
@@ -18,7 +19,7 @@ def try_rounding(args, src_op):
     return fpt_op in ROUNDINGS
 
 def fix_rounding(args, src_op):
-    new_args = args.copy()
+    new_args = list(args)
     while try_rounding(new_args, src_op):
         new_args[3] += 1
         new_args[4] -= 1
@@ -63,22 +64,48 @@ def read_costs(fname):
 def do_ops(funcs, costs, shift_input=None):
     if shift_input is None:
         shift_input = 0.0
-    for f in funcs:
+    squashed = dict()
+    for i,f in enumerate(funcs):
         src_op = strip_paren(f["function"])
         operation = cname(f)
+        if "reduced" in f:
+            operation = "r" + operation
         args = fptaylor_round_args(f)
-        fpt_op = fix_rounding(args, src_op)
-        cost = costs[operation]
         input_lower = float(f["input"]["inf"]) + shift_input
         input_upper = float(f["input"]["sup"]) + shift_input
-        print('("{}", "{}", "{}", {}, [{},{}]),'.format(src_op,
-                                                        operation,
-                                                        fpt_op,
-                                                        cost,
-                                                        str(input_lower),
-                                                        str(input_upper)))
+        cost = costs[operation]
+        key = (src_op, "reduced" in f, *args)
+        if "reduced" in f:
+            operation = operation + "_" + str(int(f["reduced"]))
+        if key in squashed:
+            entry = squashed[key]
+            assert(entry[0] == src_op)
+            assert(entry[3] == cost)
+            if input_lower < entry[4]:
+                assert(entry[5] < input_upper)
+                entry[1] = operation
+                entry[4] = input_lower
+                entry[5] = input_upper
+                continue
+
+        fpt_op = fix_rounding(args, src_op)
+
+        squashed[key] = [src_op,
+                         operation,
+                         fpt_op,
+                         cost,
+                         input_lower,
+                         input_upper]
+    id_num = 0
+    for entry in squashed.values():
+        entry[4] = str(entry[4])
+        entry[5] = str(entry[5])
+        print('("{}", "{}", "{}", {}, [{},{}]),'.format(*entry))
+        id_num += 1
 
 def do_rops(funcs, costs, input_lower, input_upper):
+    done_no_reduction = False
+    reduction_count = 0
     for f in funcs:
         src_op = strip_paren(f["function"])
         operation = "r" + cname(f)
@@ -100,22 +127,27 @@ if __name__ == "__main__":
     funcs = read_all_json(sys.argv[1])
     costs = read_costs(sys.argv[2])
 
+    # coss = [f for f in funcs if f["function"] == "cos(x-pi/2)"]
+    # do_ops(coss, costs)
+    # do_rops(coss, costs, "-inf", "inf")
+    # print('("cos", "cos", "cos", {}, [-inf, inf]),'.format(costs["cos_fp64"]))
+
     exps = [f for f in funcs if f["function"] == "exp(x)"]
     do_ops(exps, costs)
-    do_rops(exps, costs, "-inf", "709")
+    #do_rops(exps, costs, "-inf", "709")
     print('("exp", "exp", "exp", {}, [-inf, 709]),'.format(costs["exp_fp64"]))
 
     logs = [f for f in funcs if f["function"] == "log(1+x)"]
     do_ops(logs, costs, 1.0)
-    do_rops(logs, costs, "0", "inf")
+    #do_rops(logs, costs, "0", "inf")
     print('("log", "log", "log", {}, [0, inf]),'.format(costs["log_fp64"]))
 
     sins = [f for f in funcs if f["function"] == "sin(x)"]
     do_ops(sins, costs)
-    do_rops(sins, costs, "-inf", "inf")
+    #do_rops(sins, costs, "-inf", "inf")
     print('("sin", "sin", "sin", {}, [-inf, inf]),'.format(costs["sin_fp64"]))
 
     tans = [f for f in funcs if f["function"] == "tan(x)"]
     do_ops(tans, costs)
-    do_rops(tans, costs, "-inf", "inf")
+    #do_rops(tans, costs, "-inf", "inf")
     print('("tan", "tan", "tan", {}, [-inf, inf]),'.format(costs["tan_fp64"]))

@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
 import sys
+import time
 import mpmath
 
 from generation_utils import *
 
 
 def gen_tan(order, fptype):
-    inf = "0.0"
-    sup = str(mpmath.pi/4)
+    inf = "-0.1"
+    sup = str(mpmath.pi/4 + 0.1)
     subn = SUBNORMAL[fptype]
     I_subn = "1.1703344634137277e-08" #str(mpmath.atan(subn))
     I = [inf, sup]
@@ -19,6 +20,76 @@ def gen_tan(order, fptype):
     d = run_sollya('tan(x)', I, NI, SI, monomials, fptype)
 
     return d
+
+def gen_reduced_tan(f, multiples):
+    period = mpmath.pi/4
+    inf = "-0.1"
+    sup = str(period + 0.1)
+    I_subn = "1.1703344634137277e-08" #str(mpmath.atan(subn))
+    I = [inf, sup]
+    NI = [I_subn, sup]
+    SI = [inf, I_subn]
+    config = FPTAYLOR_CONFIG
+
+    reduced_tans = dict()
+    for m in range(1, multiples+1):
+        start = time.time()
+        lower_inf = str(-m*period)
+        lower_sup = str(- (m-1)*period)
+        upper_sup = str((m+1)*period)
+        upper_inf = str(m*period)
+
+        query_lines = ["Variables",
+                       "real x in [{}, {}];",
+                       "Definitions",
+                       "ret rnd64= x - {}*{};",
+                       "Expressions",
+                       "ret;"]
+        raw_query = "\n".join(query_lines)
+
+        lower_query = raw_query.format(lower_inf, lower_sup, -m, period)
+        upper_query = raw_query.format(upper_inf, upper_sup, m, period)
+
+        lower_res = FPTaylorResult(lower_query, {**config, **{"--abs-error": "true"}})
+        upper_res = FPTaylorResult(upper_query, {**config, **{"--abs-error": "true"}})
+
+        assert(lower_res.abs_error is not None)
+        assert(upper_res.abs_error is not None)
+
+        reduction_error = max(lower_res.abs_error, upper_res.abs_error)
+
+        abs_err, rel_err = fptaylor_errors(f["polynomial"]["decimal"], NI, SI, "fp64",
+                                           reduction_error)
+        assert(abs_err != None)
+        assert(rel_err != None)
+        elapsed = time.time() - start
+        rf = {"reduced" : m,
+              "generation_time" : elapsed,
+              "absolute_error" : {"algorithmic" :
+                                  {"gelpia": f["absolute_error"]["algorithmic"]["gelpia"],
+                                   "sollya" : f["absolute_error"]["algorithmic"]["sollya"]},
+                                  "input" : {"inf" : f["absolute_error"]["input"]["inf"],
+                                             "sup" : f["absolute_error"]["input"]["sup"]},
+                                  "rounding" :
+                                  {"fptaylor" : abs_err}},
+              "function" : "tan(x)",
+              "input" : {"inf" : lower_inf,
+                         "sup" : upper_sup},
+              "order" : f["order"],
+              "polynomial" : {"coefficients" : f["polynomial"]["coefficients"],
+                              "decimal" : f["polynomial"]["decimal"],
+                              "hexadecimal" : f["polynomial"]["hexadecimal"] ,
+                              "monomials" : f["polynomial"]["monomials"]},
+              "relative_error" : {"algorithmic" :
+                                  {"gelpia": f["relative_error"]["algorithmic"]["gelpia"],
+                                   "sollya" : f["relative_error"]["algorithmic"]["sollya"]},
+                                  "input" : {"inf" : f["relative_error"]["input"]["inf"],
+                                             "sup" : f["relative_error"]["input"]["sup"]},
+                                  "rounding" :
+                                  {"fptaylor" : rel_err}},
+              "type" : "fp64"}
+        reduced_tans[m] = rf
+    return reduced_tans
 
 def convert_tan_to_c(func):
     lines = ["{} {}({} x) {{".format(func["type"], cname(func), func["type"]),
@@ -72,21 +143,9 @@ if __name__ == "__main__":
         tans = [f for f in funcs if f["function"] == "tan(x)"]
 
         for f in tans:
-            coeffs = f["polynomial"]["coefficients"]
-            monomials = f["polynomial"]["monomials"]
-            func = f["function"]
-            NI = f["relative_error"]["input"]["inf"], f["relative_error"]["input"]["sup"]
-            SI = f["absolute_error"]["input"]["inf"], f["absolute_error"]["input"]["sup"]
-            fptype = f["type"]
-
-            rel_err, abs_err = oliver_errors_1(coeffs, monomials, func, NI, SI, fptype)
-            f["relative_error"]["rounding"]["oliver_1"] = rel_err
-            f["absolute_error"]["rounding"]["oliver_1"] = rel_err
-
-            rel_err, abs_err = oliver_errors_2(coeffs, monomials, func, NI, SI, fptype)
-            f["relative_error"]["rounding"]["oliver_2"] = rel_err
-            f["absolute_error"]["rounding"]["oliver_2"] = rel_err
-
             print(json.dumps(f, sort_keys=True, indent=4))
 
-        #print_tsv(tans)
+            reduced = gen_reduced_tan(f, 50)
+            for r in reduced.values():
+                print(json.dumps(r, sort_keys=True, indent=4))
+
