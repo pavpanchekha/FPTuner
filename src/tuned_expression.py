@@ -74,10 +74,13 @@ class TunedExpression():
                 logger("  floating point domain: {}", actual_domain)
                 if actual_domain[0] < valid_domain[0] or actual_domain[1] > valid_domain[1]:
                     logger("  bound violated")
-                    if value.op.startswith("ord"):
-                        logger("  trying with rord")
-                        value.op = "r" + value.op
-                        return None
+                    for row in all_modifications_ast.OperationTable:
+                        if row[0] not in value.op:
+                            continue
+                        nv = row[4]
+                        if actual_domain[0] >= nv[0] and actual_domain[1] <= nv[1]:
+                            value.op = row[1]
+                            return None
                     return False
 
         return True

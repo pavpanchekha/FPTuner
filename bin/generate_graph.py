@@ -43,9 +43,9 @@ def graph(main_file):
     for f in data["functions_data"]:
         name = f["name"]
         error = f["error_bound"]
-        counts = f["counts"]
+        counts = f["counts"][1:]
         avg_time_s = (len(counts) * secs) / sum(counts)
-        avg_time_ns = avg_time_s / 1e9
+        avg_time_ns = avg_time_s * 1e9
         averages.append(avg_time_ns)
         errors.append(float(error))
 
@@ -69,7 +69,7 @@ def graph(main_file):
 
     os.chdir(start)
 
-    return dump_file
+    return dump_file, averages
 
 if __name__ == "__main__":
     graph(sys.argv[1])

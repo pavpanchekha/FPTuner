@@ -334,7 +334,7 @@ def main(argv):
                     time_contents.extend(["int main(int argc, char** argv){",
                                           "size_t log2_values = 18;",
                                           "size_t secs = 10;",
-                                          "size_t runs = 3;",
+                                          "size_t runs = 4;",
                                           "if (argc > 1) { log2_values = strtoul(argv[1], NULL, 10); }",
                                           "if (argc > 2) { secs = strtoul(argv[2], NULL, 10); }",
                                           "if (argc > 3) { runs = strtoul(argv[3], NULL, 10); }",
